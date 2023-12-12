@@ -2,6 +2,9 @@ import React, { useState } from 'react'
 import Image from '../assets/Bullet journal-rafiki.svg'
 import '../index.css'
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { IoLogoGoogleplus } from "react-icons/io";
+import { FaApple, FaFacebookF } from "react-icons/fa";
+import { Link } from 'react-router-dom'
 
 const Login = () => {
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -36,18 +39,36 @@ const Login = () => {
                   <input type={passwordVisible ? "text" : "password"} id="Password" className="peer border-none bg-inherit bg-blue-50 focus:bg-blue-100 w-full h-full placeholder-transparent py-2 md:py-1.5 lg:py-1.5 px-2 xl:py-2 xl:px-3.5 text-xs md:twxt-sm lg:text-base xl:text-lg focus:border-transparent focus:outline-none rounded-l-lg focus:ring-0 required:border-red-500" placeholder="Password"/>
                   <div className='w-auto h-full secure bg-blue-50 peer-focus:bg-blue-100 rounded-r-lg flex items-center py-2 md:py-1.5 lg:py-1 px-2 xl:px-3 xl:py-2.5'>
                     {passwordVisible ? (
-                      <AiOutlineEye className="cursor-pointer w-4 h-4 xl:w-5 xl:h-5"  onClick={togglePasswordVisibility} />
-                    ) : (
                       <AiOutlineEyeInvisible className="cursor-pointer w-4 h-4 xl:w-5 xl:h-5"  onClick={togglePasswordVisibility} />
+                    ) : (
+                      <AiOutlineEye className="cursor-pointer w-4 h-4 xl:w-5 xl:h-5"  onClick={togglePasswordVisibility} />
                     )}
                   </div>
                   <span className="pointer-events-none absolute start-3.5 bg-transparent backdrop-blur-sm peer-focus:bg-blue-100 top-0 -translate-y-1/2 p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">Password</span>
                 </div>
               </label>
 
-              <button type="submit" className='text-blue-400 px-2 py-2 rounded-xl w-[70%] mx-auto bg-blue-50 font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300  hover:font-semibold hover:bg-white hover:border hover:border-neutral-100 hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >Sign In</button>
+              <button type="submit" className='text-blue-400 px-2 py-2 rounded-xl w-[70%] mx-auto bg-white font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300  hover:font-semibold hover:bg-blue-400 hover:text-white hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >Sign Up</button>
               
             </form>
+
+            <div class="my-3 border-b text-center w-[80%] border-gray-300 relative flex items-center justify-center">
+              <div className="absolute pointer-events-none font-semibold bg-blue-100 backdrop-blur-sm top-0 leading-none px-2 inline-block tracking-wide transform -translate-y-1/2 mx-auto text-xs md:text-sm text-blue-500">Or Sign In with</div>
+            </div>
+
+            <div className='flex flex-wrap items-center justify-between w-[80%]'>
+                <button type="submit" className='text-red-500 px-5 py-2 rounded-xl w-auto mx-auto bg-white shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:backdrop-blur-3xl hover:bg-blue-400 hover:text-white hover:shadow-2xl hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
+                    <IoLogoGoogleplus />
+                </button>
+                <button type="submit" className='px-5 py-2 rounded-xl w-auto mx-auto bg-white font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:font-semibold hover:bg-blue-400 hover:text-white hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
+                    <FaApple className='' />
+                </button>
+                <button type="submit" className='text-blue-400 px-5 py-2 rounded-xl w-auto mx-auto bg-white font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:font-semibold hover:bg-blue-400 hover:text-white hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
+                    <FaFacebookF />
+                </button>
+            </div>
+
+            <p className='text-blue-500 mt-6 mb-3 text-xs md:text-sm '>Don't have an account? <Link to='/signup' className='underline cursor-pointer'>Sign up</Link></p>
           </div>
 
         </div>
