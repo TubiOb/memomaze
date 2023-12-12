@@ -36,19 +36,21 @@ const Login = () => {
                 <span className="pointer-events-none absolute start-3.5 bg-transparent backdrop-blur-sm peer-focus:bg-blue-100 top-0 -translate-y-1/2 p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">Email</span>
               </label>
 
-              <label htmlFor="Password" className="relative block rounded-lg border w-full focus-within:border-white outline-none">
-                <div className='flex items-center'>
-                  <input type="password" id="Password" className="peer border-none bg-blue-50 w-full focus:bg-blue-100 placeholder-transparent py-2 md:py-1.5 lg:py-1 px-2 text-xs md:text-sm lg:text-base focus:border-transparent focus:outline-none rounded-lg focus:ring-0" placeholder="Password"/>
+              <label htmlFor="Password" className="relative inline-flex rounded-lg border w-full bg-blue-50 peer-focus:bg-blue-100 focus-within:border-white outline-none">
+                <div className='flex flex-row items-center w-full bg-blue-50 peer-focus:bg-blue-100 rounded-lg'>
+                  <input type={passwordVisible ? "text" : "password"} id="Password" className="peer border-none bg-inherit bg-blue-50 focus:bg-blue-100 w-full placeholder-transparent py-2 md:py-1.5 lg:py-1 px-2 text-xs md:text-sm lg:text-base focus:border-transparent focus:outline-none rounded-l-lg focus:ring-0" placeholder="Password"/>
+                  <div className='w-auto h-full secure bg-blue-50 peer-focus:bg-blue-100 rounded-r-lg flex items-center py-2 md:py-1.5 lg:py-1 px-2'>
+                    {passwordVisible ? (
+                      <AiOutlineEye className="cursor-pointer w-5 h-5"  onClick={togglePasswordVisibility} />
+                    ) : (
+                      <AiOutlineEyeInvisible className="cursor-pointer w-5 h-5"  onClick={togglePasswordVisibility} />
+                    )}
+                  </div>
+                  <span className="pointer-events-none absolute start-3.5 bg-transparent backdrop-blur-sm peer-focus:bg-blue-100 top-0 -translate-y-1/2 p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">Password</span>
                 </div>
                 
-                <span className="pointer-events-none absolute start-3.5 bg-transparent backdrop-blur-sm peer-focus:bg-blue-100 top-0 -translate-y-1/2 p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">Password</span>
-                <div className='w-5 h-5 relative secure'>
-                  {passwordVisible ? (
-                  <AiOutlineEyeInvisible className="cursor-pointer left-0 w-5 h-5 mr-1"  onClick={togglePasswordVisibility} />
-                  ) : (
-                  <AiOutlineEye className="cursor-pointer left-0 w-5 h-5 mr-1"  onClick={togglePasswordVisibility} />
-                  )}
-                </div>
+                
+                
               </label>
               
             </form>
