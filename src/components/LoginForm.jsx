@@ -16,12 +16,12 @@ const LoginForm = () => {
   return (
     <div className='flex flex-row items-center justify-between w-full h-screen'>
         <div className='w-[45%] md:hidden h-full hidden lg:flex items-center justify-end'>
-            <img src={Image} alt="" className='object-cover space-x-4 w-[80%] xl:w-[90%]' />
+            <img src={Image} alt="" className='object-cover space-x-4 w-[80%] xl:w-[90%]' loading='lazy' />
         </div>
 
         <div className='w-full md:w-full lg:w-[55%] h-full flex items-center justify-center'>
 
-          <div className="rounded-xl bg-blue-100 xl:w-[60%] lg:w-[80%] md:w-[70%] sm:w-[65%] w-[90%] h-auto py-2 px-3 gap-4 flex flex-col font-['Lato'] items-center">
+          <div className="rounded-xl bg-blue-100 xl:w-[60%] lg:w-[80%] md:w-[70%] sm:w-[65%] w-[90%] h-auto py-9 px-3 gap-4 flex flex-col font-['Lato'] items-center">
             <div className='flex items-center flex-col w-[95%] md:w-[80%] text-center p-2 gap-1'>
               <h4 className='text-lg md:text-xl lg:text-2xl font-semibold'>Welcome,</h4>
               <h4 className='text-lg md:text-xl lg:text-2xl font-normal'>Glad to see you!</h4>
