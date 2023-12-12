@@ -17,9 +17,3 @@ body {
 .memo {
     font-family: 'Rethink Sans';
 }
-
-.float-label-input:focus-within label,
-  .float-label-input input:not(:placeholder-shown) + label {
-    transform: translateY(-1.5rem) scale(0.75);
-    background-color: white;
-}
