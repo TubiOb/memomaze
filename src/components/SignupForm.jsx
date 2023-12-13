@@ -7,8 +7,8 @@ import { FaApple, FaFacebookF } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import Toast from './Toast';
-import { firestore, auth } from '../Firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth'
+import { firestore, auth, GoogleUser, FacebookUser } from '../Firebase';
+import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore';
 
 
@@ -76,6 +76,52 @@ const SignupForm = () => {
 
 
 
+  
+    //   SIGNUP WITH GOOGLE
+  const googleSignUp = async () => {
+    const provider = GoogleUser();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const credential = GoogleUser.credentialFromResult(result);
+      const token = credential.accessToken;
+      const user = result.user;
+      console.log(user);
+
+      await storeUserData(user);
+    }
+    catch (err) {
+      showToastMessage('Google sign-up failed!', 'error');
+    }
+  };
+
+
+
+    //   SAVING USER INFO FROM GOOGLE TO DATABASE
+  const storeUserData = async (user) => {
+    const userDocRef = doc(firestore, 'User', user.uid);
+    const userData = {
+      username: user.name,
+      email: user.email,
+    }
+
+    try {
+      await setDoc(userDocRef, userData);
+      setTimeout(() => {
+          //   ROUTING BACK TO LOGIN PAGE
+          history('/login');
+      }, 3500);
+
+      showToastMessage('Sign Up Successful', 'success');
+    }
+    catch (err) {
+      showToastMessage('Sign Up failed', 'error')
+    }
+  };
+
+
+  // googleSignUp();
+
+
     //   SAVING/SIGNING UP NEW USER
   const handleSave = async (e) => {
     e.preventDefault();
@@ -84,7 +130,7 @@ const SignupForm = () => {
 
     //   PASSWORD VALIDATION
     const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-    if (!passwordRegex.twst(formData.password)) {
+    if (!passwordRegex.test(formData.password)) {
         showToastMessage('Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, and one number',
         'error');
         return;
@@ -156,18 +202,18 @@ const SignupForm = () => {
 
             <form onSubmit={handleSave} className='w-[95%] md:w-[80%] mt-2 flex flex-col justify-between gap-6'>
               <label htmlFor="Username" className="relative block rounded-lg border w-full focus-within:border-white outline-none">
-                <input type="text" id="Username" onInputChange={(value) => handleInputChange(value, 'username')} className="peer border-none bg-blue-50 w-full focus:bg-blue-100 placeholder-transparent py-2 md:py-1.5 lg:py-1 xl:py-2 px-2 xl:px-3.5 text-xs md:text-sm lg:text-base xl:text-xl focus:border-transparent focus:outline-none rounded-lg focus:ring-0" placeholder="Username"/>
+                <input type="text" id="Username" onChange={(value) => handleInputChange(value, 'username')} className="peer border-none bg-blue-50 w-full focus:bg-blue-100 placeholder-transparent py-2 md:py-1.5 lg:py-1 xl:py-2 px-2 xl:px-3.5 text-xs md:text-sm lg:text-base xl:text-xl focus:border-transparent focus:outline-none rounded-lg focus:ring-0" placeholder="Username"/>
                 <span className="pointer-events-none absolute start-3.5 bg-transparent backdrop-blur-sm peer-focus:bg-blue-100 top-0 -translate-y-1/2 p-0.5 text-xs md:twxt-sm lg:text-base xl:text-lg text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">Username</span>
               </label>
 
               <label htmlFor="Email" className="relative block rounded-lg border w-full focus-within:border-white outline-none">
-                <input type="email" id="Email" onInputChange={(value) => handleInputChange(value, 'email')} className="peer border-none bg-blue-50 w-full focus:bg-blue-100 placeholder-transparent py-2 md:py-1.5 lg:py-1 px-2 xl:py-2 xl:px-3.5 text-xs md:text-sm lg:text-base focus:border-transparent focus:outline-none rounded-lg focus:ring-0" placeholder="Email"/>
+                <input type="email" id="Email" onChange={(value) => handleInputChange(value, 'email')} className="peer border-none bg-blue-50 w-full focus:bg-blue-100 placeholder-transparent py-2 md:py-1.5 lg:py-1 px-2 xl:py-2 xl:px-3.5 text-xs md:text-sm lg:text-base focus:border-transparent focus:outline-none rounded-lg focus:ring-0" placeholder="Email"/>
                 <span className="pointer-events-none absolute start-3.5 bg-transparent backdrop-blur-sm peer-focus:bg-blue-100 top-0 -translate-y-1/2 p-0.5 text-xs md:twxt-sm lg:text-base xl:text-lg text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">Email</span>
               </label>
 
               <label htmlFor="Password" className="relative inline-flex rounded-lg border w-full bg-blue-50 peer-focus:bg-blue-100 focus-within:border-white outline-none">
                 <div className='flex flex-row items-center w-full bg-blue-50 peer-focus:bg-blue-100 rounded-lg'>
-                  <input type={passwordVisible ? "text" : "password"} id="Password" onInputChange={(value) => handleInputChange(value, 'password')} className="peer border-none bg-inherit bg-blue-50 focus:bg-blue-100 w-full h-full placeholder-transparent py-2 md:py-1.5 lg:py-1.5 xl:py-2 px-2 xl:px-3.5 text-xs md:twxt-sm lg:text-base xl:text-lg focus:border-transparent focus:outline-none rounded-l-lg focus:ring-0" placeholder="Password"/>
+                  <input type={passwordVisible ? "text" : "password"} id="Password" onChange={(value) => handleInputChange(value, 'password')} className="peer border-none bg-inherit bg-blue-50 focus:bg-blue-100 w-full h-full placeholder-transparent py-2 md:py-1.5 lg:py-1.5 xl:py-2 px-2 xl:px-3.5 text-xs md:twxt-sm lg:text-base xl:text-lg focus:border-transparent focus:outline-none rounded-l-lg focus:ring-0" placeholder="Password"/>
                   <div className='w-auto h-full secure bg-blue-50 peer-focus:bg-blue-100 rounded-r-lg flex items-center py-2 md:py-1.5 lg:py-1 px-2 xl:px-3 xl:py-2.5'>
                     {passwordVisible ? (
                       <AiOutlineEye className="cursor-pointer w-4 h-4 xl:w-5 xl:h-5"  onClick={togglePasswordVisibility} />
@@ -184,12 +230,12 @@ const SignupForm = () => {
             </form>
 
             
-            <div class="my-3 border-b text-center w-[80%] border-gray-300 relative flex items-center justify-center">
+            <div className="my-3 border-b text-center w-[80%] border-gray-300 relative flex items-center justify-center">
               <div className="absolute pointer-events-none font-semibold bg-blue-100 backdrop-blur-sm top-0 leading-none px-2 inline-block tracking-wide transform -translate-y-1/2 mx-auto text-xs md:text-sm text-blue-500">Or Sign Up with</div>
             </div>
             
             <div className='flex flex-wrap items-center justify-between w-[80%]'>
-                <button type="submit" className='text-red-500 px-5 py-2 rounded-xl w-auto mx-auto bg-white shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:backdrop-blur-3xl hover:bg-blue-400 hover:text-white hover:shadow-2xl hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
+                <button type="submit" onClick={googleSignUp} className='text-red-500 px-5 py-2 rounded-xl w-auto mx-auto bg-white shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:backdrop-blur-3xl hover:bg-blue-400 hover:text-white hover:shadow-2xl hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
                     <IoLogoGoogleplus />
                 </button>
                 <button type="submit" className='px-5 py-2 rounded-xl w-auto mx-auto bg-white font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:font-semibold hover:bg-blue-400 hover:text-white hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >

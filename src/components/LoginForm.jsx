@@ -7,11 +7,21 @@ import { FaApple, FaFacebookF } from "react-icons/fa";
 import { Link } from 'react-router-dom'
 
 const LoginForm = () => {
+
+    //   HANDLING THE PASSWORD VISIBILITY
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const togglePasswordVisibility = () => {
           setPasswordVisible(!passwordVisible);
   };
+
+
+   //    HANDLING THE REMEMBER ME TOGGLE
+  const [rememberMe, setRememberMe] = useState(false);
+
+  const handleRememberMe = () => {
+    setRememberMe(!rememberMe);
+  }
 
   return (
     <div className='flex flex-row items-center justify-between w-full h-screen'>
@@ -47,6 +57,25 @@ const LoginForm = () => {
                   <span className="pointer-events-none absolute start-3.5 bg-transparent backdrop-blur-sm peer-focus:bg-blue-100 top-0 -translate-y-1/2 p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">Password</span>
                 </div>
               </label>
+
+              <div className='flex flex-wrap w-full -mt-5 px-3 items-center justify-between'>
+                <div className='flex flex-row items-center justify-between gap-1'>
+                  <p className='text-xs md:text-sm text-blue-500'>Remember me</p>
+                  <div class="btn-status">
+                    <input type="checkbox" name="checkbox" id="checkbox" class="hidden" checked={rememberMe} onChange={handleRememberMe} />
+                    <label
+                        htmlFor="checkbox"
+                        class={`btn-change flex items-center p-1 rounded-md w-8 h-4 border border-neutral-300 cursor-pointer /*${rememberMe  ? 'remembered' : ''} */`}
+                        style={{
+                          '--bg-btn': rememberMe ? '#C6F6D5' : '#fed7d7',
+                          '--btn-color': rememberMe ? '#38A169' : '#e53e3e',
+                        }}>
+                    </label>
+                  </div>
+                </div>
+
+                <p className='text-xs md:text-sm text-blue-500 hover:underline cursor-pointer'>Forgot password?</p>
+              </div>
 
               <button type="submit" className='text-blue-400 px-2 py-2 rounded-xl w-[70%] mx-auto bg-white font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300  hover:font-semibold hover:bg-blue-400 hover:text-white hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >Sign Up</button>
               
