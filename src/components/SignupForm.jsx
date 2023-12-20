@@ -7,16 +7,15 @@ import { FaApple, FaFacebookF } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import Toast from './Toast';
-import { firestore, auth, GoogleUser, FacebookUser } from '../Firebase';
-import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth'
-import { doc, setDoc } from 'firebase/firestore';
+import { firestore, auth, /* FacebookUser, */ GoogleUser } from '../Firebase';
+import { createUserWithEmailAndPassword, signInWithPopup, FacebookAuthProvider } from 'firebase/auth'
+import { collection, doc, getDocs, query, setDoc, where } from 'firebase/firestore';
 
 
 const SignupForm = () => {
 
     //   SETTING UP NAVIGATION
   const history = useNavigate();
-
 
     //   PASSWORD VISIBILITY TOGGLE
   const [passwordVisible, setPasswordVisible] = useState(false);
@@ -40,38 +39,9 @@ const SignupForm = () => {
     ...formData,
     [fieldName]: value,
     });
+
+    console.log(setFormData);
   };
-
-
-
-    //   CONFIGURING TOAST TO TOAST MESSAGE
-  const showToastMessage = (message, type) => {
-        switch (type) {
-            case 'success':
-                toast.success(message, {
-                    position: toast.POSITION.TOP_RIGHT,
-                    duration: 3000,
-                    preventDefault: true,
-                });
-                break;
-            case 'error':
-                toast.error(message, {
-                    position: toast.POSITION.TOP_RIGHT,
-                    duration: 3000,
-                    preventDefault: true,
-                });
-                break;
-            case 'warning':
-                toast.warning(message, {
-                    position: toast.POSITION.TOP_RIGHT,
-                    duration: 3000,
-                    preventDefault: true,
-                });
-                break;
-            default:
-                break;
-        }
-    };
 
 
 
@@ -79,30 +49,62 @@ const SignupForm = () => {
   
     //   SIGNUP WITH GOOGLE
   const googleSignUp = async () => {
-    const provider = GoogleUser();
+    // const provider = GoogleUser();
     try {
-      const result = await signInWithPopup(auth, provider);
-      const credential = GoogleUser.credentialFromResult(result);
-      const token = credential.accessToken;
+      const result = await signInWithPopup(auth, GoogleUser);
+      // const credential = GoogleUser.credentialFromResult(result);
+      // const token = credential.accessToken;
       const user = result.user;
       console.log(user);
 
-      await storeUserData(user);
+      await storeUserData(user, 'google');
     }
     catch (err) {
       showToastMessage('Google sign-up failed!', 'error');
+      // showToastMessage(err.code, 'error');
+      // showToastMessage(err.code, 'error');
+      // showToastMessage(err.customData.email, 'error');
+      // const credential = GoogleAuthProvider.credentialFromResult(err);
     }
   };
 
 
 
+
+
+    //   SIGNUP WITH FACEBOOK
+  const [user, setUser] = useState(null);
+  const facebookSignUp = async () => {
+    const provider = new FacebookAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      // const credential = FacebookAuthProvider.credentialFromResult(result);
+      // const token = credential.accessToken;
+      setUser(result.user);
+      console.log(user);
+
+      await storeUserData(user, 'facebook');
+    }
+    catch (err) {
+      showToastMessage('Facebook sign-up failed!', 'error');
+    }
+  }
+
+
+
+
+
     //   SAVING USER INFO FROM GOOGLE TO DATABASE
-  const storeUserData = async (user) => {
+  const storeUserData = async (user, source) => {
     const userDocRef = doc(firestore, 'User', user.uid);
     const userData = {
-      username: user.name,
+      username: getFirstName(user.displayName),
       email: user.email,
+      source: source,
     }
+
+    console.log(userData);
+    console.log(userDocRef)
 
     try {
       await setDoc(userDocRef, userData);
@@ -114,8 +116,16 @@ const SignupForm = () => {
       showToastMessage('Sign Up Successful', 'success');
     }
     catch (err) {
-      showToastMessage('Sign Up failed', 'error')
+      showToastMessage(err.message, 'error');
+      console.log(err.message);
     }
+  };
+
+
+    //    GETTING FIRSTNAME AS USERNAME FROM GOOGLE AUTH
+  const getFirstName = (fullName) => {
+    const nameParts = fullName.split(' ');
+    return nameParts[0];
   };
 
 
@@ -129,20 +139,50 @@ const SignupForm = () => {
 
 
     //   PASSWORD VALIDATION
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
-    if (!passwordRegex.test(formData.password)) {
-        showToastMessage('Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, and one number',
-        'error');
-        return;
+    const validatePassword = (password) => {
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      return passwordRegex.test(password);
     }
+
+    
+    if (!validatePassword(formData.password)) {
+        showToastMessage('Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character',
+        'error');
+    }
+
 
 
     //   EMAIL VALIDATION
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(formData.email)) {
+    const validateEmail = (email) => {
+      // eslint-disable-next-line
+      const emailRegex = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+      return emailRegex.test(email);
+    };
+
+
+    if (!validateEmail(formData.email)) {
         showToastMessage('Invalid emaii address', 'error');
-        return;
     }
+
+
+    console.log('FormData:', formData);
+
+
+    //   CHECKING IF USER WITH SAME EMAIL OR USERNAME ALREADY EXISTS
+    const userQuery = query(collection(firestore, 'User'), where('email', '==', formData.email), where('source', '==', 'manual'));
+    const querySnapshot = await getDocs(userQuery);
+
+
+    const googleUserQuery = query(collection(firestore, 'User'), where('email', '==', user.email), where('source', '==', 'google'));
+    const googleQuerySnapshot = await getDocs(googleUserQuery);
+
+
+    if (!querySnapshot.empty || !googleQuerySnapshot.empty) {
+      // USER WITH SAME EMAIL EXISTS
+      showToastMessage('User with the same email already exists', 'warning');
+      return;
+    }
+
 
     //   GETTING USER DATA FROM TABLE AND SENDING TO FIREBASE STORAGE
     try {
@@ -155,6 +195,7 @@ const SignupForm = () => {
         await setDoc(userDocRef, {
             username: formData.username,
             email: formData.email,
+            source: 'manual',
         });
 
         setTimeout(() => {
@@ -163,7 +204,7 @@ const SignupForm = () => {
                 username: '',
                 email: '',
                 password: '',
-            })
+            });
 
 
             //   ROUTING BACK TO LOGIN PAGE
@@ -185,6 +226,35 @@ const SignupForm = () => {
 
 
 
+   //   CONFIGURING TOAST TO TOAST MESSAGE
+  const showToastMessage = (message, type) => {
+        switch (type) {
+            case 'success':
+                toast.success(message, {
+                    position: 'top-right',
+                    duration: 3000,
+                    preventDefault: true,
+                });
+                break;
+            case 'error':
+                toast.error(message, {
+                    position: 'top-right',
+                    duration: 3000,
+                    preventDefault: true,
+                });
+                break;
+            case 'warning':
+                toast.warning(message, {
+                    position: 'top-right',
+                    duration: 3000,
+                    preventDefault: true,
+                });
+                break;
+            default:
+                break;
+        }
+    };
+
 
 
    
@@ -193,27 +263,27 @@ const SignupForm = () => {
     <div className='flex flex-row items-center justify-between w-full h-screen'>
         <div className='w-full md:w-full lg:w-[55%] h-full flex items-center justify-center'>
 
-          <div className="rounded-xl bg-blue-100 xl:w-[60%] lg:w-[80%] md:w-[70%] sm:w-[65%] w-[90%] h-auto py-9 px-3 gap-4 flex flex-col font-['Lato'] items-center">
-            <div className='flex items-center flex-col w-[95%] md:w-[80%] text-center p-2 gap-1.5 xl:gap-3'>
+          <div className="rounded-xl bg-blue-100 xl:w-[65%] lg:w-[80%] md:w-[70%] sm:w-[65%] w-[90%] h-auto py-5 px-3 gap-2 flex flex-col font-['Lato'] items-center">
+            <div className='flex items-center flex-col w-[95%] md:w-[80%] text-center p-2 gap-1.5 xl:gap-3.5'>
               <h4 className='text-lg md:text-xl lg:text-2xl font-semibold'>Start Your Journey,</h4>
-              <h4 className='text-lg md:text-xl lg:text-2xl font-normal'>Capture Moments, Stay Organized!</h4>
-              <p className='text-sm md:text-base lg:text-lg'>Welcome aboard! Let's begin your adventure of recording memories and staying organized. Enter your details to create your account.</p>
+              <h4 className='text-lg md:text-xl font-medium'>Capture Moments, Stay Organized!</h4>
+              <p className='text-sm md:text-base lg:text-lg font-extralight'>Welcome aboard! Let's begin your adventure of recording memories and staying organized. Enter your details to create your account.</p>
             </div>
 
-            <form onSubmit={handleSave} className='w-[95%] md:w-[80%] mt-2 flex flex-col justify-between gap-6'>
+            <form onSubmit={handleSave} className='w-[95%] md:w-[80%] mt-2 flex flex-col justify-between gap-4'>
               <label htmlFor="Username" className="relative block rounded-lg border w-full focus-within:border-white outline-none">
-                <input type="text" id="Username" onChange={(value) => handleInputChange(value, 'username')} className="peer border-none bg-blue-50 w-full focus:bg-blue-100 placeholder-transparent py-2 md:py-1.5 lg:py-1 xl:py-2 px-2 xl:px-3.5 text-xs md:text-sm lg:text-base xl:text-xl focus:border-transparent focus:outline-none rounded-lg focus:ring-0" placeholder="Username"/>
-                <span className="pointer-events-none absolute start-3.5 bg-transparent backdrop-blur-sm peer-focus:bg-blue-100 top-0 -translate-y-1/2 p-0.5 text-xs md:twxt-sm lg:text-base xl:text-lg text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">Username</span>
+                <input type="text" id="Username" onChange={(event) => handleInputChange(event.target.value, 'username')} className="peer border-none bg-blue-50 w-full focus:bg-blue-100 placeholder-transparent py-2 md:py-1.5 lg:py-1 xl:py-2 px-2 xl:px-3.5 text-xs md:text-sm lg:text-base focus:border-transparent focus:outline-none rounded-lg focus:ring-0" placeholder="Username"/>
+                <span className="pointer-events-none absolute start-3.5 bg-transparent backdrop-blur-sm peer-focus:bg-transparent top-0 -translate-y-1/2 p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">Username</span>
               </label>
 
               <label htmlFor="Email" className="relative block rounded-lg border w-full focus-within:border-white outline-none">
-                <input type="email" id="Email" onChange={(value) => handleInputChange(value, 'email')} className="peer border-none bg-blue-50 w-full focus:bg-blue-100 placeholder-transparent py-2 md:py-1.5 lg:py-1 px-2 xl:py-2 xl:px-3.5 text-xs md:text-sm lg:text-base focus:border-transparent focus:outline-none rounded-lg focus:ring-0" placeholder="Email"/>
-                <span className="pointer-events-none absolute start-3.5 bg-transparent backdrop-blur-sm peer-focus:bg-blue-100 top-0 -translate-y-1/2 p-0.5 text-xs md:twxt-sm lg:text-base xl:text-lg text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">Email</span>
+                <input type="email" id="Email" onChange={(event) => handleInputChange(event.target.value, 'email')} className="peer border-none bg-blue-50 w-full focus:bg-blue-100 placeholder-transparent py-2 md:py-1.5 lg:py-1 px-2 xl:py-2 xl:px-3.5 text-xs md:text-sm lg:text-base focus:border-transparent focus:outline-none rounded-lg focus:ring-0" placeholder="Email"/>
+                <span className="pointer-events-none absolute start-3.5 bg-transparent backdrop-blur-sm peer-focus:bg-transparent top-0 -translate-y-1/2 p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">Email</span>
               </label>
 
               <label htmlFor="Password" className="relative inline-flex rounded-lg border w-full bg-blue-50 peer-focus:bg-blue-100 focus-within:border-white outline-none">
                 <div className='flex flex-row items-center w-full bg-blue-50 peer-focus:bg-blue-100 rounded-lg'>
-                  <input type={passwordVisible ? "text" : "password"} id="Password" onChange={(value) => handleInputChange(value, 'password')} className="peer border-none bg-inherit bg-blue-50 focus:bg-blue-100 w-full h-full placeholder-transparent py-2 md:py-1.5 lg:py-1.5 xl:py-2 px-2 xl:px-3.5 text-xs md:twxt-sm lg:text-base xl:text-lg focus:border-transparent focus:outline-none rounded-l-lg focus:ring-0" placeholder="Password"/>
+                  <input type={passwordVisible ? "text" : "password"} id="Password" onChange={(event) => handleInputChange(event.target.value, 'password')} className="peer border-none bg-inherit bg-blue-50 focus:bg-blue-100 w-full h-full placeholder-transparent py-2 md:py-1.5 lg:py-1.5 xl:py-2 px-2 xl:px-3.5 text-xs md:text-sm lg:text-base focus:border-transparent focus:outline-none rounded-l-lg focus:ring-0" placeholder="Password"/>
                   <div className='w-auto h-full secure bg-blue-50 peer-focus:bg-blue-100 rounded-r-lg flex items-center py-2 md:py-1.5 lg:py-1 px-2 xl:px-3 xl:py-2.5'>
                     {passwordVisible ? (
                       <AiOutlineEye className="cursor-pointer w-4 h-4 xl:w-5 xl:h-5"  onClick={togglePasswordVisibility} />
@@ -221,7 +291,7 @@ const SignupForm = () => {
                       <AiOutlineEyeInvisible className="cursor-pointer w-4 h-4 xl:w-5 xl:h-5"  onClick={togglePasswordVisibility} />
                     )}
                   </div>
-                  <span className="pointer-events-none absolute start-3.5 bg-transparent backdrop-blur-sm peer-focus:bg-blue-100 top-0 -translate-y-1/2 p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">Password</span>
+                  <span className="pointer-events-none absolute start-3.5 bg-transparent backdrop-blur-sm peer-focus:bg-transparent top-0 -translate-y-1/2 p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">Password</span>
                 </div>
               </label>
 
@@ -230,7 +300,7 @@ const SignupForm = () => {
             </form>
 
             
-            <div className="my-3 border-b text-center w-[80%] border-gray-300 relative flex items-center justify-center">
+            <div className="my-2.5 border-b text-center w-[80%] border-gray-300 relative flex items-center justify-center">
               <div className="absolute pointer-events-none font-semibold bg-blue-100 backdrop-blur-sm top-0 leading-none px-2 inline-block tracking-wide transform -translate-y-1/2 mx-auto text-xs md:text-sm text-blue-500">Or Sign Up with</div>
             </div>
             
@@ -241,12 +311,12 @@ const SignupForm = () => {
                 <button type="submit" className='px-5 py-2 rounded-xl w-auto mx-auto bg-white font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:font-semibold hover:bg-blue-400 hover:text-white hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
                     <FaApple className='' />
                 </button>
-                <button type="submit" className='text-blue-400 px-5 py-2 rounded-xl w-auto mx-auto bg-white font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:font-semibold hover:bg-blue-400 hover:text-white hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
+                <button type="submit" onClick={facebookSignUp} className='text-blue-400 px-5 py-2 rounded-xl w-auto mx-auto bg-white font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:font-semibold hover:bg-blue-400 hover:text-white hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
                     <FaFacebookF />
                 </button>
             </div>
 
-            <p className='text-blue-500 mt-6 mb-3 text-xs md:text-sm '>Already have an account? <Link to='/login' className='underline cursor-pointer'>Sign in</Link></p>
+            <p className='text-blue-500 my-2 text-xs md:text-sm '>Already have an account? <Link to='/login' className='underline cursor-pointer'>Sign in</Link></p>
           </div>
         </div>
 

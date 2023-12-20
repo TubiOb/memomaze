@@ -12,6 +12,7 @@ const Toast = ({ showToast }) => {
             dir='rtl'
             theme="light"
             invert={true}
+            expand={true}
             richColors
             closeButton
             />
