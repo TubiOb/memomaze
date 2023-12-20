@@ -99,7 +99,6 @@ const SignupForm = () => {
     const userData = {
       username: getFirstName(user.displayName),
       email: user.email,
-      source: source,
     }
 
     try {
@@ -119,7 +118,7 @@ const SignupForm = () => {
 
 
 
-  
+
     //    GETTING FIRSTNAME AS USERNAME FROM GOOGLE AUTH
   const getFirstName = (fullName) => {
     const nameParts = fullName.split(' ');
