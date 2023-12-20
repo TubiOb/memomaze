@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 import Toast from './Toast';
 import { firestore, auth, /* FacebookUser, */ GoogleUser } from '../Firebase';
 import { createUserWithEmailAndPassword, signInWithPopup, FacebookAuthProvider } from 'firebase/auth'
-import { collection, doc, getDocs, query, setDoc, where } from 'firebase/firestore';
+import { doc, setDoc } from 'firebase/firestore';
 
 
 const SignupForm = () => {
@@ -55,9 +55,8 @@ const SignupForm = () => {
       // const credential = GoogleUser.credentialFromResult(result);
       // const token = credential.accessToken;
       const user = result.user;
-      console.log(user);
 
-      await storeUserData(user, 'google');
+      await storeUserData(user);
     }
     catch (err) {
       showToastMessage('Google sign-up failed!', 'error');
@@ -83,7 +82,7 @@ const SignupForm = () => {
       setUser(result.user);
       console.log(user);
 
-      await storeUserData(user, 'facebook');
+      await storeUserData(user);
     }
     catch (err) {
       showToastMessage('Facebook sign-up failed!', 'error');
@@ -95,16 +94,13 @@ const SignupForm = () => {
 
 
     //   SAVING USER INFO FROM GOOGLE TO DATABASE
-  const storeUserData = async (user, source) => {
+  const storeUserData = async (user) => {
     const userDocRef = doc(firestore, 'User', user.uid);
     const userData = {
       username: getFirstName(user.displayName),
       email: user.email,
       source: source,
     }
-
-    console.log(userData);
-    console.log(userDocRef)
 
     try {
       await setDoc(userDocRef, userData);
@@ -116,12 +112,14 @@ const SignupForm = () => {
       showToastMessage('Sign Up Successful', 'success');
     }
     catch (err) {
-      showToastMessage(err.message, 'error');
-      console.log(err.message);
+      // showToastMessage(err.message, 'error');
+      // console.log(err.message);
     }
   };
 
 
+
+  
     //    GETTING FIRSTNAME AS USERNAME FROM GOOGLE AUTH
   const getFirstName = (fullName) => {
     const nameParts = fullName.split(' ');
@@ -129,7 +127,7 @@ const SignupForm = () => {
   };
 
 
-  // googleSignUp();
+
 
 
     //   SAVING/SIGNING UP NEW USER
@@ -140,7 +138,7 @@ const SignupForm = () => {
 
     //   PASSWORD VALIDATION
     const validatePassword = (password) => {
-      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+      const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
       return passwordRegex.test(password);
     }
 
@@ -165,23 +163,7 @@ const SignupForm = () => {
     }
 
 
-    console.log('FormData:', formData);
-
-
-    //   CHECKING IF USER WITH SAME EMAIL OR USERNAME ALREADY EXISTS
-    const userQuery = query(collection(firestore, 'User'), where('email', '==', formData.email), where('source', '==', 'manual'));
-    const querySnapshot = await getDocs(userQuery);
-
-
-    const googleUserQuery = query(collection(firestore, 'User'), where('email', '==', user.email), where('source', '==', 'google'));
-    const googleQuerySnapshot = await getDocs(googleUserQuery);
-
-
-    if (!querySnapshot.empty || !googleQuerySnapshot.empty) {
-      // USER WITH SAME EMAIL EXISTS
-      showToastMessage('User with the same email already exists', 'warning');
-      return;
-    }
+    // console.log('FormData:', formData);
 
 
     //   GETTING USER DATA FROM TABLE AND SENDING TO FIREBASE STORAGE
@@ -195,7 +177,6 @@ const SignupForm = () => {
         await setDoc(userDocRef, {
             username: formData.username,
             email: formData.email,
-            source: 'manual',
         });
 
         setTimeout(() => {
@@ -214,11 +195,13 @@ const SignupForm = () => {
         showToastMessage('Sign Up Successful', 'success')
     }
     catch(err) {
-        if (err.message.includes('already in use')) {
-            showToastMessage('User already exists', 'warning');
+        if (err.message.includes('auth/email-already-in-use')) {
+            showToastMessage('User with the same email already exists', 'warning');
         }
         else {
             showToastMessage('Sign Up failed', 'error');
+            // showToastMessage(err.message, 'error');
+            // console.log(err.message);
         }
     }
   };
