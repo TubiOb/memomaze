@@ -63,7 +63,7 @@ const LoginForm = () => {
       const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
 
       const userId = userCredential.user.uid;
-      console.log(userId);
+      // console.log(userId);
 
       const userDocRef = doc(firestore, `User/${userId}`);
       const UserDoc = await getDoc(userDocRef);

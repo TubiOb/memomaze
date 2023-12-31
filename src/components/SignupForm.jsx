@@ -40,7 +40,7 @@ const SignupForm = () => {
     [fieldName]: value,
     });
 
-    console.log(setFormData);
+    // console.log(setFormData);
   };
 
 
@@ -54,9 +54,9 @@ const SignupForm = () => {
       const result = await signInWithPopup(auth, GoogleUser);
       // const credential = GoogleUser.credentialFromResult(result);
       // const token = credential.accessToken;
-      const user = result.user;
+      const user = result.user.uid;
 
-      await storeUserData(user);
+      const userDoc = await storeUserData(user);
     }
     catch (err) {
       showToastMessage('Google sign-up failed!', 'error');
@@ -73,6 +73,7 @@ const SignupForm = () => {
 
     //   SIGNUP WITH FACEBOOK
   const [user, setUser] = useState(null);
+
   const facebookSignUp = async () => {
     const provider = new FacebookAuthProvider();
     try {
@@ -168,7 +169,7 @@ const SignupForm = () => {
     // console.log('FormData:', formData);
 
 
-    //   GETTING USER DATA FROM TABLE AND SENDING TO FIREBASE STORAGE
+    //   GETTING USER DATA FROM FORM AND SENDING TO FIREBASE STORAGE
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
 
