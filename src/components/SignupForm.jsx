@@ -3,7 +3,7 @@ import '../index.css'
 import Image from '../assets/Bullet journal-pana.svg'
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { IoLogoGoogleplus } from "react-icons/io";
-import { FaApple, FaFacebookF } from "react-icons/fa";
+import { FaFacebookF } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import Toast from './Toast';
@@ -94,14 +94,17 @@ const SignupForm = () => {
 
 
     //   SAVING USER INFO FROM GOOGLE TO DATABASE
-  const storeUserData = async (user) => {
-    const userDocRef = doc(firestore, 'User', user.uid);
-    const userData = {
-      username: getFirstName(user.displayName),
-      email: user.email,
-    }
+  const storeUserData = async (user, e) => {
+    e.preventDefault();
 
     try {
+      const userDocRef = doc(firestore, 'User', user.uid);
+      
+      const userData = {
+        username: getFirstName(user.displayName),
+        email: user.email,
+      }
+
       await setDoc(userDocRef, userData);
       setTimeout(() => {
           //   ROUTING BACK TO LOGIN PAGE
@@ -144,7 +147,7 @@ const SignupForm = () => {
     
     if (!validatePassword(formData.password)) {
         showToastMessage('Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character',
-        'error');
+        'warning');
     }
 
 
@@ -289,9 +292,6 @@ const SignupForm = () => {
             <div className='flex flex-wrap items-center justify-between w-[80%]'>
                 <button type="submit" onClick={googleSignUp} className='text-red-500 px-5 py-2 rounded-xl w-auto mx-auto bg-white shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:backdrop-blur-3xl hover:bg-blue-400 hover:text-white hover:shadow-2xl hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
                     <IoLogoGoogleplus />
-                </button>
-                <button type="submit" className='px-5 py-2 rounded-xl w-auto mx-auto bg-white font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:font-semibold hover:bg-blue-400 hover:text-white hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
-                    <FaApple className='' />
                 </button>
                 <button type="submit" onClick={facebookSignUp} className='text-blue-400 px-5 py-2 rounded-xl w-auto mx-auto bg-white font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:font-semibold hover:bg-blue-400 hover:text-white hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
                     <FaFacebookF />

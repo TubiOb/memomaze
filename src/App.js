@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Preloader from "./components/Preloader";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+// import { AuthProvider } from 'react-auth-kit'
 
 function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -15,13 +16,18 @@ function App() {
 
   return (
     <div>
-      <BrowserRouter>
-        <Routes>
-          <Route index element={isLoading ? <Preloader /> : <Login /> } />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-        </Routes>
-      </BrowserRouter>
+      {/* <AuthProvider authType={'cookie'} authName={'_auth'} cookieDomain={window.location.hostname} refreshTokens={true} cookieSecure={true}> */}
+          <BrowserRouter>
+          {isLoading ? <Preloader /> : (
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route index element={<Login />} />
+            </Routes>
+          )}
+          </BrowserRouter>
+      {/* </AuthProvider> */}
+      
     </div>
   );
 }

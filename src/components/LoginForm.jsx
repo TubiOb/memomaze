@@ -4,24 +4,132 @@ import '../index.css'
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { IoLogoGoogleplus } from "react-icons/io";
 import { FaApple, FaFacebookF } from "react-icons/fa";
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+// import { useSignIn } from 'react-auth-kit'
+import { toast } from 'sonner'
+import Toast from './Toast';
+import { doc, getDoc } from 'firebase/firestore';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth, firestore } from '../Firebase';
+// import Cookies from 'js-cookie';
 
 const LoginForm = () => {
+  const history = useNavigate();
 
     //   HANDLING THE PASSWORD VISIBILITY
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const togglePasswordVisibility = () => {
-          setPasswordVisible(!passwordVisible);
+    setPasswordVisible(!passwordVisible);
   };
 
 
-   //    HANDLING THE REMEMBER ME TOGGLE
-  const [rememberMe, setRememberMe] = useState(false);
+  const [formData, setFormData] = useState({
+    email: '',
+    password: '',
+  });
 
-  const handleRememberMe = () => {
-    setRememberMe(!rememberMe);
+  const handleInputChange = (value, fieldName) => {
+      setFormData({
+      ...formData,
+      [fieldName]: value,
+      });
+  };
+
+
+  // const signIn = useSignIn();
+
+   //    HANDLING THE REMEMBER ME TOGGLE
+  // const [rememberMe, setRememberMe] = useState(false);
+
+  // const handleRememberMe = () => {
+  //   setRememberMe(!rememberMe);
+  // }
+
+
+  
+    //    SIGNING INTO THE DIARY/TODO APP
+  const handleSignIn = async(e) => {
+    e.preventDefault();
+
+
+    try {
+
+      if (!formData.email || !formData.password) {
+        showToastMessage('Please fill in both email and password.', 'error');
+        return;
+      }
+
+      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+
+      const userId = userCredential.user.uid;
+      console.log(userId);
+
+      const userDocRef = doc(firestore, `User/${userId}`);
+      const UserDoc = await getDoc(userDocRef);
+
+      if (UserDoc) {
+        // eslint-disable-next-line
+        const userData = UserDoc.data();
+
+        showToastMessage('Sign In Successful', 'success');
+
+        setFormData({
+            emailAddress: '',
+            password: '',
+        });
+
+        setTimeout(() => {
+          // setLoading(false);
+
+          history('/signup');
+        }, 3500);
+
+      }
+
+    }
+    catch (err) {
+      showToastMessage('Invalid email or Password', 'error');
+
+      setFormData({
+        emailAddress: '',
+        password: '',
+      });
+    }
   }
+
+
+
+
+
+    //   CONFIGURING TOAST TO TOAST MESSAGE
+  const showToastMessage = (message, type) => {
+    switch (type) {
+        case 'success':
+            toast.success(message, {
+                position: 'top-right',
+                duration: 3000,
+                preventDefault: true,
+            });
+            break;
+        case 'error':
+            toast.error(message, {
+                position: 'top-right',
+                duration: 3000,
+                preventDefault: true,
+            });
+            break;
+        case 'warning':
+            toast.warning(message, {
+                position: 'top-right',
+                duration: 3000,
+                preventDefault: true,
+            });
+            break;
+        default:
+            break;
+    }
+};
 
   return (
     <div className='flex flex-row items-center justify-between w-full h-screen'>
@@ -38,15 +146,15 @@ const LoginForm = () => {
               <p className='text-sm md:text-base lg:text-lg'>Hey, Enter your details to get signed in to your account</p>
             </div>
 
-            <form className='w-[95%] md:w-[80%] mt-2 flex flex-col justify-between gap-6'>
+            <form onSubmit={handleSignIn} className='w-[95%] md:w-[80%] mt-2 flex flex-col justify-between gap-6'>
               <label htmlFor="Email" className="relative block rounded-lg border w-full focus-within:border-white outline-none">
-                <input type="email" id="Email" className="peer border-none bg-blue-50 w-full h-full focus:bg-blue-100 placeholder-transparent py-2 md:py-1.5 lg:py-1.5 px-2 xl:px-3.5 xl:py-2.5 text-xs md:text-sm lg:text-base focus:border-transparent focus:outline-none rounded-lg focus:ring-0 required:border-red-500" placeholder="Email"/>
+                <input type="email" id="Email" className="peer border-none bg-blue-50 w-full h-full focus:bg-blue-100 placeholder-transparent py-2 md:py-1.5 lg:py-1.5 px-2 xl:px-3.5 xl:py-2.5 text-xs md:text-sm lg:text-base focus:border-transparent focus:outline-none rounded-lg focus:ring-0 required:border-red-500" placeholder="Email" value={formData.email} onChange={(event) => handleInputChange(event.target.value, 'email')}/>
                 <span className="pointer-events-none absolute start-3.5 bg-transparent backdrop-blur-sm peer-focus:bg-transparent top-0 -translate-y-1/2 p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">Email</span>
               </label>
 
               <label htmlFor="Password" className="relative inline-flex rounded-lg border w-full bg-blue-50 peer-focus:bg-blue-100 focus-within:border-white outline-none">
                 <div className='flex flex-row items-center w-full bg-blue-50 peer-focus:bg-blue-100 rounded-lg'>
-                  <input type={passwordVisible ? "text" : "password"} id="Password" className="peer border-none bg-inherit bg-blue-50 focus:bg-blue-100 w-full h-full placeholder-transparent py-2 md:py-1.5 lg:py-1.5 px-2 xl:py-2 xl:px-3.5 text-xs md:twxt-sm lg:text-base focus:border-transparent focus:outline-none rounded-l-lg focus:ring-0 required:border-red-500" placeholder="Password"/>
+                  <input type={passwordVisible ? "text" : "password"} id="Password" className="peer border-none bg-inherit bg-blue-50 focus:bg-blue-100 w-full h-full placeholder-transparent py-2 md:py-1.5 lg:py-1.5 px-2 xl:py-2 xl:px-3.5 text-xs md:twxt-sm lg:text-base focus:border-transparent focus:outline-none rounded-l-lg focus:ring-0 required:border-red-500" placeholder="Password" onChange={(event) => handleInputChange(event.target.value, 'password')} />
                   <div className='w-auto h-full secure bg-blue-50 peer-focus:bg-blue-100 rounded-r-lg flex items-center py-2 md:py-1.5 lg:py-1 px-2 xl:px-3 xl:py-2.5'>
                     {passwordVisible ? (
                       <AiOutlineEyeInvisible className="cursor-pointer w-4 h-4 xl:w-5 xl:h-5"  onClick={togglePasswordVisibility} />
@@ -59,20 +167,20 @@ const LoginForm = () => {
               </label>
 
               <div className='flex flex-wrap w-full -mt-5 px-3 items-center justify-between'>
-                <div className='flex flex-row items-center justify-between gap-1'>
+                {/* <div className='flex flex-row items-center justify-between gap-1'>
                   <p className='text-xs md:text-sm text-blue-500'>Remember me</p>
                   <div className="btn-status">
                     <input type="checkbox" name="checkbox" id="checkbox" className="hidden" checked={rememberMe} onChange={handleRememberMe} />
                     <label
                         htmlFor="checkbox"
-                        className={`btn-change flex items-center p-1 rounded-md w-8 h-4 border border-neutral-300 cursor-pointer /*${rememberMe  ? 'remembered' : ''} */`}
+                        className={`btn-change flex items-center p-1 rounded-md w-8 h-4 border border-neutral-300 cursor-pointer ${rememberMe  ? 'remembered' : ''}`}
                         style={{
                           '--bg-btn': rememberMe ? '#C6F6D5' : '#fed7d7',
                           '--btn-color': rememberMe ? '#38A169' : '#e53e3e',
                         }}>
                     </label>
                   </div>
-                </div>
+                </div> */}
 
                 <p className='text-xs md:text-sm text-blue-500 hover:underline cursor-pointer'>Forgot password?</p>
               </div>
@@ -102,6 +210,7 @@ const LoginForm = () => {
 
         </div>
         
+        <Toast showToast={showToastMessage} />
     </div>
   )
 }
