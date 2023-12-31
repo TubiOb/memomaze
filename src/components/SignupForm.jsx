@@ -7,25 +7,25 @@ import { FaFacebookF } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import Toast from './Toast';
-import { firestore, auth, /* FacebookUser, */ GoogleUser } from '../Firebase';
-import { createUserWithEmailAndPassword, signInWithPopup, FacebookAuthProvider } from 'firebase/auth'
+import { firestore, auth, FacebookUser, GoogleUser } from '../Firebase';
+import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth'
 import { doc, setDoc } from 'firebase/firestore';
 
 
 const SignupForm = () => {
 
-    //   SETTING UP NAVIGATION
+    //   SETTING UP NAVIGATION //
   const history = useNavigate();
 
-    //   PASSWORD VISIBILITY TOGGLE
+    //   PASSWORD VISIBILITY TOGGLE //
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const togglePasswordVisibility = () => {
-          setPasswordVisible(!passwordVisible);
+      setPasswordVisible(!passwordVisible);
   };
 
 
-    //   DEFAULT VALUES OF FORM DATA
+    //   DEFAULT VALUES OF FORM DATA //
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -33,7 +33,7 @@ const SignupForm = () => {
   });
 
 
-    //   HANDLING VALUE CHANGE IN THE INPUT FIELDS 
+    //   HANDLING VALUE CHANGE IN THE INPUT FIELDS //
   const handleInputChange = (value, fieldName) => {
     setFormData({
     ...formData,
@@ -46,17 +46,20 @@ const SignupForm = () => {
 
 
 
+
+
+
   
-    //   SIGNUP WITH GOOGLE
+    //   SIGNUP WITH GOOGLE //
   const googleSignUp = async () => {
     // const provider = GoogleUser();
     try {
       const result = await signInWithPopup(auth, GoogleUser);
       // const credential = GoogleUser.credentialFromResult(result);
       // const token = credential.accessToken;
-      const user = result.user.uid;
+      const user = result.user;
 
-      const userDoc = await storeUserData(user);
+      await storeUserData(user, 'google');
     }
     catch (err) {
       showToastMessage('Google sign-up failed!', 'error');
@@ -71,19 +74,20 @@ const SignupForm = () => {
 
 
 
-    //   SIGNUP WITH FACEBOOK
-  const [user, setUser] = useState(null);
 
+
+
+    //   SIGNUP WITH FACEBOOK //
   const facebookSignUp = async () => {
-    const provider = new FacebookAuthProvider();
+
+    // const provider = new FacebookAuthProvider();
     try {
-      const result = await signInWithPopup(auth, provider);
+      const result = await signInWithPopup(auth, FacebookUser);
+      const user = result.user;
       // const credential = FacebookAuthProvider.credentialFromResult(result);
       // const token = credential.accessToken;
-      setUser(result.user);
-      console.log(user);
 
-      await storeUserData(user);
+      await storeUserData(user, 'facebook');
     }
     catch (err) {
       showToastMessage('Facebook sign-up failed!', 'error');
@@ -94,17 +98,32 @@ const SignupForm = () => {
 
 
 
-    //   SAVING USER INFO FROM GOOGLE TO DATABASE
-  const storeUserData = async (user, e) => {
+
+
+
+    //   SAVING USER INFO FROM GOOGLE TO DATABASE //
+  const storeUserData = async (user, e, provider) => {
     e.preventDefault();
 
     try {
       const userDocRef = doc(firestore, 'User', user.uid);
-      
-      const userData = {
-        username: getFirstName(user.displayName),
-        email: user.email,
+
+      let userData;
+
+      if (provider === 'google') {
+        userData = {
+          username: getFirstName(user.displayName),
+          email: user.email,
+        }
       }
+      else if (provider === 'facebook') {
+        userData = {
+          username: getFirstName(user.displayName),
+          email: user.email,
+        }
+      }
+      
+      
 
       await setDoc(userDocRef, userData);
       setTimeout(() => {
@@ -115,6 +134,14 @@ const SignupForm = () => {
       showToastMessage('Sign Up Successful', 'success');
     }
     catch (err) {
+        if (err.message.includes('auth/email-already-in-use')) {
+          showToastMessage('User with the same email already exists', 'warning');
+        }
+        else {
+          showToastMessage('Sign Up failed', 'error');
+          // showToastMessage(err.message, 'error');
+          // console.log(err.message);
+        }
       // showToastMessage(err.message, 'error');
       // console.log(err.message);
     }
@@ -123,7 +150,11 @@ const SignupForm = () => {
 
 
 
-    //    GETTING FIRSTNAME AS USERNAME FROM GOOGLE AUTH
+
+
+
+
+    //    GETTING FIRSTNAME AS USERNAME FROM GOOGLE AUTH //
   const getFirstName = (fullName) => {
     const nameParts = fullName.split(' ');
     return nameParts[0];
@@ -133,11 +164,13 @@ const SignupForm = () => {
 
 
 
-    //   SAVING/SIGNING UP NEW USER
+
+
+
+
+    //   SAVING/SIGNING UP NEW USER //
   const handleSave = async (e) => {
     e.preventDefault();
-
-
 
     //   PASSWORD VALIDATION
     const validatePassword = (password) => {
@@ -151,8 +184,6 @@ const SignupForm = () => {
         'warning');
     }
 
-
-
     //   EMAIL VALIDATION
     const validateEmail = (email) => {
       // eslint-disable-next-line
@@ -164,8 +195,6 @@ const SignupForm = () => {
     if (!validateEmail(formData.email)) {
         showToastMessage('Invalid emaii address', 'error');
     }
-
-
     // console.log('FormData:', formData);
 
 
@@ -209,6 +238,10 @@ const SignupForm = () => {
     }
   };
  
+
+
+
+
 
 
 
@@ -286,11 +319,11 @@ const SignupForm = () => {
             </form>
 
             
-            <div className="my-2.5 border-b text-center w-[80%] border-gray-300 relative flex items-center justify-center">
+            <div className="my-5 border-b text-center w-[80%] border-gray-300 relative flex items-center justify-center">
               <div className="absolute pointer-events-none font-semibold bg-blue-100 backdrop-blur-sm top-0 leading-none px-2 inline-block tracking-wide transform -translate-y-1/2 mx-auto text-xs md:text-sm text-blue-500">Or Sign Up with</div>
             </div>
             
-            <div className='flex flex-wrap items-center justify-between w-[80%]'>
+            <div className='flex flex-wrap items-center justify-between w-[40%]'>
                 <button type="submit" onClick={googleSignUp} className='text-red-500 px-5 py-2 rounded-xl w-auto mx-auto bg-white shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:backdrop-blur-3xl hover:bg-blue-400 hover:text-white hover:shadow-2xl hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
                     <IoLogoGoogleplus />
                 </button>

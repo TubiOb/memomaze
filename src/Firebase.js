@@ -21,5 +21,5 @@ export const firestore = getFirestore(app);
 export const auth = getAuth(app);
 export const database = getDatabase(app);
 // export const createdUser = createUserWithEmailAndPassword(app);
-export const GoogleUser = new GoogleAuthProvider();
-export const FacebookUser = new FacebookAuthProvider();
+export const GoogleUser = new GoogleAuthProvider(app);
+export const FacebookUser = new FacebookAuthProvider(app);

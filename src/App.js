@@ -18,13 +18,11 @@ function App() {
     <div>
       {/* <AuthProvider authType={'cookie'} authName={'_auth'} cookieDomain={window.location.hostname} refreshTokens={true} cookieSecure={true}> */}
           <BrowserRouter>
-          {isLoading ? <Preloader /> : (
             <Routes>
+              <Route index element={isLoading ? <Preloader /> : <Login /> } />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              <Route index element={<Login />} />
             </Routes>
-          )}
           </BrowserRouter>
       {/* </AuthProvider> */}
       

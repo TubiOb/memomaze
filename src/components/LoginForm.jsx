@@ -3,7 +3,7 @@ import Image from '../assets/Bullet journal-rafiki.svg'
 import '../index.css'
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { IoLogoGoogleplus } from "react-icons/io";
-import { FaApple, FaFacebookF } from "react-icons/fa";
+import { FaFacebookF } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom'
 // import { useSignIn } from 'react-auth-kit'
 import { toast } from 'sonner'
@@ -189,16 +189,13 @@ const LoginForm = () => {
               
             </form>
 
-            <div className="my-2.5 border-b text-center w-[80%] border-gray-300 relative flex items-center justify-center">
+            <div className="my-5 border-b text-center w-[80%] border-gray-300 relative flex items-center justify-center">
               <div className="absolute pointer-events-none font-semibold bg-blue-100 backdrop-blur-sm top-0 leading-none px-2 inline-block tracking-wide transform -translate-y-1/2 mx-auto text-xs md:text-sm text-blue-500">Or Sign In with</div>
             </div>
 
-            <div className='flex flex-wrap items-center justify-between w-[80%]'>
+            <div className='flex flex-wrap items-center justify-between w-[40%]'>
                 <button type="submit" className='text-red-500 px-5 py-2 rounded-xl w-auto mx-auto bg-white shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:backdrop-blur-3xl hover:bg-blue-400 hover:text-white hover:shadow-2xl hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
                     <IoLogoGoogleplus />
-                </button>
-                <button type="submit" className='px-5 py-2 rounded-xl w-auto mx-auto bg-white font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:font-semibold hover:bg-blue-400 hover:text-white hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
-                    <FaApple className='' />
                 </button>
                 <button type="submit" className='text-blue-400 px-5 py-2 rounded-xl w-auto mx-auto bg-white font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:font-semibold hover:bg-blue-400 hover:text-white hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
                     <FaFacebookF />
