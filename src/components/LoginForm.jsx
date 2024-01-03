@@ -127,7 +127,7 @@ const signUserIn = async (user, provider) => {
 
       await setDoc(userDocRef, userData);
 
-        // SIGNING USER UIN
+        
       setTimeout(() => {
           //   ROUTING BACK TO LOGIN PAGE
           history('/welcome');
@@ -135,6 +135,7 @@ const signUserIn = async (user, provider) => {
       showToastMessage(`${provider} Sign Up Successful`, 'success');
     }
 
+      // SIGNING USER IN
     else if (userDoc.exists()) {
       setTimeout(() => {
           //   ROUTING BACK TO LOGIN PAGE
