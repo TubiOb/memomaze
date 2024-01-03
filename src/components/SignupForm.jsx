@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 import Toast from './Toast';
 import { firestore, auth, FacebookUser, GoogleUser } from '../Firebase';
 import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth'
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
 
 
 const SignupForm = () => {
@@ -51,22 +51,22 @@ const SignupForm = () => {
 
   
     //   SIGNUP WITH GOOGLE //
-  const googleSignUp = async () => {
+  const googleSignUp = async (e) => {
     // const provider = GoogleUser();
     try {
       const result = await signInWithPopup(auth, GoogleUser);
-      // const credential = GoogleUser.credentialFromResult(result);
-      // const token = credential.accessToken;
       const user = result.user;
 
-      await storeUserData(user, 'google');
+      await storeUserData(user, 'Google');
+
+      // showToastMessage('Google sign-up successful', 'success');
+
+      setTimeout(() => {
+        window.close();
+      }, 60000);
     }
     catch (err) {
-      showToastMessage('Google sign-up failed!', 'error');
-      // showToastMessage(err.code, 'error');
-      // showToastMessage(err.code, 'error');
-      // showToastMessage(err.customData.email, 'error');
-      // const credential = GoogleAuthProvider.credentialFromResult(err);
+      // showToastMessage('Google sign-up failed', 'error');
     }
   };
 
@@ -87,10 +87,10 @@ const SignupForm = () => {
       // const credential = FacebookAuthProvider.credentialFromResult(result);
       // const token = credential.accessToken;
 
-      await storeUserData(user, 'facebook');
+      await storeUserData(user, 'Facebook');
     }
     catch (err) {
-      showToastMessage('Facebook sign-up failed!', 'error');
+      showToastMessage('Facebook sign-up failed', 'error');
     }
   }
 
@@ -102,46 +102,49 @@ const SignupForm = () => {
 
 
     //   SAVING USER INFO FROM GOOGLE TO DATABASE //
-  const storeUserData = async (user, e, provider) => {
-    e.preventDefault();
+  const storeUserData = async (user, provider) => {
 
     try {
       const userDocRef = doc(firestore, 'User', user.uid);
+      const userDoc = await getDoc(userDocRef);
 
       let userData;
 
-      if (provider === 'google') {
-        userData = {
-          username: getFirstName(user.displayName),
-          email: user.email,
+      if (!userDoc.exists()) {
+        if (provider === 'Google') {
+          userData = {
+            username: getFirstName(user.displayName),
+            email: user.email,
+          }
         }
-      }
-      else if (provider === 'facebook') {
-        userData = {
-          username: getFirstName(user.displayName),
-          email: user.email,
+        else if (provider === 'Facebook') {
+          userData = {
+            username: getFirstName(user.displayName),
+            email: user.email,
+          }
         }
+  
+        await setDoc(userDocRef, userData);
+
+        setTimeout(() => {
+            //   ROUTING BACK TO LOGIN PAGE
+            history('/login');
+        }, 2500);
+  
+        showToastMessage(`${provider} Sign Up Successful`, 'success');
       }
-      
-      
 
-      await setDoc(userDocRef, userData);
-      setTimeout(() => {
-          //   ROUTING BACK TO LOGIN PAGE
-          history('/login');
-      }, 3500);
+      else {
+        showToastMessage('User with the same email already exists', 'warning');
+        console.log(user.uid);
+      }
 
-      showToastMessage('Sign Up Successful', 'success');
+      
     }
     catch (err) {
-        if (err.message.includes('auth/email-already-in-use')) {
-          showToastMessage('User with the same email already exists', 'warning');
-        }
-        else {
           showToastMessage('Sign Up failed', 'error');
           // showToastMessage(err.message, 'error');
           // console.log(err.message);
-        }
       // showToastMessage(err.message, 'error');
       // console.log(err.message);
     }
