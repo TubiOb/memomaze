@@ -9,7 +9,7 @@ import { toast } from 'sonner'
 import Toast from './Toast';
 import { firestore, auth, FacebookUser, GoogleUser } from '../Firebase';
 import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth'
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, setDoc, where } from 'firebase/firestore';
 
 
 const SignupForm = () => {
@@ -94,7 +94,7 @@ const SignupForm = () => {
 
 
 
-    //   SAVING USER INFO FROM GOOGLE TO DATABASE //
+    //   SAVING USER INFO FROM GOOGLE/FACEBOOK TO DATABASE //
   const storeUserData = async (user, provider) => {
 
     try {
@@ -103,7 +103,18 @@ const SignupForm = () => {
 
       let userData;
 
+        // SIGNING USER UP
       if (!userDoc.exists()) {
+
+          // CHECK IF EMAIL IS ALREADY REGISTERED
+        const emailExists = await checkIfEmailExists(user.email);
+
+        if (emailExists) {
+          showToastMessage(`User with the email ${user.email} already exists`, 'warning');
+          return;
+        }
+
+
         if (provider === 'Google') {
           userData = {
             username: getFirstName(user.displayName),
@@ -122,9 +133,19 @@ const SignupForm = () => {
         setTimeout(() => {
             //   ROUTING BACK TO LOGIN PAGE
             history('/login');
-        }, 2500);
+        }, 1500);
   
         showToastMessage(`${provider} Sign Up Successful`, 'success');
+      }
+
+        // SIGNING USER UIN
+      else if (userDoc.exists()) {
+        setTimeout(() => {
+            //   ROUTING BACK TO LOGIN PAGE
+            history('/login');
+        }, 1500);
+  
+        showToastMessage(`Sign In Successful`, 'success');
       }
 
       else {
@@ -189,6 +210,19 @@ const SignupForm = () => {
     // console.log('FormData:', formData);
 
 
+
+
+      // CHECK IF EMAIL IS ALREADY REGISTERED
+    const emailExists = await checkIfEmailExists(formData.email);
+
+    if (emailExists) {
+      showToastMessage(`User with the email ${formData.email} already exists`, 'warning');
+      return;
+    }
+
+
+
+
     //   GETTING USER DATA FROM FORM AND SENDING TO FIREBASE STORAGE
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
@@ -220,9 +254,19 @@ const SignupForm = () => {
     catch(err) {
         if (err.message.includes('auth/email-already-in-use')) {
             showToastMessage('User with the same email already exists', 'warning');
+            setFormData ({
+              username: '',
+              email: '',
+              password: '',
+          });
         }
         else {
             showToastMessage('Sign Up failed', 'error');
+            setFormData ({
+              username: '',
+              email: '',
+              password: '',
+            });
             // showToastMessage(err.message, 'error');
             // console.log(err.message);
         }
@@ -230,6 +274,15 @@ const SignupForm = () => {
   };
  
 
+
+
+
+
+
+  const checkIfEmailExists = async (email) => {
+    const querySnapshot = await getDocs(collection(firestore, 'User'), where('email', '==', email));
+    return !querySnapshot.empty;
+  };
 
 
 

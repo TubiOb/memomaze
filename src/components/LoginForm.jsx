@@ -8,12 +8,13 @@ import { Link, useNavigate } from 'react-router-dom'
 // import { useSignIn } from 'react-auth-kit'
 import { toast } from 'sonner'
 import Toast from './Toast';
-import { doc, getDoc } from 'firebase/firestore';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth, firestore } from '../Firebase';
+import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
+import { auth, firestore, FacebookUser, GoogleUser } from '../Firebase';
 // import Cookies from 'js-cookie';
 
 const LoginForm = () => {
+    //   SETTING UP NAVIGATION //
   const history = useNavigate();
 
     //   HANDLING THE PASSWORD VISIBILITY
@@ -24,11 +25,14 @@ const LoginForm = () => {
   };
 
 
+     //   DEFAULT VALUES OF FORM DATA //
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
 
+
+    //   HANDLING VALUE CHANGE IN THE INPUT FIELDS //
   const handleInputChange = (value, fieldName) => {
       setFormData({
       ...formData,
@@ -45,6 +49,128 @@ const LoginForm = () => {
   // const handleRememberMe = () => {
   //   setRememberMe(!rememberMe);
   // }
+
+
+
+
+
+
+
+
+//   SIGNIN WITH GOOGLE //
+const googleSignIn = async (e) => {
+  e.preventDefault();
+  try {
+    const result = await signInWithPopup(auth, GoogleUser);
+    const user = result.user;
+
+    await signUserIn(user, 'Google');
+
+    // showToastMessage('Google sign-up successful', 'success');
+  }
+  catch (err) {
+    showToastMessage(`User with same details already logged in`, 'warning');
+  }
+};
+
+
+
+
+
+
+
+
+  //   SIGNIN WITH FACEBOOK //
+const facebookSignIn = async (e) => {
+  e.preventDefault();
+  try {
+    const result = await signInWithPopup(auth, FacebookUser);
+    const user = result.user;
+
+    await signUserIn(user, 'Facebook');
+  }
+  catch (err) {
+    showToastMessage(`User with same details already logged in`, 'warning');
+  }
+}
+
+
+
+
+
+
+
+
+  //   SIGNNG IN GOOGLE/FACEBOOK USER //
+const signUserIn = async (user, provider) => {
+
+  try {
+    const userDocRef = doc(firestore, 'User', user.uid);
+    const userDoc = await getDoc(userDocRef);
+
+    let userData;
+
+      // SIGNING USER UP
+    if (!userDoc.exists()) {
+      if (provider === 'Google') {
+        userData = {
+          username: getFirstName(user.displayName),
+          email: user.email,
+        }
+      }
+      else if (provider === 'Facebook') {
+        userData = {
+          username: getFirstName(user.displayName),
+          email: user.email,
+        }
+      }
+
+      await setDoc(userDocRef, userData);
+
+        // SIGNING USER UIN
+      setTimeout(() => {
+          //   ROUTING BACK TO LOGIN PAGE
+          history('/signup');
+      }, 1500);
+      showToastMessage(`${provider} Sign Up Successful`, 'success');
+    }
+
+    else if (userDoc.exists()) {
+      setTimeout(() => {
+          //   ROUTING BACK TO LOGIN PAGE
+          history('/signup');
+      }, 1500);
+
+      showToastMessage(`Sign In Successful`, 'success');
+    }
+
+    else {
+      showToastMessage(`User with the same ${provider} details already exists`, 'warning');
+    }
+
+    
+  }
+  catch (err) {
+        showToastMessage('Sign In failed', 'error');
+  }
+};
+
+
+
+
+
+
+  //    GETTING FIRSTNAME AS USERNAME FROM GOOGLE AUTH //
+  const getFirstName = (fullName) => {
+    const nameParts = fullName.split(' ');
+    return nameParts[0];
+  };
+
+ 
+
+
+
+
 
 
   
@@ -74,16 +200,15 @@ const LoginForm = () => {
 
         showToastMessage('Sign In Successful', 'success');
 
-        setFormData({
-            emailAddress: '',
-            password: '',
-        });
-
         setTimeout(() => {
           // setLoading(false);
+          setFormData({
+            emailAddress: '',
+            password: '',
+          });
 
           history('/signup');
-        }, 3500);
+        }, 2500);
 
       }
 
@@ -194,10 +319,10 @@ const LoginForm = () => {
             </div>
 
             <div className='flex flex-wrap items-center justify-between w-[40%]'>
-                <button type="submit" className='text-red-500 px-5 py-2 rounded-xl w-auto mx-auto bg-white shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:backdrop-blur-3xl hover:bg-blue-400 hover:text-white hover:shadow-2xl hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
+                <button type="submit" onClick={googleSignIn} className='text-red-500 px-5 py-2 rounded-xl w-auto mx-auto bg-white shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:backdrop-blur-3xl hover:bg-blue-400 hover:text-white hover:shadow-2xl hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
                     <IoLogoGoogleplus />
                 </button>
-                <button type="submit" className='text-blue-400 px-5 py-2 rounded-xl w-auto mx-auto bg-white font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:font-semibold hover:bg-blue-400 hover:text-white hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
+                <button type="submit" onClick={facebookSignIn} className='text-blue-400 px-5 py-2 rounded-xl w-auto mx-auto bg-white font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:font-semibold hover:bg-blue-400 hover:text-white hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >
                     <FaFacebookF />
                 </button>
             </div>
