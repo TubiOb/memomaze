@@ -52,7 +52,7 @@ const SignupForm = () => {
   
     //   SIGNUP WITH GOOGLE //
   const googleSignUp = async (e) => {
-    // const provider = GoogleUser();
+    e.preventDefault();
     try {
       const result = await signInWithPopup(auth, GoogleUser);
       const user = result.user;
@@ -60,13 +60,9 @@ const SignupForm = () => {
       await storeUserData(user, 'Google');
 
       // showToastMessage('Google sign-up successful', 'success');
-
-      setTimeout(() => {
-        window.close();
-      }, 60000);
     }
     catch (err) {
-      // showToastMessage('Google sign-up failed', 'error');
+      showToastMessage(`User with same details already exists. Login to proceed`, 'warning');
     }
   };
 
@@ -78,19 +74,16 @@ const SignupForm = () => {
 
 
     //   SIGNUP WITH FACEBOOK //
-  const facebookSignUp = async () => {
-
-    // const provider = new FacebookAuthProvider();
+  const facebookSignUp = async (e) => {
+    e.preventDefault();
     try {
       const result = await signInWithPopup(auth, FacebookUser);
       const user = result.user;
-      // const credential = FacebookAuthProvider.credentialFromResult(result);
-      // const token = credential.accessToken;
 
       await storeUserData(user, 'Facebook');
     }
     catch (err) {
-      showToastMessage('Facebook sign-up failed', 'error');
+      showToastMessage(`User with same details already exists. Login to proceed`, 'warning');
     }
   }
 
@@ -135,18 +128,13 @@ const SignupForm = () => {
       }
 
       else {
-        showToastMessage('User with the same email already exists', 'warning');
-        console.log(user.uid);
+        showToastMessage(`User with the same ${provider} details already exists`, 'warning');
       }
 
       
     }
     catch (err) {
           showToastMessage('Sign Up failed', 'error');
-          // showToastMessage(err.message, 'error');
-          // console.log(err.message);
-      // showToastMessage(err.message, 'error');
-      // console.log(err.message);
     }
   };
 
