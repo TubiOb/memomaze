@@ -130,7 +130,7 @@ const signUserIn = async (user, provider) => {
         // SIGNING USER UIN
       setTimeout(() => {
           //   ROUTING BACK TO LOGIN PAGE
-          history('/signup');
+          history('/welcome');
       }, 1500);
       showToastMessage(`${provider} Sign Up Successful`, 'success');
     }
@@ -138,7 +138,7 @@ const signUserIn = async (user, provider) => {
     else if (userDoc.exists()) {
       setTimeout(() => {
           //   ROUTING BACK TO LOGIN PAGE
-          history('/signup');
+          history('/welcome');
       }, 1500);
 
       showToastMessage(`Sign In Successful`, 'success');

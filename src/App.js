@@ -3,6 +3,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Preloader from "./components/Preloader";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import Welcome from "./pages/Welcome";
+import Home from "./pages/Home";
 // import { AuthProvider } from 'react-auth-kit'
 
 function App() {
@@ -22,6 +24,8 @@ function App() {
               <Route index element={isLoading ? <Preloader /> : <Login /> } />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/welcome" element={<Welcome />} />
+              <Route path="/home" element={<Home />} />
             </Routes>
           </BrowserRouter>
       {/* </AuthProvider> */}

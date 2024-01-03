@@ -8,15 +8,15 @@
     font-family: 'Rethink Sans';
 }
 
-:root {
+/* :root {
    --bg-btn: #fed7d7;
    --btn-color: #e53e3e;
-}
+} */
 
 body {
   margin: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  /* -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale; */
 }
 
 .memo {
@@ -25,7 +25,7 @@ body {
 
   /* REMEMBER ME TOGGLE  */
 
-#checkbox:checked ~ .btn-change::before {
+/* #checkbox:checked ~ .btn-change::before {
    transition: 0.3s;
    transform: translateX(13px);
 }
@@ -43,6 +43,6 @@ body {
    background-color: var(--btn-color);
    transition: 0.3s;
    transform: translateX(0);
-}
+} */
 
 

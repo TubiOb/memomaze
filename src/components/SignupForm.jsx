@@ -132,7 +132,7 @@ const SignupForm = () => {
 
         setTimeout(() => {
             //   ROUTING BACK TO LOGIN PAGE
-            history('/login');
+            history('/welcome');
         }, 1500);
   
         showToastMessage(`${provider} Sign Up Successful`, 'success');
@@ -142,7 +142,7 @@ const SignupForm = () => {
       else if (userDoc.exists()) {
         setTimeout(() => {
             //   ROUTING BACK TO LOGIN PAGE
-            history('/login');
+            history('/welcome');
         }, 1500);
   
         showToastMessage(`Sign In Successful`, 'success');
