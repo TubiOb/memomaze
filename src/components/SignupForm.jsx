@@ -8,11 +8,12 @@ import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import Toast from './Toast';
 import { firestore, auth, FacebookUser, GoogleUser } from '../Firebase';
-import { createUserWithEmailAndPassword, signInWithPopup } from 'firebase/auth'
+import { createUserWithEmailAndPassword, sendEmailVerification, signInWithPopup } from 'firebase/auth'
 import { collection, doc, getDoc, getDocs, setDoc, where } from 'firebase/firestore';
 
 
 const SignupForm = () => {
+  const [emailSent, setEmailSent] = useState(false);
 
     //   SETTING UP NAVIGATION //
   const history = useNavigate();
@@ -115,13 +116,7 @@ const SignupForm = () => {
         }
 
 
-        if (provider === 'Google') {
-          userData = {
-            username: getFirstName(user.displayName),
-            email: user.email,
-          }
-        }
-        else if (provider === 'Facebook') {
+        if (provider === 'Google' || provider === 'Facebook') {
           userData = {
             username: getFirstName(user.displayName),
             email: user.email,
@@ -129,6 +124,12 @@ const SignupForm = () => {
         }
   
         await setDoc(userDocRef, userData);
+
+        if (provider !== 'Google' && provider !== 'Facebook') {
+          await sendEmailVerification(user);
+          setEmailSent(true);
+          showToastMessage('Email verification sent. Please check your inbox.', 'success');
+        }
 
         setTimeout(() => {
             //   ROUTING BACK TO LOGIN PAGE
@@ -226,6 +227,7 @@ const SignupForm = () => {
     //   GETTING USER DATA FROM FORM AND SENDING TO FIREBASE STORAGE
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+        const user = userCredential.user;
 
         const userId = userCredential.user.uid;
 
@@ -249,7 +251,12 @@ const SignupForm = () => {
             history('/login');
         }, 3500);
 
-        showToastMessage('Sign Up Successful', 'success')
+        showToastMessage('Sign Up Successful', 'success');
+
+        await sendEmailVerification(user);
+
+        setEmailSent(true);
+        showToastMessage('Email verification sent. Please check your inbox.', 'success');
     }
     catch(err) {
         if (err.message.includes('auth/email-already-in-use')) {
@@ -331,6 +338,11 @@ const SignupForm = () => {
               <h4 className='text-lg md:text-xl lg:text-2xl font-semibold'>Start Your Journey,</h4>
               <h4 className='text-lg md:text-xl font-medium'>Capture Moments, Stay Organized!</h4>
               <p className='text-sm md:text-base lg:text-lg font-extralight'>Welcome aboard! Let's begin your adventure of recording memories and staying organized. Enter your details to create your account.</p>
+              {
+                emailSent && (
+                    <p className='text-xs text-green-600 md:text-base text-left md:text-center'>A password reset email has been sent to your mail.</p>
+                )
+              }
             </div>
 
             <form onSubmit={handleSave} className='w-[95%] md:w-[80%] mt-2 flex flex-col justify-between gap-4'>
