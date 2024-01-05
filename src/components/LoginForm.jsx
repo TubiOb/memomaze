@@ -208,7 +208,7 @@ const signUserIn = async (user, provider) => {
             password: '',
           });
 
-          history('/signup');
+          history('/welcome');
         }, 2500);
 
       }
