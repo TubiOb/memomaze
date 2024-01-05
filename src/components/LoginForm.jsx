@@ -254,8 +254,8 @@ const signUserIn = async (user, provider) => {
             break;
         default:
             break;
-    }
-};
+      }
+    };
 
   return (
     <div className='flex flex-row items-center justify-between w-full h-screen'>
@@ -308,7 +308,7 @@ const signUserIn = async (user, provider) => {
                   </div>
                 </div> */}
 
-                <p className='text-xs md:text-sm text-blue-500 hover:underline cursor-pointer'>Forgot password?</p>
+                <p className='text-xs md:text-sm text-blue-500 hover:underline cursor-pointer'><Link to='/forgot-password' >Forgot password?</Link></p>
               </div>
 
               <button type="submit" className='text-blue-400 px-2 py-2 rounded-xl w-[70%] mx-auto bg-white font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300  hover:font-semibold hover:bg-blue-400 hover:text-white hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >Sign In</button>
