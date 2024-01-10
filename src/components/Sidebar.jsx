@@ -30,7 +30,7 @@ const Sidebar = () => {
                     {menus.map((menu, index) => (
                         <li key={index} className={`flex gap-1 items-center cursor-pointer px-1 py-1 relative group rounded-lg ${ menu.active  ? 'bg-blue-200 hover:bg-blue-300 text-white' : 'hover:bg-blue-300 hover:text-white text-gray-500'}`}>
                             {React.createElement(menu.icon, {color: menu.color, size: 25})}
-                            <div className='absolute rounded-md px-2 py-1 ml-10 bg-blue-200 font-medium invisible opacity-10 translate-x-1 transition-all group-hover:visible group-hover:opacity-100'>{menu.name}</div>
+                            <div className='absolute rounded-md px-2 py-1 ml-10 bg-blue-200 font-medium invisible opacity-10 translate-x-1 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0'>{menu.name}</div>
 
                             {/* <div className=''>
                                 {menu.name}
