@@ -182,7 +182,7 @@ const signUserIn = async (user, provider) => {
 
     try {
 
-      if (!formData.email || !formData.password) {
+      if (formData.email === '' || formData.password === '') {
         showToastMessage('Please fill in both email and password.', 'error');
         return;
       }
@@ -209,13 +209,17 @@ const signUserIn = async (user, provider) => {
           });
 
           history('/welcome');
-        }, 2500);
+        }, 1500);
 
       }
 
     }
     catch (err) {
-      showToastMessage('Invalid email or Password', 'error');
+      if (formData.email === '' || formData.password === '') {
+        showToastMessage('Please fill in both email and password.', 'error');
+      } else {
+        showToastMessage('Invalid email or password', 'error');
+      }
 
       setFormData({
         emailAddress: '',

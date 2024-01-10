@@ -6,6 +6,7 @@ import Signup from "./pages/Signup";
 import Welcome from "./pages/Welcome";
 import Home from "./pages/Home";
 import ForgotPassword from "./pages/ForgotPassword";
+import { ChakraProvider } from '@chakra-ui/react'
 // import { AuthProvider } from 'react-auth-kit'
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
   return (
     <div>
       {/* <AuthProvider authType={'cookie'} authName={'_auth'} cookieDomain={window.location.hostname} refreshTokens={true} cookieSecure={true}> */}
+        <ChakraProvider>
           <BrowserRouter>
             <Routes>
               <Route index element={isLoading ? <Preloader /> : <Login /> } />
@@ -30,6 +32,7 @@ function App() {
               <Route path="/home" element={<Home />} />
             </Routes>
           </BrowserRouter>
+        </ChakraProvider>
       {/* </AuthProvider> */}
       
     </div>
