@@ -7,6 +7,7 @@ import { VscNotebook } from "react-icons/vsc";
 import { Box } from '@chakra-ui/react'
 import { RiSettingsLine } from "react-icons/ri";
 import { RiNotification3Line } from "react-icons/ri";
+import { MdAdd } from "react-icons/md";
 
 
 const Sidebar = () => {
@@ -19,6 +20,10 @@ const Sidebar = () => {
         { name: 'Calendar', icon: IoCalendarOutline, color: '', active: false, alert: false},
     ]
 
+    const adds = [
+        { name: 'New Task', icon: MdAdd, color: 'lightslategray' }
+    ]
+
   return (
     <aside className='h-screen'>
         <nav className='h-full flex flex-col bg-white border-r shadow-md'>
@@ -28,9 +33,9 @@ const Sidebar = () => {
                 <ul className='flex flex-col gap-3 mb-2'>
                     {/* <p>Menu</p> */}
                     {menus.map((menu, index) => (
-                        <li key={index} className={`flex gap-1 items-center cursor-pointer px-1 py-1 relative group rounded-lg ${ menu.active  ? 'bg-blue-200 hover:bg-blue-300 text-white' : 'hover:bg-blue-300 hover:text-white text-gray-500'}`}>
+                        <li key={index} className={`flex gap-1 items-center cursor-pointer px-1 py-1 relative group rounded-lg ${ menu.active  ? 'bg-blue-200 hover:bg-blue-400 text-white' : 'hover:bg-blue-400 hover:text-white text-gray-500'}`}>
                             {React.createElement(menu.icon, {color: menu.color, size: 25})}
-                            <div className='absolute rounded-md px-2 py-1 ml-10 bg-blue-200 font-medium invisible opacity-10 translate-x-1 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0'>{menu.name}</div>
+                            <div className='absolute rounded-md px-2 py-1 ml-10 bg-blue-400 font-medium invisible opacity-10 translate-x-1 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0'>{menu.name}</div>
 
                             {/* <div className=''>
                                 {menu.name}
@@ -40,6 +45,19 @@ const Sidebar = () => {
                 </ul>
 
                 <hr className='my-3' />
+                
+                <ul className='flex flex-col gap-3 mb-2'>
+                    {adds.map((add, index) => (
+                        <li key={index} className={`flex gap-1 items-center cursor-pointer px-1 py-1 relative group rounded-lg ${ add.active  ? 'bg-blue-200 hover:bg-blue-300' : 'hover:border-neutral-200 hover:shadow-md text-gray-500'}`}>
+                            {React.createElement(add.icon, {color: add.color, size: 25})}
+                            <div className='absolute rounded-md px-2 py-1 ml-10 bg-blue-400 text-white font-medium invisible opacity-10 w-20 translate-x-1 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0'>{add.name}</div>
+                        </li>
+                    ))}
+                </ul>
+
+                {/* <div className='flex items-center cursor-pointer justify-center px-1 py-1.5 text-sm border border-neutral-300 rounded-lg  '>
+                    <MdAdd size='19' />
+                </div> */}
             </div>
 
             <div className='border-t flex flex-col items-center gap-1 p-1'>
@@ -47,7 +65,7 @@ const Sidebar = () => {
                     <RiSettingsLine size={['25']} className='hover:bg-blue-300 hover:text-white px-1 py-1 cursor-pointer rounded-lg' />
                     <RiNotification3Line size={['25']} className='hover:bg-blue-300 hover:text-white px-1 py-1 cursor-pointer rounded-lg' />
                 </Box>
-                <button className='p-1.5 rounded-lg  bg-white hover:bg-blue-200 hover:text-white'><PiMoonDuotone size='20' /></button>
+                <button className='p-1 rounded-lg  bg-white hover:bg-blue-200 hover:text-white'><PiMoonDuotone size='20' /></button>
             </div>
         </nav>
     </aside>

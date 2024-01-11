@@ -3,7 +3,7 @@ import '../index.css'
 import Memomaze from '../assets/Memomaze logo.png'
 import { GrOverview } from "react-icons/gr";
 import { MdDone } from "react-icons/md";
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 
 const WelcomeNote = () => {
   return (
@@ -36,9 +36,9 @@ const WelcomeNote = () => {
 
               <p className='text-center font-medium text-xs lg:text-sm 2xl:text-base mb-4'>Ready to begin your journey? Start writing and organizing today!</p>
 
-              <Link to='/home'>
+              <NavLink to='/home'>
                 <button type="submit" className='text-white px-2 py-2 rounded-xl w-auto mx-auto bg-blue-400 font-semibold shadow-neutral-200 border-neutral-50 shadow-md transition duration-300 hover:font-semibold hover:bg-white hover:text-blue-400  hover:shadow-neutral-300 text-sm md:text-lg flex items-center justify-center' >Continue</button>
-              </Link>
+              </NavLink>
 
             </div>
         </div>
