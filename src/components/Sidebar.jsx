@@ -21,7 +21,7 @@ const Sidebar = () => {
     ]
 
     const adds = [
-        { name: 'New Task', icon: MdAdd, color: 'lightslategray' }
+        { name: 'Add New', icon: MdAdd, color: 'lightslategray' }
     ]
 
   return (
@@ -30,7 +30,7 @@ const Sidebar = () => {
         {/* <button className='p-1.5 flex mt-1 ml-auto mr-[-15px] bg-white rounded-lg border border-blue-200 hover:bg-blue-100 hover:text-white hover:border-white'><LuPanelRightOpen /></button> */}
 
             <div className='flex-1 px-2 py-2 text-sm md:text-md rounded-lg'>
-                <ul className='flex flex-col gap-3 mb-2'>
+                <ul className='flex flex-col gap-4 mb-2'>
                     {/* <p>Menu</p> */}
                     {menus.map((menu, index) => (
                         <li key={index} className={`flex gap-1 items-center cursor-pointer px-1 py-1 relative group rounded-lg ${ menu.active  ? 'bg-blue-200 hover:bg-blue-400 text-white' : 'hover:bg-blue-400 hover:text-white text-gray-500'}`}>
@@ -44,11 +44,11 @@ const Sidebar = () => {
                     ))}
                 </ul>
 
-                <hr className='my-3' />
+                <hr className='my-1' />
                 
-                <ul className='flex flex-col gap-3 mb-2'>
+                <ul className='flex flex-col gap-3 mt-6'>
                     {adds.map((add, index) => (
-                        <li key={index} className={`flex gap-1 items-center cursor-pointer px-1 py-1 relative group rounded-lg ${ add.active  ? 'bg-blue-200 hover:bg-blue-300' : 'hover:border-neutral-200 hover:shadow-md text-gray-500'}`}>
+                        <li key={index} className={`flex gap-1 items-center cursor-pointer px-1 py-1 relative group rounded-lg hover:border-neutral-200 hover:shadow-md text-gray-500`}>
                             {React.createElement(add.icon, {color: add.color, size: 25})}
                             <div className='absolute rounded-md px-2 py-1 ml-10 bg-blue-400 text-white font-medium invisible opacity-10 w-20 translate-x-1 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0'>{add.name}</div>
                         </li>

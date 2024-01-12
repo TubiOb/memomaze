@@ -22,7 +22,7 @@ function App() {
         <Route path="forgot-password" element={<ForgotPassword />} />
         <Route path="welcome" element={<Welcome />} />
         <Route path="home" element={<Home />} >
-          <Route path="home" element={<HomeLayout />} />
+          <Route path="" element={<HomeLayout />} />
         </Route>
     </Route>
     )
