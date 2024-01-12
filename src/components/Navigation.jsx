@@ -8,7 +8,7 @@ import { NavLink } from 'react-router-dom';
 
 const Navigation = () => {
   return (
-    <Box display='flex' flexDir='row' overflow='hidden' justifyContent='space-between' alignItems='center' h='auto' py='1' px={['2', '5']} w='full' gap={['5', '10']} borderBottom='1px' borderColor='lightgrey'>
+    <Box display='flex' flexDir='row' justifyContent='space-between' alignItems='center' h='auto' py='1' px={['2', '5']} w='full' gap={['5', '10']} borderBottom='1px' borderColor='lightgrey'>
           <Box className="flex gap-1 items-center p-1 font-['Montserrat Alternates'] w-[15%] md:w-[30%]">
             <img src={Logo} alt="Memomaze" className="w-8 " />
             <h1 className='hidden md:flex font-medium text-sm lg:text-lg'>Memomaze</h1>
