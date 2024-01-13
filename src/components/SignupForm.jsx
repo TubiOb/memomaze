@@ -361,9 +361,9 @@ const SignupForm = () => {
                   <input type={passwordVisible ? "text" : "password"} id="Password" onChange={(event) => handleInputChange(event.target.value, 'password')} className="peer border-none bg-inherit bg-blue-50 focus:bg-blue-100 w-full h-full placeholder-transparent py-2 md:py-1.5 lg:py-1.5 xl:py-2 px-2 xl:px-3.5 text-sm md:text-sm lg:text-base focus:border-transparent focus:outline-none rounded-l-lg focus:ring-0" placeholder="Password"/>
                   <div className='w-auto h-full secure bg-blue-50 peer-focus:bg-blue-100 rounded-r-lg flex items-center py-2 md:py-1.5 lg:py-1 px-2 xl:px-3 xl:py-2.5'>
                     {passwordVisible ? (
-                      <AiOutlineEye className="cursor-pointer w-4 h-4 xl:w-5 xl:h-5"  onClick={togglePasswordVisibility} />
+                      <AiOutlineEyeInvisible className="cursor-pointer w-5 h-5 xl:w-6 xl:h-6"  onClick={togglePasswordVisibility} />
                     ) : (
-                      <AiOutlineEyeInvisible className="cursor-pointer w-4 h-4 xl:w-5 xl:h-5"  onClick={togglePasswordVisibility} />
+                      <AiOutlineEye className="cursor-pointer w-5 h-5 xl:w-6 xl:h-6"  onClick={togglePasswordVisibility} />
                     )}
                   </div>
                   <span className="pointer-events-none absolute start-3.5 bg-transparent backdrop-blur-sm peer-focus:bg-transparent top-0 -translate-y-1/2 p-0.5 text-sm text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs">Password</span>
