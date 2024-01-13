@@ -27,8 +27,8 @@ const Sidebar = () => {
     ]
 
   return (
-    <aside className='h-screen'>
-        <nav className='h-full py-3 sticky flex flex-col bg-white border-r shadow-md'>
+    <aside className='h-screen sticky'>
+        <nav className='h-full py-3 flex flex-col bg-white border-r shadow-md'>
         {/* <button className='p-1.5 flex mt-1 ml-auto mr-[-15px] bg-white rounded-lg border border-blue-200 hover:bg-blue-100 hover:text-white hover:border-white'><LuPanelRightOpen /></button> */}
 
             <div className='flex-1 flex flex-col px-2 py-2 text-sm md:text-md rounded-lg gap-10'>
