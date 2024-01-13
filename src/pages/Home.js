@@ -8,7 +8,7 @@ const Home = () => {
   return (
     <div className={`flex flex-col w-full h-screen items-center font-['Rethink Sans']`}>
       {/* <Navigation /> */}
-      <main className='flex-1 flex flex-row w-full h-screen items-start'>
+      <main className='flex flex-row w-full items-start'>
         <Sidebar />
 
         <Outlet />
