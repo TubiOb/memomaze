@@ -6,9 +6,9 @@ import '../index.css'
 
 const Home = () => {
   return (
-    <div className={`flex flex-col w-full h-full items-center font-['Rethink Sans']`}>
+    <div className={`flex flex-col w-full h-screen items-center font-['Rethink Sans']`}>
       {/* <Navigation /> */}
-      <main className='flex-1 flex flex-row w-full items-start'>
+      <main className='flex-1 flex flex-row w-full h-screen items-start'>
         <Sidebar />
 
         <Outlet />
