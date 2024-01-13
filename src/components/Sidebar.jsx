@@ -31,7 +31,7 @@ const Sidebar = () => {
         <nav className='h-full pt-3 flex flex-col bg-white border-r shadow-md items-center justify-between gap-3'>
         {/* <button className='p-1.5 flex mt-1 ml-auto mr-[-15px] bg-white rounded-lg border border-blue-200 hover:bg-blue-100 hover:text-white hover:border-white'><LuPanelRightOpen /></button> */}
 
-            <div className='px-2 py-2 text-sm md:text-md rounded-lg gap-1'>
+            <div className='px-2 py-2 text-sm md:text-md rounded-lg gap-1 mb-5'>
                 <Box className="flex gap-1 items-center font-['Montserrat Alternates']  mx-auto mb-9">
                     <img src={Logo} alt="Memomaze" className='w-9' />
                     {/* <h1 className='hidden md:flex font-medium text-sm lg:text-lg'>Memomaze</h1> */}
