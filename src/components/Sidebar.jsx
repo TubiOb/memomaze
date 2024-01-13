@@ -31,7 +31,7 @@ const Sidebar = () => {
         <nav className='h-full py-3 flex flex-col bg-white border-r shadow-md items-center justify-between gap-3'>
         {/* <button className='p-1.5 flex mt-1 ml-auto mr-[-15px] bg-white rounded-lg border border-blue-200 hover:bg-blue-100 hover:text-white hover:border-white'><LuPanelRightOpen /></button> */}
 
-            <div className='flex-1 px-2 py-2 text-sm md:text-md rounded-lg gap-1 mb-5'>
+            <div className='flex-1 px-2 py-2 text-sm md:text-md rounded-lg gap-1 mb-1'>
                 <Box className="flex gap-1 items-center font-['Montserrat Alternates']  mx-auto mb-9">
                     <img src={Logo} alt="Memomaze" className='w-9' />
                     {/* <h1 className='hidden md:flex font-medium text-sm lg:text-lg'>Memomaze</h1> */}
@@ -67,7 +67,7 @@ const Sidebar = () => {
                 </div> */}
             </div>
 
-            <div className='border-t flex-1 flex flex-col items-center justify-end gap-1 p-1 h-32'>
+            <div className='border-t flex-1 flex flex-col items-center justify-end gap-1 p-1'>
                 <Box display='flex' flexDir='column' gap='3' p='1.5' alignItems='center' rounded='lg'>
                     <RiSettingsLine size={['25']} className='hover:bg-blue-300 hover:text-white px-1 py-1 cursor-pointer rounded-lg' />
                     <RiNotification3Line size={['25']} className='hover:bg-blue-300 hover:text-white px-1 py-1 cursor-pointer rounded-lg' />
