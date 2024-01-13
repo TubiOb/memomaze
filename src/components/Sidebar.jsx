@@ -67,7 +67,7 @@ const Sidebar = () => {
                 </div> */}
             </div>
 
-            <div className='border-t flex flex-col items-center mt-9 gap-1 p-1'>
+            <div className='border-t flex flex-col items-center mt-5 gap-1 p-1'>
                 <Box display='flex' flexDir='column' gap='2' p='1.5' alignItems='center' rounded='lg'>
                     <RiSettingsLine size={['25']} className='hover:bg-blue-300 hover:text-white px-1 py-1 cursor-pointer rounded-lg' />
                     <RiNotification3Line size={['25']} className='hover:bg-blue-300 hover:text-white px-1 py-1 cursor-pointer rounded-lg' />
