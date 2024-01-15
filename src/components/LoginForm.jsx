@@ -182,10 +182,10 @@ const signUserIn = async (user, provider) => {
 
     try {
 
-      if (formData.email === '' || formData.password === '') {
-        showToastMessage('Please fill in both email and password.', 'error');
-        return;
-      }
+      // if (formData.email === '' || formData.password === '') {
+      //   showToastMessage('Please fill in both email and password.', 'error');
+      //   return;
+      // }
 
       const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
 
