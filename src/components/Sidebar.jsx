@@ -27,17 +27,17 @@ const Sidebar = () => {
     ]
 
   return (
-    <aside className='h-full sticky'>
-        <nav className='h-full flex flex-col items-center bg-white border-r shadow-md'>
+    <aside className='h-screen'>
+        <nav className='h-full flex flex-col items-center bg-white border-r shadow-md overflow-y-hidden'>
         {/* <button className='p-1.5 flex mt-1 ml-auto mr-[-15px] bg-white rounded-lg border border-blue-200 hover:bg-blue-100 hover:text-white hover:border-white'><LuPanelRightOpen /></button> */}
 
-            <div className='flex flex-col px-2 py-2 items-start justify-between text-sm bg-white h-full md:text-md rounded-lg'>
-                <Box className="flex gap-1 items-center font-['Montserrat Alternates'] mx-auto mb-1">
+            <div className='flex flex-col px-2 py-2 justify-between text-sm bg-white h-full md:text-md'>
+                <Box className="flex gap-1 items-center font-['Montserrat Alternates'] mx-auto">
                     <img src={Logo} alt="Memomaze" className='w-9' />
                     {/* <h1 className='hidden md:flex font-medium text-sm lg:text-lg'>Memomaze</h1> */}
                 </Box>
 
-                <ul className='flex flex-col items-center justify-center gap-4 mb-2'>
+                <ul className='flex flex-col items-center justify-center gap-4'>
                     {/* <p>Menu</p> */}
                     {menus.map((menu, index) => (
                         <li key={index} className={`flex gap-1 items-center cursor-pointer px-1 py-1 relative group rounded-lg ${ menu.active  ? 'bg-blue-200 hover:bg-blue-400 text-white' : 'hover:bg-blue-400 hover:text-white text-gray-500'}`}>
@@ -53,7 +53,7 @@ const Sidebar = () => {
 
                 <hr className='my-1' />
                 
-                <ul className='flex flex-col items-center justify-center gap-3 mt-4'>
+                <ul className='flex items-center justify-center'>
                     {adds.map((add, index) => (
                         <li key={index} className={`flex gap-1 items-center cursor-pointer px-1 py-1 relative group rounded-lg hover:border-neutral-200 hover:shadow-md text-gray-500`}>
                             {React.createElement(add.icon, {color: add.color, size: 25})}
@@ -63,7 +63,7 @@ const Sidebar = () => {
                 </ul>
 
                
-                <div className='border-t flex flex-col items-center mt-4 gap-1'>
+                <div className='border-t flex flex-col items-center gap-1'>
                     <Box display='flex' flexDir='column' gap='2' p='1' alignItems='center' rounded='lg'>
                         <RiSettingsLine size={['25']} className='hover:bg-blue-300 hover:text-white py-1 cursor-pointer rounded-lg' />
                         <RiNotification3Line size={['25']} className='hover:bg-blue-300 hover:text-white py-1 cursor-pointer rounded-lg' />
