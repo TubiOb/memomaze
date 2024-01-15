@@ -1,7 +1,7 @@
 import React from 'react'
 // import Navigation from '../components/Navigation'
 import Sidebar from '../components/Sidebar'
-import { Outlet } from 'react-router-dom'
+// import { Outlet } from 'react-router-dom'
 import '../index.css'
 
 const Home = () => {
