@@ -27,7 +27,7 @@ const Sidebar = () => {
     ]
 
   return (
-    <aside className='h-screen'>
+    <aside className='h-full'>
         <nav className='h-screen flex flex-col items-stretch bg-white border-r shadow-md'>
         {/* <button className='p-1.5 flex mt-1 ml-auto mr-[-15px] bg-white rounded-lg border border-blue-200 hover:bg-blue-100 hover:text-white hover:border-white'><LuPanelRightOpen /></button> */}
 
@@ -63,7 +63,7 @@ const Sidebar = () => {
                 </ul>
 
                
-                <div className='border-t flex flex-col items-center gap-1'>
+                {/* <div className='border-t flex flex-col items-center gap-1'>
                     <Box display='flex' flexDir='column' gap='2' p='1' alignItems='center' rounded='lg'>
                         <RiSettingsLine size={['25']} className='hover:bg-blue-300 hover:text-white py-1 cursor-pointer rounded-lg' />
                         <RiNotification3Line size={['25']} className='hover:bg-blue-300 hover:text-white py-1 cursor-pointer rounded-lg' />
@@ -73,12 +73,9 @@ const Sidebar = () => {
                     <NavLink to='profile'>
                         <Box className="cursor-pointer group" display='flex' gap='2' alignItems='center'>
                             <Avatar size={['xs', 'sm']} name={'Kent Dodds'} src='https://bit.ly/kent-c-dodds' />
-                            {/* <Box className='border border-neutral-200 leading-4 group-hover:border-white flex-col' display={['none', 'none', 'none', 'flex']} py='1' px='2' rounded='md'>
-                                <Text as='h4' fontWeight='600' className='text-sm'> Kent Dodds </Text>
-                            </Box> */}
                         </Box>
                     </NavLink>
-                </div>
+                </div> */}
             </div>
 
             
