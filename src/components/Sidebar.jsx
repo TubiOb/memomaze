@@ -27,7 +27,7 @@ const Sidebar = () => {
     ]
 
   return (
-    <aside className='h-screen'>
+    <aside className='h-screen w-[14%] md:w-[7%] lg:w-[6%] xl:w-[4%]'>
         <nav className='h-full flex flex-col px-2 py-2 items-center justify-between bg-white border-r text-sm md:text-md shadow-md'>
         {/* <button className='p-1.5 flex mt-1 ml-auto mr-[-15px] bg-white rounded-lg border border-blue-200 hover:bg-blue-100 hover:text-white hover:border-white'><LuPanelRightOpen /></button> */}
 
@@ -42,7 +42,7 @@ const Sidebar = () => {
                     {menus.map((menu, index) => (
                         <li key={index} className={`flex gap-1 items-center cursor-pointer px-1 py-1 relative group rounded-lg ${ menu.active  ? 'bg-blue-200 hover:bg-blue-400 text-white' : 'hover:bg-blue-400 hover:text-white text-gray-500'}`}>
                             {React.createElement(menu.icon, {color: menu.color, size: 25})}
-                            <div className='absolute rounded-md px-2 py-1 ml-10 bg-blue-400 font-medium invisible opacity-10 translate-x-1 transition-all group-hover:visible group-hover:opacity-100 group-hover:translate-x-0'>{menu.name}</div>
+                            <div className='absolute rounded-md px-2 py-1 ml-10 bg-blue-400 font-medium invisible opacity-10 translate-x-1 transition-all z-50 group-hover:visible group-hover:opacity-100 group-hover:translate-x-0'>{menu.name}</div>
 
                             {/* <div className=''>
                                 {menu.name}
@@ -57,7 +57,7 @@ const Sidebar = () => {
                     {adds.map((add, index) => (
                         <li key={index} className={`flex gap-1 items-center cursor-pointer px-1 py-1 relative group rounded-lg hover:border-neutral-200 hover:shadow-md text-gray-500`}>
                             {React.createElement(add.icon, {color: add.color, size: 25})}
-                            <div className='absolute rounded-md px-2 py-1 ml-10 bg-blue-400 text-white font-medium invisible opacity-10 w-20 translate-x-1 transition-all group-hover:visible group-hover:opacity-100 group-hover:z-50 group-hover:translate-x-0'>{add.name}</div>
+                            <div className='absolute rounded-md px-2 py-1 ml-10 bg-blue-400 text-white font-medium invisible opacity-10 w-20 translate-x-1 transition-all group-hover:visible group-hover:opacity-100 z-50 group-hover:translate-x-0'>{add.name}</div>
                         </li>
                     ))}
                 </ul>
