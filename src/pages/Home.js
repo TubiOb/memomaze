@@ -6,13 +6,11 @@ import '../index.css'
 
 const Home = () => {
   return (
-    <div className={`flex flex-col w-full h-full items-center font-['Rethink Sans']`}>
+    <div className={`flex flex-row w-full h-screen items-center font-['Rethink Sans']`}>
       {/* <Navigation /> */}
-      <main className='flex flex-row w-full items-start'>
         <Sidebar />
 
-        <Outlet />
-      </main>
+        <Outlet className='bg-red-900' />
       
     </div>
   )
