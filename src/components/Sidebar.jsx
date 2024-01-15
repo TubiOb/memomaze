@@ -27,11 +27,11 @@ const Sidebar = () => {
     ]
 
   return (
-    <aside className='h-full'>
-        <nav className='h-screen flex flex-col items-stretch bg-white border-r shadow-md'>
+    <aside className='h-full bg-red-800'>
+        <nav className='h-screen grid grid-cols-1 px-2 py-2 items-center justify-between bg-white border-r text-sm md:text-md shadow-md'>
         {/* <button className='p-1.5 flex mt-1 ml-auto mr-[-15px] bg-white rounded-lg border border-blue-200 hover:bg-blue-100 hover:text-white hover:border-white'><LuPanelRightOpen /></button> */}
 
-            <div className='flex-1 flex flex-col px-2 py-2 items-center justify-around text-sm bg-white h-full md:text-md m-auto'>
+            {/* <div className='flex-1 flex flex-col px-2 py-2 items-center justify-around text-sm bg-white h-full md:text-md m-auto'> */}
                 <Box className="flex gap-1 items-center font-['Montserrat Alternates'] mx-auto">
                     <img src={Logo} alt="Memomaze" className='w-9' />
                     {/* <h1 className='hidden md:flex font-medium text-sm lg:text-lg'>Memomaze</h1> */}
@@ -76,7 +76,7 @@ const Sidebar = () => {
                         </Box>
                     </NavLink>
                 </div> */}
-            </div>
+            {/* </div> */}
 
             
         </nav>

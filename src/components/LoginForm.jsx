@@ -183,6 +183,14 @@ const signUserIn = async (user, provider) => {
     e.preventDefault();
 
 
+    const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+
+    const userId = userCredential.user.uid;
+    // console.log(userId);
+
+    const userDocRef = doc(firestore, `User/${userId}`);
+    const UserDoc = await getDoc(userDocRef);
+    
     try {
 
       // if (formData.email === '' || formData.password === '') {
@@ -190,13 +198,7 @@ const signUserIn = async (user, provider) => {
       //   return;
       // }
 
-      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
-
-      const userId = userCredential.user.uid;
-      // console.log(userId);
-
-      const userDocRef = doc(firestore, `User/${userId}`);
-      const UserDoc = await getDoc(userDocRef);
+      
 
       if (UserDoc) {
         // eslint-disable-next-line
