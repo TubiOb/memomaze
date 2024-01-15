@@ -27,8 +27,8 @@ const Sidebar = () => {
     ]
 
   return (
-    <aside className='h-screen'>
-        <nav className='h-screen grid grid-cols-1 px-2 items-center justify-between bg-white border-r text-sm md:text-md shadow-md'>
+    <aside className='h-screen relative'>
+        <nav className='h-full fixed flex flex-col px-2 py-2 items-center justify-between bg-white border-r text-sm md:text-md shadow-md'>
         {/* <button className='p-1.5 flex mt-1 ml-auto mr-[-15px] bg-white rounded-lg border border-blue-200 hover:bg-blue-100 hover:text-white hover:border-white'><LuPanelRightOpen /></button> */}
 
             {/* <div className='flex-1 flex flex-col px-2 py-2 items-center justify-around text-sm bg-white h-full md:text-md m-auto'> */}
@@ -63,7 +63,7 @@ const Sidebar = () => {
                 </ul>
 
                
-                <div className='border-t flex flex-col items-center gap-1'>
+                <div className='border-t flex flex-col items-center justify-between gap-2'>
                     <Box display='flex' flexDir='column' gap='2' p='1' alignItems='center' rounded='lg'>
                         <RiSettingsLine size={['25']} className='hover:bg-blue-300 hover:text-white py-1 cursor-pointer rounded-lg' />
                         <RiNotification3Line size={['25']} className='hover:bg-blue-300 hover:text-white py-1 cursor-pointer rounded-lg' />
