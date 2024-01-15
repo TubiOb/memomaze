@@ -7,7 +7,7 @@ const HomeLayout = () => {
 
   return (
     <div className='flex flex-col md:flex-row gap-1 md:gap-0 w-full h-screen items-start'>
-        <aside className="h-auto md:h-[100%] flex flex-col items-center justify-center md:justify-start md:items-start w-full md:w-[15%] lg:w-[25%] md:border-r md:border-r-neutral-200 shadow-md py-3 px-2">
+        <aside className="h-auto md:h-[100%] flex flex-col items-center justify-center md:justify-start md:items-start w-full md:w-[20%] lg:w-[25%] md:border-r md:border-r-neutral-200 shadow-md py-3 px-2">
             <div className="flex items-center w-[95%] mx-auto text-sm hover:bg-blue-300 cursor-pointer group py-1 px-1.5 rounded-lg hover:text-white gap-2">
                 <MdAdd size='20' className="p-0.5 border border-neutral-400 rounded-md group-hover:border-white group-hover:shadow-md" />
                 <button className="p-1 ">New Folder</button>
