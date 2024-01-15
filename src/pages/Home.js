@@ -1,16 +1,16 @@
 import React from 'react'
 // import Navigation from '../components/Navigation'
 import Sidebar from '../components/Sidebar'
-// import { Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import '../index.css'
 
 const Home = () => {
   return (
-    <div className={`flex flex-row w-full bg-red-800 h-[100%] font-['Rethink Sans']`}>
+    <div className={`flex flex-row w-full h-[100%] font-['Rethink Sans']`}>
       {/* <Navigation /> */}
         <Sidebar />
 
-        {/* <Outlet /> */}
+        <Outlet />
       
     </div>
   )
