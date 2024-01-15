@@ -20,6 +20,9 @@ const LoginForm = () => {
     //   HANDLING THE PASSWORD VISIBILITY
   const [passwordVisible, setPasswordVisible] = useState(false);
 
+    //   ADDING STATE TO TRACK INITIAL SIGN-IN ATTEMPTS
+  const [isInitialSignIn, setIsInitialSignIn] = useState(true);
+
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
@@ -208,6 +211,7 @@ const signUserIn = async (user, provider) => {
             password: '',
           });
 
+          setIsInitialSignIn(true);
           history('/welcome');
         }, 1500);
 
@@ -217,6 +221,8 @@ const signUserIn = async (user, provider) => {
     catch (err) {
       if (formData.email === '' || formData.password === '') {
         showToastMessage('Please fill in both email and password.', 'error');
+      } else if (isInitialSignIn) {
+        showToastMessage('Invalid email or password', 'error');
       } else {
         showToastMessage('Invalid email or password', 'error');
       }
@@ -225,6 +231,8 @@ const signUserIn = async (user, provider) => {
         emailAddress: '',
         password: '',
       });
+
+      setIsInitialSignIn(false);
     }
   }
 
