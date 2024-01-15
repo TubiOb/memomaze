@@ -10,7 +10,7 @@ const Home = () => {
       {/* <Navigation /> */}
         <Sidebar />
 
-        <Outlet className='bg-red-900' />
+        <Outlet />
       
     </div>
   )
