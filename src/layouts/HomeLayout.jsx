@@ -15,7 +15,7 @@ const HomeLayout = () => {
             
         </aside>
 
-        <div className="w-full h-screen bg-red-800 flex items-start">
+        <div className="w-full h-screen flex items-start">
             <div className="w-full flex border-b border-b-neutral-200 px-2 py-1 items-start justify-center">
                 <Box className='w-full md:w-[60%] lg:w-[45%] xl:w-[70%]'>
                     <InputGroup className='w-[90%] lg:w-[80%] mx-auto'>
