@@ -6,7 +6,7 @@ import '../index.css'
 
 const Home = () => {
   return (
-    <div className={`flex flex-row w-full h-[100%] font-['Rethink Sans']`}>
+    <div className={`flex flex-row w-full h-screen bg-black font-['Rethink Sans']`}>
       {/* <Navigation /> */}
         <Sidebar />
 
