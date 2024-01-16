@@ -1,4 +1,4 @@
-import React, { /* useEffect, useState */ } from 'react'
+import React, { useEffect, useState } from 'react'
 import { PiMoonDuotone } from "react-icons/pi";
 import { IoCalendarOutline } from "react-icons/io5";
 import { GoChecklist, GoTasklist } from "react-icons/go";
@@ -10,33 +10,40 @@ import { RiNotification3Line } from "react-icons/ri";
 import { MdAdd } from "react-icons/md";
 import Logo from '../assets/Memomaze logo.png'
 import { NavLink } from 'react-router-dom';
-// import { doc, getDoc } from 'firebase/firestore';
-// import { auth, firestore } from '../Firebase';
+import { doc, getDoc } from 'firebase/firestore';
+import { auth, firestore } from '../Firebase';
 
 
 const Sidebar = () => {
 
-    // const [currentUser, setCurrentUser] = useState('');
+    // eslint-disable-next-line
+    const [loggedUser, setloggedUser] = useState('');
 
-    // useEffect(() => {
-    //     const activeUser = auth.onAuthStateChanged( async (user) => {
-    //         if (user) {
-    //             const userUID = user.uid;
-    //             const userDocRef = doc(firestore, 'User', userUID);
+    useEffect(() => {
+        auth.onAuthStateChanged( async (user) => {
+            if (user) {
+                const userUID = user.uid;
+                const userDocRef = doc(firestore, 'User', userUID);
 
-    //             try {
-    //                 const userData = await getDoc(userDocRef);
+                try {
+                    const userData = await getDoc(userDocRef);
 
-    //                 if (userData.exists()) {
-                    
-    //                 }
-    //             }
-    //             catch (err) {
+                    if (userData.exists()) {
+                        const userInfo = userData.data();
 
-    //             }
-    //         }
-    //     })
-    // })
+                        if (userInfo) {
+                            const loggedUser = userInfo.username;
+
+                            setloggedUser(loggedUser);
+                        }
+                    }
+                }
+                catch (err) {
+
+                }
+            }
+        })
+    })
 
     const menus = [
         { name: 'Dashboard', icon: LuLayoutDashboard, color: '', active: true },
