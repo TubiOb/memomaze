@@ -10,8 +10,8 @@ import { RiNotification3Line } from "react-icons/ri";
 import { MdAdd } from "react-icons/md";
 import Logo from '../assets/Memomaze logo.png'
 import { NavLink } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, firestore } from '../Firebase';
+// import { doc, getDoc } from 'firebase/firestore';
+// import { auth, firestore } from '../Firebase';
 
 
 const Sidebar = () => {
