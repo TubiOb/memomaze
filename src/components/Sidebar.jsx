@@ -18,25 +18,25 @@ const Sidebar = () => {
 
     const [currentUser, setCurrentUser] = useState('');
 
-    useEffect(() => {
-        const activeUser = auth.onAuthStateChanged( async (user) => {
-            if (user) {
-                const userUID = user.uid;
-                const userDocRef = doc(firestore, 'User', userUID);
+    // useEffect(() => {
+    //     const activeUser = auth.onAuthStateChanged( async (user) => {
+    //         if (user) {
+    //             const userUID = user.uid;
+    //             const userDocRef = doc(firestore, 'User', userUID);
 
-                try {
-                    const userData = await getDoc(userDocRef);
+    //             try {
+    //                 const userData = await getDoc(userDocRef);
 
-                    if (userData.exists()) {
+    //                 if (userData.exists()) {
                     
-                    }
-                }
-                catch (err) {
+    //                 }
+    //             }
+    //             catch (err) {
 
-                }
-            }
-        })
-    })
+    //             }
+    //         }
+    //     })
+    // })
 
     const menus = [
         { name: 'Dashboard', icon: LuLayoutDashboard, color: '', active: true },
