@@ -7,8 +7,8 @@ const HomeLayout = () => {
     // const buttonSize = useBreakpointValue({ base: 'md', md: 'lg' });
 
   return (
-    <div className='flex-1 flex flex-col md:flex-row gap-2 md:gap-0 w-full -z-0 items-start'>
-        <aside className="h-auto md:h-screen flex-grow flex flex-col items-center justify-center md:justify-start md:items-start w-full md:w-[25%] xl:w-[20%] md:border-r md:border-r-neutral-200 shadow-md py-3 px-2">
+    <div className='flex-1 flex-grow flex flex-col md:flex-row gap-2 md:gap-0 w-full items-start'>
+        <aside className="h-auto md:h-screen flex-grow flex flex-col bg-white left-0 items-center justify-center md:justify-start md:items-start w-full md:w-[25%] xl:w-[20%] md:border-r md:border-r-neutral-200 shadow-md py-3 px-2">
             <div className="flex items-center w-[95%] mx-auto text-sm 2xl:text-base hover:bg-blue-300 cursor-pointer group py-1 px-1.5 rounded-lg hover:text-white gap-2">
                 <MdAdd size='20' className="p-0.5 border border-neutral-400 rounded-md group-hover:border-white group-hover:shadow-md" />
                 <button className="p-1 ">New Folder</button>

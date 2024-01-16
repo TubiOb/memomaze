@@ -51,8 +51,8 @@ const Sidebar = () => {
     ]
 
   return (
-    <aside className='h-screen w-[14%] relative z-auto md:w-[7%] lg:w-[6%] xl:w-[4%]'>
-        <nav className='h-full flex flex-col flex-grow fixed px-2 py-2 items-center justify-between bg-white border-r text-sm md:text-md shadow-md'>
+    <aside className='h-screen w-[14%] relative z-50 md:w-[7%] lg:w-[6%] xl:w-[4%] flex justify-center items-center'>
+        <nav className='h-full flex flex-col flex-grow fixed px-2 py-2 items-center justify-between border-r text-sm md:text-md shadow-md'>
         {/* <button className='p-1.5 flex mt-1 ml-auto mr-[-15px] bg-white rounded-lg border border-blue-200 hover:bg-blue-100 hover:text-white hover:border-white'><LuPanelRightOpen /></button> */}
 
             {/* <div className='flex-1 flex flex-col px-2 py-2 items-center justify-around text-sm bg-white h-full md:text-md m-auto'> */}
