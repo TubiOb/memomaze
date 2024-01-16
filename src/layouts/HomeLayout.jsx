@@ -32,9 +32,9 @@ const HomeLayout = () => {
             <Box w='full' display='flex' alignContent='center' justifyContent='center' h='screen'>
                 <Tabs w='full' align="center" h='full' className="flex-grow"  variant="unstyled">
                     <TabList display='flex' alignItems='center' gap={['7', '32']} cursor='pointer'>
-                        <Tab>One</Tab>
-                        <Tab>Two</Tab>
-                        <Tab>Three</Tab>
+                        <Tab>All</Tab>
+                        <Tab>Notes</Tab>
+                        <Tab>Tasks</Tab>
                     </TabList>
                     <TabIndicator mt="-1.5px" height="2px" bg="blue.200" borderRadius="1px"/>
                     <TabPanels h={['79.5vh', '90vh', '85vh', '81.5vh']} w='full' p='1' className="overflow-y-auto" overflowY='auto'>
@@ -65,9 +65,45 @@ const HomeLayout = () => {
                                 Peach is the princess of the fictional Mushroom Kingdom, which is constantly under
                                 attack by Bowser.
                             </div>
+                            <div className="w-32 md:w-48 max-h-56 overflow-hidden border border-neutral-400">
+                                <b>Princess Peach</b> (<i>Japanese: ピーチ姫 Hepburn: Pīchi-hime, [piː.tɕi̥ çi̥.me]</i>)
+                                is a character in Nintendo's Mario franchise. Originally created by Shigeru Miyamoto,
+                                Peach is the princess of the fictional Mushroom Kingdom, which is constantly under
+                                attack by Bowser.
+                            </div>
+                            <div className="w-32 md:w-48 max-h-56 overflow-hidden border border-neutral-400">
+                                <b>Princess Peach</b> (<i>Japanese: ピーチ姫 Hepburn: Pīchi-hime, [piː.tɕi̥ çi̥.me]</i>)
+                                is a character in Nintendo's Mario franchise. Originally created by Shigeru Miyamoto,
+                                Peach is the princess of the fictional Mushroom Kingdom, which is constantly under
+                                attack by Bowser.
+                            </div>
                         </TabPanel>
                         <TabPanel className="flex-grow items-center w-full" h='screen' gap='2' flexWrap='wrap' display='flex' justifyContent='start' flexGrow='grow'>
                              <div className="w-32 md:w-48 max-h-56 overflow-hidden border border-neutral-400">
+                                <b>Princess Peach</b> (<i>Japanese: ピーチ姫 Hepburn: Pīchi-hime, [piː.tɕi̥ çi̥.me]</i>)
+                                is a character in Nintendo's Mario franchise. Originally created by Shigeru Miyamoto,
+                                Peach is the princess of the fictional Mushroom Kingdom, which is constantly under
+                                attack by Bowser.
+                            </div>
+                            <div className="w-32 md:w-48 max-h-56 overflow-hidden border border-neutral-400">
+                                <b>Princess Peach</b> (<i>Japanese: ピーチ姫 Hepburn: Pīchi-hime, [piː.tɕi̥ çi̥.me]</i>)
+                                is a character in Nintendo's Mario franchise. Originally created by Shigeru Miyamoto,
+                                Peach is the princess of the fictional Mushroom Kingdom, which is constantly under
+                                attack by Bowser.
+                            </div>
+                            <div className="w-32 md:w-48 max-h-56 overflow-hidden border border-neutral-400">
+                                <b>Princess Peach</b> (<i>Japanese: ピーチ姫 Hepburn: Pīchi-hime, [piː.tɕi̥ çi̥.me]</i>)
+                                is a character in Nintendo's Mario franchise. Originally created by Shigeru Miyamoto,
+                                Peach is the princess of the fictional Mushroom Kingdom, which is constantly under
+                                attack by Bowser.
+                            </div>
+                            <div className="w-32 md:w-48 max-h-56 overflow-hidden border border-neutral-400">
+                                <b>Princess Peach</b> (<i>Japanese: ピーチ姫 Hepburn: Pīchi-hime, [piː.tɕi̥ çi̥.me]</i>)
+                                is a character in Nintendo's Mario franchise. Originally created by Shigeru Miyamoto,
+                                Peach is the princess of the fictional Mushroom Kingdom, which is constantly under
+                                attack by Bowser.
+                            </div>
+                            <div className="w-32 md:w-48 max-h-56 overflow-hidden border border-neutral-400">
                                 <b>Princess Peach</b> (<i>Japanese: ピーチ姫 Hepburn: Pīchi-hime, [piː.tɕi̥ çi̥.me]</i>)
                                 is a character in Nintendo's Mario franchise. Originally created by Shigeru Miyamoto,
                                 Peach is the princess of the fictional Mushroom Kingdom, which is constantly under

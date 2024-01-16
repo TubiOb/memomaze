@@ -131,22 +131,23 @@ const SignupForm = () => {
           showToastMessage('Email verification sent. Please check your inbox.', 'success');
         }
 
+        showToastMessage(`${provider} Sign Up Successful`, 'success');
+
         setTimeout(() => {
             //   ROUTING BACK TO LOGIN PAGE
             history('/welcome');
         }, 1500);
-  
-        showToastMessage(`${provider} Sign Up Successful`, 'success');
       }
 
         // SIGNING USER UIN
       else if (userDoc.exists()) {
+
+        showToastMessage(`Sign In Successful`, 'success');
+
         setTimeout(() => {
             //   ROUTING BACK TO LOGIN PAGE
             history('/welcome');
         }, 1500);
-  
-        showToastMessage(`Sign In Successful`, 'success');
       }
 
       else {
@@ -238,6 +239,8 @@ const SignupForm = () => {
             email: formData.email,
         });
 
+        showToastMessage('Sign Up Successful', 'success');
+
         setTimeout(() => {
             //   RESETTING THE FORM
             setFormData ({
@@ -250,8 +253,6 @@ const SignupForm = () => {
             //   ROUTING BACK TO LOGIN PAGE
             history('/login');
         }, 3500);
-
-        showToastMessage('Sign Up Successful', 'success');
 
         await sendEmailVerification(user);
 
