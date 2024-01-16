@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { /* useEffect, useState */ } from 'react'
 import { PiMoonDuotone } from "react-icons/pi";
 import { IoCalendarOutline } from "react-icons/io5";
 import { GoChecklist, GoTasklist } from "react-icons/go";
@@ -16,7 +16,7 @@ import { NavLink } from 'react-router-dom';
 
 const Sidebar = () => {
 
-    const [currentUser, setCurrentUser] = useState('');
+    // const [currentUser, setCurrentUser] = useState('');
 
     // useEffect(() => {
     //     const activeUser = auth.onAuthStateChanged( async (user) => {
