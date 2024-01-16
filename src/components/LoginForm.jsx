@@ -20,9 +20,6 @@ const LoginForm = () => {
     //   HANDLING THE PASSWORD VISIBILITY
   const [passwordVisible, setPasswordVisible] = useState(false);
 
-    //   ADDING STATE TO TRACK INITIAL SIGN-IN ATTEMPTS
-  const [isInitialSignIn, setIsInitialSignIn] = useState(true);
-
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
@@ -133,19 +130,20 @@ const signUserIn = async (user, provider) => {
         
       setTimeout(() => {
           //   ROUTING BACK TO LOGIN PAGE
+          showToastMessage(`${provider} Sign Up Successful`, 'success');
+
           history('/welcome');
       }, 1500);
-      showToastMessage(`${provider} Sign Up Successful`, 'success');
     }
 
       // SIGNING USER IN
     else if (userDoc.exists()) {
       setTimeout(() => {
           //   ROUTING BACK TO LOGIN PAGE
+          showToastMessage(`Sign In Successful`, 'success');
+
           history('/welcome');
       }, 1500);
-
-      showToastMessage(`Sign In Successful`, 'success');
     }
 
     else {
@@ -183,28 +181,24 @@ const signUserIn = async (user, provider) => {
     e.preventDefault();
 
 
-    const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
-
-    const userId = userCredential.user.uid;
-    // console.log(userId);
-
-    const userDocRef = doc(firestore, `User/${userId}`);
-    const UserDoc = await getDoc(userDocRef);
-    
     try {
 
-      // if (formData.email === '' || formData.password === '') {
-      //   showToastMessage('Please fill in both email and password.', 'error');
-      //   return;
-      // }
+      if (formData.email === '' || formData.password === '') {
+        showToastMessage('Please fill in both email and password.', 'error');
+        return;
+      }
 
-      
+      const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+
+      const userId = userCredential.user.uid;
+      // console.log(userId);
+
+      const userDocRef = doc(firestore, `User/${userId}`);
+      const UserDoc = await getDoc(userDocRef);
 
       if (UserDoc) {
         // eslint-disable-next-line
         const userData = UserDoc.data();
-
-        showToastMessage('Sign In Successful', 'success');
 
         setTimeout(() => {
           // setLoading(false);
@@ -213,7 +207,8 @@ const signUserIn = async (user, provider) => {
             password: '',
           });
 
-          setIsInitialSignIn(true);
+          showToastMessage('Sign In Successful', 'success');
+
           history('/welcome');
         }, 1500);
 
@@ -223,18 +218,19 @@ const signUserIn = async (user, provider) => {
     catch (err) {
       if (formData.email === '' || formData.password === '') {
         showToastMessage('Please fill in both email and password.', 'error');
-      } else if (isInitialSignIn) {
-        showToastMessage('Invalid email or password', 'error');
       } else {
         showToastMessage('Invalid email or password', 'error');
+
+        setFormData({
+          emailAddress: '',
+          password: '',
+        });
       }
 
       setFormData({
         emailAddress: '',
         password: '',
       });
-
-      setIsInitialSignIn(false);
     }
   }
 
