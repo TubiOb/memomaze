@@ -203,7 +203,7 @@ const signUserIn = async (user, provider) => {
         setTimeout(() => {
           // setLoading(false);
           setFormData({
-            emailAddress: '',
+            email: '',
             password: '',
           });
 
@@ -221,14 +221,14 @@ const signUserIn = async (user, provider) => {
       } else {
         showToastMessage('Invalid email or password', 'error');
 
-        setFormData({
-          emailAddress: '',
-          password: '',
-        });
+        // setFormData({
+        //   email: '',
+        //   password: '',
+        // });
       }
 
       setFormData({
-        emailAddress: '',
+        email: '',
         password: '',
       });
     }
