@@ -19,6 +19,10 @@ const Sidebar = () => {
     // eslint-disable-next-line
     const [loggedUser, setloggedUser] = useState('');
 
+    // eslint-disable-next-line
+    const [userImage, setuserImage] = useState('');
+
+
     useEffect(() => {
         auth.onAuthStateChanged( async (user) => {
             if (user) {
@@ -33,8 +37,10 @@ const Sidebar = () => {
 
                         if (userInfo) {
                             const loggedUser = userInfo.username;
+                            const userImage = userInfo.userImage;
 
                             setloggedUser(loggedUser);
+                            setuserImage(userImage);
                         }
                     }
                 }
@@ -103,7 +109,7 @@ const Sidebar = () => {
 
                     <NavLink to='profile'>
                         <Box className="cursor-pointer group" display='flex' gap='2' alignItems='center'>
-                            <Avatar size={['xs', 'sm']} name={'Kent Dodds'} src='https://bit.ly/kent-c-dodds' />
+                            <Avatar size={['xs', 'sm']} name={loggedUser} src={userImage} />
                         </Box>
                     </NavLink>
                 </div>

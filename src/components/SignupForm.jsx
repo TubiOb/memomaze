@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import '../index.css'
 import Image from '../assets/Bullet journal-pana.svg'
+import DefaultImage from '../assets/user.png'
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { IoLogoGoogleplus } from "react-icons/io";
 import { FaFacebookF } from "react-icons/fa";
@@ -120,6 +121,7 @@ const SignupForm = () => {
           userData = {
             username: getFirstName(user.displayName),
             email: user.email,
+            userImage: DefaultImage,
           }
         }
   
@@ -237,6 +239,7 @@ const SignupForm = () => {
         await setDoc(userDocRef, {
             username: formData.username,
             email: formData.email,
+            userImage: DefaultImage,
         });
 
         showToastMessage('Sign Up Successful', 'success');
