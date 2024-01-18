@@ -28,7 +28,7 @@ const Home = () => {
         ]
       },
       { label: 'Folder', placeholder: 'Select folder', type: 'select', id: 'folder', options: [
-          {label: 'Default', value: 'Default'},
+          {label: 'General', value: 'General'},
           {label: 'Personal', value: 'Personal'}
         ] 
       },

@@ -6,6 +6,8 @@ import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
 // import Blank from '../assets/No Item.png'
 import { PiSmileyDuotone } from "react-icons/pi";
 import CustomModal from "../components/CustomModal";
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { firestore } from '../Firebase';
 
 const HomeLayout = () => {
     // const buttonSize = useBreakpointValue({ base: 'md', md: 'lg' });
@@ -25,14 +27,33 @@ const HomeLayout = () => {
     const addFolderModalConfig = {
         title: 'Add Folder',
         formFields: [
-          { label: 'Folder Name', placeholder: 'Enter folder name', type: 'input', id: 'folder name' },
-          { label: 'Save To', placeholder: 'Select where to save', type: 'select', id: 'save to', options: [
-                {label: 'Tasks', value: 'Tasks'},
-                {label: 'Notes', value: 'Notes'}
-            ] 
-          },
+          { label: 'Folder Name', placeholder: 'Enter folder name', type: 'input', fieldName: 'folderName' },
+        //   { label: 'Save To', placeholder: 'Select where to save', type: 'select', id: 'save to', options: [
+        //         {label: 'Tasks', value: 'Tasks'},
+        //         {label: 'Notes', value: 'Notes'}
+        //     ] 
+        //   },
         ],
     };
+
+    const handleSaveFolder = async (formData) => {
+        const { folderName } = formData;
+        console.log(folderName);
+
+        const folderCollectionRef = collection(firestore, 'Folder');
+        try {
+                // eslint-disable-next-line
+            const newFolderRef = await addDoc(folderCollectionRef, {
+                folderName,
+                createdAt: serverTimestamp(),
+            });
+    
+        } catch (err) {
+            console.error("Error adding document: ", err);
+        }
+
+        closeModal();
+    }
 
   return (
     <div className='flex-1 h-full static flex-grow flex flex-col md:flex-row gap-2 md:gap-0 w-full items-start'>
@@ -89,7 +110,7 @@ const HomeLayout = () => {
             </Box>
         </div>
 
-        <CustomModal isOpen={isModalOpen} onClose={closeModal} initialRef={initialRef} modalConfig={addFolderModalConfig} />
+        <CustomModal isOpen={isModalOpen} onClose={closeModal} initialRef={initialRef} modalConfig={addFolderModalConfig} onSubmit={handleSaveFolder} />
     </div>
   )
 }
