@@ -22,6 +22,18 @@ const HomeLayout = () => {
       setIsModalOpen(false);
     }
 
+    const addFolderModalConfig = {
+        title: 'Add Folder',
+        formFields: [
+          { label: 'Folder Name', placeholder: 'Enter folder name', type: 'input', id: 'folder name' },
+          { label: 'Save To', placeholder: 'Select where to save', type: 'select', id: 'save to', options: [
+                {label: 'Tasks', value: 'Tasks'},
+                {label: 'Notes', value: 'Notes'}
+            ] 
+          },
+        ],
+    };
+
   return (
     <div className='flex-1 h-full static flex-grow flex flex-col md:flex-row gap-2 md:gap-0 w-full items-start'>
         <aside className="h-auto md:h-screen flex-grow flex flex-col bg-white left-0 items-center justify-center md:justify-start md:items-start w-full md:w-[25%] xl:w-[20%] md:border-r md:border-r-neutral-200 shadow-md py-3 px-2">
@@ -77,7 +89,7 @@ const HomeLayout = () => {
             </Box>
         </div>
 
-        <CustomModal isOpen={isModalOpen} onClose={closeModal} initialRef={initialRef} />
+        <CustomModal isOpen={isModalOpen} onClose={closeModal} initialRef={initialRef} modalConfig={addFolderModalConfig} />
     </div>
   )
 }
