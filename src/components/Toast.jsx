@@ -15,6 +15,7 @@ const Toast = ({ showToast }) => {
             expand={true}
             richColors
             closeButton
+            containerStyle={{ marginRight: '2%' }}
             />
     </div>
   )
