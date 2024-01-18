@@ -14,7 +14,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { auth, firestore } from '../Firebase';
 
 
-const Sidebar = () => {
+const Sidebar = ({ openModal }) => {
 
     // eslint-disable-next-line
     const [loggedUser, setloggedUser] = useState('');
@@ -59,13 +59,13 @@ const Sidebar = () => {
         { name: 'Calendar', icon: IoCalendarOutline, color: '', active: false, alert: false},
     ]
 
-    const adds = [
-        { name: 'Add New', icon: MdAdd, color: 'lightslategray' }
-    ]
+    // const adds = [
+    //     { icon: MdAdd, color: 'lightslategray', onclick: openModal }
+    // ]
 
   return (
-    <aside className='h-screen w-[14%] relative z-50 md:w-[7%] lg:w-[6%] xl:w-[4%] flex justify-center items-center'>
-        <nav className='h-full flex flex-col flex-grow fixed px-2 py-2 items-center justify-between border-r text-sm md:text-md shadow-md'>
+    <aside className='h-screen w-[50px] relative z-50  flex justify-center items-center'>
+        <nav className='h-screen flex flex-col flex-grow fixed px-2 py-2 items-center justify-between border-r text-sm md:text-md shadow-md'>
         {/* <button className='p-1.5 flex mt-1 ml-auto mr-[-15px] bg-white rounded-lg border border-blue-200 hover:bg-blue-100 hover:text-white hover:border-white'><LuPanelRightOpen /></button> */}
 
             {/* <div className='flex-1 flex flex-col px-2 py-2 items-center justify-around text-sm bg-white h-full md:text-md m-auto'> */}
@@ -90,14 +90,18 @@ const Sidebar = () => {
 
                 <hr className='my-1 w-[80%]' />
                 
-                <ul className='flex items-center justify-center'>
+                {/* <ul className='flex items-center justify-center'>
                     {adds.map((add, index) => (
                         <li key={index} className={`flex gap-1 items-center cursor-pointer px-1 py-1 relative group rounded-lg hover:border-neutral-200 hover:shadow-md text-gray-500`}>
                             {React.createElement(add.icon, {color: add.color, size: 25})}
                             <div className='absolute rounded-md px-2 py-1 ml-10 bg-blue-400 text-white font-medium invisible opacity-10 w-20 translate-x-1 transition-all group-hover:visible group-hover:opacity-100 z-50 group:hover:z-50 group-hover:translate-x-0'>{add.name}</div>
                         </li>
                     ))}
-                </ul>
+                </ul> */}
+
+                <button className='flex items-center justify-center cursor-pointer px-1 py-1 relative group rounded-lg hover:border-neutral-200 hover:shadow-md text-gray-500'>
+                    <MdAdd size={25} color='lightslategray' onClick={openModal} />
+                </button>
 
                
                 <div className='border-t flex flex-col items-center justify-between gap-2'>
