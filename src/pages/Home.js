@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 // import Navigation from '../components/Navigation'
 import Sidebar from '../components/Sidebar'
 import CustomModal from '../components/CustomModal'
@@ -7,6 +7,7 @@ import '../index.css'
 
 const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const initialRef = useRef();
 
   const openModal = () => {
     console.log("What's on your mind?");
@@ -24,7 +25,7 @@ const Home = () => {
 
         <Outlet />
 
-        <CustomModal isOpen={isModalOpen} onClose={closeModal} />
+        <CustomModal isOpen={isModalOpen} onClose={closeModal} initialRef={initialRef} />
       
     </div>
   )

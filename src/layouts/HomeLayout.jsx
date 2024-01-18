@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { CiSearch } from "react-icons/ci";
 import { Box, InputGroup, InputLeftElement, Input } from '@chakra-ui/react'
 import { MdAdd } from "react-icons/md";
@@ -11,6 +11,7 @@ const HomeLayout = () => {
     // const buttonSize = useBreakpointValue({ base: 'md', md: 'lg' });
 
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const initialRef = useRef();
   
     const openModal = () => {
       console.log("What's on your mind?");
@@ -76,7 +77,7 @@ const HomeLayout = () => {
             </Box>
         </div>
 
-        <CustomModal isOpen={isModalOpen} onClose={closeModal} />
+        <CustomModal isOpen={isModalOpen} onClose={closeModal} initialRef={initialRef} />
     </div>
   )
 }

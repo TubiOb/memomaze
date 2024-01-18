@@ -1,7 +1,7 @@
 import React from 'react'
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, FormControl, FormLabel, Input, Button, } from '@chakra-ui/react';
 
-const CustomModal = ({isOpen, onClose}) => {
+const CustomModal = ({isOpen, onClose, initialRef}) => {
   return (
     <div>
         <Modal isOpen={isOpen} onClose={onClose} isCentered size={['xs', 'md', 'lg']} colorScheme='teal' >
