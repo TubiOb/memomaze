@@ -9,7 +9,7 @@ import CustomModal from "../components/CustomModal";
 import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from 'firebase/firestore';
 import { firestore, auth } from '../Firebase';
 
-const HomeLayout = () => {
+const HomeLayout = ({ updateFolderOptions }) => {
     // const buttonSize = useBreakpointValue({ base: 'md', md: 'lg' });
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [folderOptions, setFolderOptions] = useState([]);
@@ -91,9 +91,6 @@ const HomeLayout = () => {
         const { folderName } = formData;
         console.log(folderName);
 
-        const folderCollectionRef = collection(firestore, 'Folder');
-
-        console.log('folderCollectionRef:', folderCollectionRef);
         try {
             if (!currentUser) {
                 console.error('User not logged in or user data is incomplete.');
@@ -101,23 +98,29 @@ const HomeLayout = () => {
                 console.log(currentUserId)
             }
 
-            const queryRef = query(folderCollectionRef, where('folderName', '==', folderName));
-            const checkFolder = await getDocs(queryRef)
-
-            if (checkFolder.size > 0) {
-                console.error('Folder with the same name already exists.');
-            }
             else {
-                    // eslint-disable-next-line
-                const newFolderRef = await addDoc(folderCollectionRef, {
-                    folderName,
-                    createdAt: serverTimestamp(),
-                    ownerId: currentUserId,
-                });
-                console.log(currentUserId)
+                const folderCollectionRef = collection(firestore, 'Folder');
+                const queryRef = query(folderCollectionRef, where('folderName', '==', folderName));
+                const checkFolder = await getDocs(queryRef)
 
-                closeModal();
+                if (checkFolder.size > 0) {
+                    console.error('Folder with the same name already exists.');
+                }
+                else {
+                        // eslint-disable-next-line
+                    const newFolderRef = await addDoc(folderCollectionRef, {
+                        folderName,
+                        createdAt: serverTimestamp(),
+                        ownerId: currentUserId,
+                    });
+                    console.log(currentUserId)
+                    setFolderOptions(prevFolders => [...prevFolders, { name: folderName, value: folderName }]);
+                    updateFolderOptions = prevFolders => [...prevFolders, { name: folderName, value: folderName }];
+
+                    closeModal();
+                }
             }
+            
         } catch (err) {
             console.error("Error adding document: ", err);
         }
@@ -128,24 +131,31 @@ const HomeLayout = () => {
 
         //   FETCHING FOLDERS FROM DATABASE
     const fetchFolders = async () => {
-        if (!currentUser) {
-            console.error('User not logged in or user data is incomplete.');
-            console.log(currentUser)
-            console.log(currentUserId)
-        }
+        
 
         const folderCollection = collection(firestore, 'Folder');
         // const usersFolders = query(folderCollection, where('ownerId', '==', currentUser.uid))
 
         try {
-          const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
-          const folders = retrievedFolders.docs.map((folderDoc) => (
-              { name: folderDoc.data().folderName, value: folderDoc.data().folderName }
-          ));
-          setFolderOptions(folders);
+
+            if (!currentUser) {
+                console.error('User not logged in or user data is incomplete.');
+                console.log(currentUser)
+                console.log(currentUserId)
+            }
+            else {
+                const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
+                const folders = retrievedFolders.docs.map((folderDoc) => (
+                    { name: folderDoc.data().folderName, value: folderDoc.data().folderName }
+                ));
+                setFolderOptions(folders);
+                updateFolderOptions = folders;
+            }
+          
         } catch (error) {
               console.error("Error fetching folders: ", error);
         }
+        return setFolderOptions;
     };   
 
 
@@ -175,10 +185,10 @@ const HomeLayout = () => {
                 {/* <button className="p-1 ">New Folder</button> */}
             </button>
 
-            <ul className="hidden md:grid grid-cols-1 items-center w-[95%] mx-auto text-sm 2xl:text-base font-medium cursor-none group py-2 px-1.5 rounded-lg gap-2">
+            <ul className="hidden md:grid grid-cols-1 items-center w-[95%] mx-auto text-sm 2xl:text-base font-medium overflow-y-auto max-h-[60%] group py-2 px-1.5 rounded-lg gap-2">
                 Folders
-                {folderOptions.map(folder => (
-                    <li key={folder.value} className="flex items-center w-[95%] mx-auto text-sm 2xl:text-md font-normal bg-blue-300 cursor-pointer group py-2 px-1.5 rounded-lg hover:text-white gap-2">{folder.label}</li>
+                {folderOptions.map((folder, folderIndex) => (
+                    <li key={folderIndex} className="flex items-center w-[95%] mx-auto text-sm 2xl:text-md font-normal bg-blue-300 cursor-pointer group py-2 px-1.5 rounded-lg text-white gap-2">{folder.name}</li>
                 ))}
                 
             </ul>
