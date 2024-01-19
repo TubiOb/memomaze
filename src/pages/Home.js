@@ -5,7 +5,7 @@ import CustomModal from '../components/CustomModal'
 import { firestore, auth } from '../Firebase';
 import { Outlet } from 'react-router-dom'
 import '../index.css'
-import { collection, getDocs, getDoc, doc, query, where } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc, query, where, serverTimestamp } from 'firebase/firestore';
 
 const Home = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -77,7 +77,7 @@ const Home = () => {
           {name: 'Notes', value: 'Notes'}
         ]
       },
-      { label: 'Folder', placeholder: 'Select folder', type: 'select', id: 'folder', options: folderOptions },
+      { label: 'Folder', placeholder: 'Select folder', type: 'select', id: 'folder', fieldName: 'selectedFolder', options: folderOptions },
       { label: 'Contents', placeholder: 'Write your thoughts here...', type: 'textarea', id: 'contents' },
     ],
   };
@@ -87,45 +87,76 @@ const Home = () => {
 
 
 
-  // useEffect(() => {
-  //   const fetchFolders = async () => {
-  //     const folderCollection = collection(firestore, 'Folder');
-  //     const retrievedFolders = await getDocs(folderCollection);
-  //     const folders = retrievedFolders.docs.map(folderDoc => (
-  //       { label: folderDoc.data().folderName, value: folderDoc.data().folderName }
-  //     ))
-  //     setFolderOptions(folders);
-  //   };
-  //   fetchFolders();
-  // }, []);
+  const fetchFolders = async () => {
+    const folderCollection = collection(firestore, 'Folder');
+
+    try {
+
+        if (!currentUser) {
+            console.error('User not logged in or user data is incomplete.');
+            console.log(currentUser)
+            console.log(currentUserId)
+        }
+        else {
+            const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
+            const folders = retrievedFolders.docs.map((folderDoc) => (
+                { name: folderDoc.data().folderName, value: folderDoc.data().folderName }
+            ));
+            setFolderOptions(folders);
+        }
+        fetchFolders();
+    } catch (error) {
+          console.error("Error fetching folders: ", error);
+    }
+  };
 
 
 
-const fetchFolders = async () => {
+
+
+
+// eslint-disable-next-line
+  const handleSaveFolder = async (formData) => {
+    const { folderName } = formData;
+    console.log(folderName);
+
+    try {
+        if (!currentUser) {
+            console.error('User not logged in or user data is incomplete.');
+            console.log(currentUser)
+            console.log(currentUserId)
+        }
+
+        else {
+            const folderCollectionRef = collection(firestore, 'Folder');
+            const queryRef = query(folderCollectionRef, where('folderName', '==', folderName));
+            const checkFolder = await getDocs(queryRef)
+
+            if (checkFolder.size > 0) {
+                console.error('Folder with the same name already exists.');
+            }
+            else {
+                    // eslint-disable-next-line
+                const newFolderRef = await addDoc(folderCollectionRef, {
+                    folderName,
+                    createdAt: serverTimestamp(),
+                    ownerId: currentUserId,
+                });
+                console.log(currentUserId)
+                setFolderOptions(prevFolders => [...prevFolders, { name: folderName, value: folderName }]);
+                // eslint-disable-next-line
+                updateFolderOptions = prevFolders => [...prevFolders, { name: folderName, value: folderName }];
+
+                closeModal();
+            }
+        }
         
-
-  const folderCollection = collection(firestore, 'Folder');
-  // const usersFolders = query(folderCollection, where('ownerId', '==', currentUser.uid))
-
-  try {
-
-      if (!currentUser) {
-          console.error('User not logged in or user data is incomplete.');
-          console.log(currentUser)
-          console.log(currentUserId)
-      }
-      else {
-          const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
-          const folders = retrievedFolders.docs.map((folderDoc) => (
-              { name: folderDoc.data().folderName, value: folderDoc.data().folderName }
-          ));
-          setFolderOptions(folders);
-      }
-      fetchFolders();
-  } catch (error) {
-        console.error("Error fetching folders: ", error);
+    } catch (err) {
+        console.error("Error adding document: ", err);
+    }
   }
-};
+
+
 
 
 
