@@ -8,7 +8,7 @@ import { Link, useNavigate } from 'react-router-dom'
 // import { useSignIn } from 'react-auth-kit'
 import { toast } from 'sonner'
 import Toast from './Toast';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { signInWithEmailAndPassword, signInWithPopup } from 'firebase/auth';
 import { auth, firestore, FacebookUser, GoogleUser } from '../Firebase';
 // import Cookies from 'js-cookie';
@@ -106,6 +106,7 @@ const signUserIn = async (user, provider) => {
 
   try {
     const userDocRef = doc(firestore, 'User', user.uid);
+    const folderCollectionRef = collection(firestore, 'Folder');
     const userDoc = await getDoc(userDocRef);
 
     let userData;
@@ -126,6 +127,11 @@ const signUserIn = async (user, provider) => {
       }
 
       await setDoc(userDocRef, userData);
+
+      await addDoc(folderCollectionRef, {
+        folderName: 'General',
+        createdAt: serverTimestamp(),
+      });
 
         
       setTimeout(() => {
