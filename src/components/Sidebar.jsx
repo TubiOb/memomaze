@@ -18,11 +18,11 @@ const Sidebar = ({ openModal }) => {
 
     // eslint-disable-next-line
     const [loggedUser, setloggedUser] = useState('');
-
     // eslint-disable-next-line
     const [userImage, setuserImage] = useState('');
 
 
+        //   GETTING CURRENT USER
     useEffect(() => {
         auth.onAuthStateChanged( async (user) => {
             if (user) {
@@ -51,6 +51,9 @@ const Sidebar = ({ openModal }) => {
         })
     })
 
+
+
+        //   DYNAMICALLY CREATING SIDEBAR MENUITEMS
     const menus = [
         { name: 'Dashboard', icon: LuLayoutDashboard, color: '', active: true },
         { name: 'Completed', icon: GoChecklist, color: '', active: false },
