@@ -5,11 +5,13 @@ import CustomModal from '../components/CustomModal'
 import { firestore, auth } from '../Firebase';
 import { Outlet } from 'react-router-dom'
 import '../index.css'
-import { collection, getDocs, getDoc, doc, query, where, serverTimestamp } from 'firebase/firestore';
+import { collection, getDocs, getDoc, doc, query, where, addDoc, serverTimestamp } from 'firebase/firestore';
 
-const Home = () => {
+const Home = ({ updateFileOptions }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [folderOptions, setFolderOptions] = useState([]);
+  // eslint-disable-next-line
+  const [fileOptions, setFileOptions] = useState([]);
   const [currentUser, setCurrentUser] = useState('');
   const [currentUserId, setCurrentUserId] = useState('');
   const initialRef = useRef();
@@ -41,7 +43,7 @@ const Home = () => {
                           const loggedUser = userInfo.username;
                           setCurrentUser(loggedUser)
                           console.log(loggedUser)
-                          console.log(currentUserId)
+                          // console.log(currentUserId)
                       }
                   }
               }
@@ -71,14 +73,14 @@ const Home = () => {
   const addFileModalConfig = {
     title: 'Add File',
     formFields: [
-      { label: 'File Name', placeholder: 'Enter file name', type: 'input', id: 'file name' },
-      { label: 'Save To', placeholder: 'Select where to save', type: 'select', id: 'save to', options: [
+      { label: 'File Name', placeholder: 'Enter file name', type: 'input', id: 'file name', fieldName: 'fileName' },
+      { label: 'Save To', placeholder: 'Select where to save', type: 'select', id: 'activity', fieldName: 'category', options: [
           {name: 'Tasks', value: 'Tasks'},
           {name: 'Notes', value: 'Notes'}
         ]
       },
       { label: 'Folder', placeholder: 'Select folder', type: 'select', id: 'folder', fieldName: 'selectedFolder', options: folderOptions },
-      { label: 'Contents', placeholder: 'Write your thoughts here...', type: 'textarea', id: 'contents' },
+      { label: 'Contents', placeholder: 'Write your thoughts here...', type: 'textarea', id: 'contents', fieldName: 'contents' },
     ],
   };
 
@@ -86,7 +88,7 @@ const Home = () => {
 
 
 
-
+      //   FETCHING FOLDERS FROM DATABASE
   const fetchFolders = async () => {
     const folderCollection = collection(firestore, 'Folder');
 
@@ -115,10 +117,11 @@ const Home = () => {
 
 
 
-// eslint-disable-next-line
-  const handleSaveFolder = async (formData) => {
-    const { folderName } = formData;
-    console.log(folderName);
+      //   SAVING FILES TO THEIR RESPECTIVE FOLDERS IN THE DATABASE
+          // eslint-disable-next-line
+  const handleSaveFile = async (formData) => {
+    const { fileName, category, selectedFolder, contents } = formData;
+    console.log(fileName, '\n', category, '\n', selectedFolder, '\n', contents);
 
     try {
         if (!currentUser) {
@@ -128,26 +131,42 @@ const Home = () => {
         }
 
         else {
-            const folderCollectionRef = collection(firestore, 'Folder');
-            const queryRef = query(folderCollectionRef, where('folderName', '==', folderName));
-            const checkFolder = await getDocs(queryRef)
+              // Check if all required fields are filled
+            if (!fileName || !category || !selectedFolder || !contents) {
+              console.error('Please fill in all required fields.');
+              return;
+            }
 
-            if (checkFolder.size > 0) {
+            const fileDetails = {
+              fileName,
+              category,
+              contents,
+              createdAt: serverTimestamp(),
+              ownerId: currentUserId,
+            };
+
+            const fileCollectionRef = collection(firestore, 'Folder', selectedFolder, 'Files');
+            const queryRef = query(fileCollectionRef, where('fileName', '==', fileName));
+            const checkFile = await getDocs(queryRef)
+
+            if (checkFile.size > 0) {
                 console.error('Folder with the same name already exists.');
             }
             else {
+              try {
                     // eslint-disable-next-line
-                const newFolderRef = await addDoc(folderCollectionRef, {
-                    folderName,
-                    createdAt: serverTimestamp(),
-                    ownerId: currentUserId,
-                });
-                console.log(currentUserId)
-                setFolderOptions(prevFolders => [...prevFolders, { name: folderName, value: folderName }]);
-                // eslint-disable-next-line
-                updateFolderOptions = prevFolders => [...prevFolders, { name: folderName, value: folderName }];
+                const newFileRef = await addDoc(collection(firestore, 'Folder', selectedFolder, 'Files'), fileDetails);
+                // console.log(currentUserId)
+                setFileOptions((prevFiles) => [...prevFiles, { name: fileName, value: fileName }]);
+                // // eslint-disable-next-line
+                updateFileOptions = prevFiles => [...prevFiles, { name: fileName, value: fileName }];
 
                 closeModal();
+              }
+                    
+              catch (err) {
+
+              }
             }
         }
         
@@ -167,7 +186,7 @@ const Home = () => {
       if (currentUser) {
           fetchFolders();
 
-          console.log(currentUser)
+          // console.log(currentUser)
       }
       // eslint-disable-next-line
   }, [currentUser]);
@@ -183,7 +202,7 @@ const Home = () => {
 
         <Outlet />
 
-        <CustomModal isOpen={isModalOpen} onClose={closeModal} initialRef={initialRef} modalConfig={addFileModalConfig} updateFolderOptions={updateFolderOptions} />
+        <CustomModal isOpen={isModalOpen} onClose={closeModal} initialRef={initialRef} modalConfig={addFileModalConfig} updateFolderOptions={updateFolderOptions} onSubmit={handleSaveFile} />
       
     </div>
   )

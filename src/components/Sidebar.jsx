@@ -12,7 +12,8 @@ import Logo from '../assets/Memomaze logo.png'
 import { NavLink } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { auth, firestore } from '../Firebase';
-
+import { useColorMode } from '@chakra-ui/react'
+import { LuSunDim } from "react-icons/lu";
 
 const Sidebar = ({ openModal }) => {
 
@@ -20,6 +21,9 @@ const Sidebar = ({ openModal }) => {
     const [loggedUser, setloggedUser] = useState('');
     // eslint-disable-next-line
     const [userImage, setuserImage] = useState('');
+
+
+    const { modeIcon, toggleColorMode } = useColorMode()
 
 
         //   GETTING CURRENT USER
@@ -67,8 +71,8 @@ const Sidebar = ({ openModal }) => {
     // ]
 
   return (
-    <aside className='h-screen w-[50px] relative z-50  flex justify-center items-center'>
-        <nav className='h-full flex flex-col flex-grow fixed px-2 py-2 items-center justify-between text-sm md:text-md shadow-md'>
+    <aside className='h-screen w-[50px] relative z-50  flex justify-center items-center border-r shadow-md'>
+        <nav className='h-full flex flex-col flex-grow fixed px-2 py-2 items-center justify-between text-sm md:text-md '>
         {/* <button className='p-1.5 flex mt-1 ml-auto mr-[-15px] bg-white rounded-lg border border-blue-200 hover:bg-blue-100 hover:text-white hover:border-white'><LuPanelRightOpen /></button> */}
 
             {/* <div className='flex-1 flex flex-col px-2 py-2 items-center justify-around text-sm bg-white h-full md:text-md m-auto'> */}
@@ -112,7 +116,14 @@ const Sidebar = ({ openModal }) => {
                         <RiSettingsLine size={['25']} className='hover:bg-blue-300 hover:text-white py-1 cursor-pointer rounded-lg' />
                         <RiNotification3Line size={['25']} className='hover:bg-blue-300 hover:text-white py-1 cursor-pointer rounded-lg' />
                     </Box>
-                    <button className='p-1 rounded-lg  bg-white hover:bg-blue-200 hover:text-white'><PiMoonDuotone size='20' /></button>
+                    <button className='p-1 rounded-lg hover:bg-blue-200 hover:text-white' onClick={toggleColorMode} >
+                    {/* {PiMoonDuotone ? <LuSunDim size='20' /> : <PiMoonDuotone size='20' />} */}
+                    {modeIcon === LuSunDim ? (
+                        <PiMoonDuotone size='20' />
+                    ) : (
+                        <LuSunDim size='20' />
+                    )}
+                    </button>
 
                     <NavLink to='profile'>
                         <Box className="cursor-pointer group" display='flex' gap='2' alignItems='center'>

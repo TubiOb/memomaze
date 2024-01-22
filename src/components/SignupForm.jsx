@@ -10,7 +10,7 @@ import { toast } from 'sonner'
 import Toast from './Toast';
 import { firestore, auth, FacebookUser, GoogleUser } from '../Firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, signInWithPopup } from 'firebase/auth'
-import { collection, doc, getDoc, getDocs, setDoc, where, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, setDoc, where } from 'firebase/firestore';
 
 
 const SignupForm = () => {
@@ -101,7 +101,6 @@ const SignupForm = () => {
 
     try {
       const userDocRef = doc(firestore, 'User', user.uid);
-      const folderCollectionRef = collection(firestore, 'Folder');
       const userDoc = await getDoc(userDocRef);
 
       let userData;
@@ -125,13 +124,8 @@ const SignupForm = () => {
             userImage: DefaultImage,
           }
         }
-  
+        
         await setDoc(userDocRef, userData);
-
-        await addDoc(folderCollectionRef, {
-          folderName: 'General',
-          createdAt: serverTimestamp(),
-        });
 
         if (provider !== 'Google' && provider !== 'Facebook') {
           await sendEmailVerification(user);
@@ -241,17 +235,11 @@ const SignupForm = () => {
         const userId = userCredential.user.uid;
 
         const userDocRef = doc(firestore, `User/${userId}`);
-        const folderCollectionRef = collection(firestore, 'Folder');
 
         await setDoc(userDocRef, {
             username: formData.username,
             email: formData.email,
             userImage: DefaultImage,
-        });
-
-        await addDoc(folderCollectionRef, {
-          folderName: 'General',
-          createdAt: serverTimestamp(),
         });
 
         showToastMessage('Sign Up Successful', 'success');

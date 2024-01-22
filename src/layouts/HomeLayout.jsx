@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect, useCallback } from 'react'
 import { CiSearch } from "react-icons/ci";
 import { Box, InputGroup, InputLeftElement, Input } from '@chakra-ui/react'
 import { MdAdd } from "react-icons/md";
@@ -8,11 +8,14 @@ import { PiSmileyDuotone } from "react-icons/pi";
 import CustomModal from "../components/CustomModal";
 import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from 'firebase/firestore';
 import { firestore, auth } from '../Firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const HomeLayout = ({ updateFolderOptions }) => {
     // const buttonSize = useBreakpointValue({ base: 'md', md: 'lg' });
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [folderOptions, setFolderOptions] = useState([]);
+    const [selectedFolder, setSelectedFolder] = useState('');
+    const [files, setFiles] = useState([]);
     const [currentUser, setCurrentUser] = useState('');
     const [currentUserId, setCurrentUserId] = useState('');
     const initialRef = useRef();
@@ -33,9 +36,19 @@ const HomeLayout = ({ updateFolderOptions }) => {
 
         //   HANDLING/FETCHING SELECTED FOLDER
     const handleFieldChange = (fieldName, selectedValue) => {
-        console.log(selectedValue);
+        // console.log(selectedValue);
+        setSelectedFolder(selectedValue);
     };
 
+
+    useEffect(() => {
+        console.log(selectedFolder);
+      }, [selectedFolder]);
+
+
+    const updateFileOptions = (newFiles) => {
+        setFiles(newFiles);
+      };
 
 
 
@@ -52,7 +65,7 @@ const HomeLayout = ({ updateFolderOptions }) => {
 
         //   GETTING CURRENT USER
     useEffect(() => {
-        const loggedInUser = auth.onAuthStateChanged( async (user) => {
+        const loggedInUser = onAuthStateChanged(auth, async (user) => {
             if (user) {
                 const userUID = user.uid;
                 setCurrentUserId(userUID);
@@ -67,7 +80,7 @@ const HomeLayout = ({ updateFolderOptions }) => {
                             const loggedUser = userInfo.username;
                             setCurrentUser(loggedUser)
                             console.log(loggedUser)
-                            console.log(currentUserId)
+                            // console.log(currentUserId)
                         }
                     }
                 }
@@ -150,6 +163,10 @@ const HomeLayout = ({ updateFolderOptions }) => {
                 ));
                 setFolderOptions(folders);
                 updateFolderOptions = folders;
+
+                if (selectedFolder) {
+                    fetchFiles(selectedFolder);
+                }
             }
           
         } catch (error) {
@@ -162,23 +179,71 @@ const HomeLayout = ({ updateFolderOptions }) => {
 
 
 
+
+
+
+
+        //   FETCHING FILES FROM DATABASE
+    const fetchFiles = useCallback(async (folderId) => {
+        const fileCollection = collection(firestore, 'Files');
+
+        try {
+
+            if (!currentUser) {
+                console.error('User not logged in or user data is incomplete.');
+                console.log(currentUser)
+                console.log(currentUserId)
+            }
+            else {
+                let retrievedFiles;
+                if (folderId) {
+                    retrievedFiles = await getDocs(query(fileCollection, where('ownerId', '==', currentUserId), where('folderId', '==', folderId)));
+                }
+                else {
+                    retrievedFiles = await getDocs(query(fileCollection, where('ownerId', '==', currentUserId)));
+                }
+                
+                const fileData = retrievedFiles.docs.map((fileDoc) => (
+                    { id: fileDoc.id, name: fileDoc.data().folderName, contents: fileDoc.data().contents }
+                ));
+                setFiles(fileData);
+            }
+            // fetchFiles();
+        } catch (error) {
+                console.error("Error fetching folders: ", error);
+        }
+    }, [currentUser, currentUserId])
+
+
+
+
+
+
+
+
         //   USEEFFECT TO CALL AND RETREIVE FOLDERS FROM DATABASE
     useEffect(() => {
         if (currentUser) {
             fetchFolders();
 
-            console.log(currentUser)
+            // console.log(currentUser)
         }
         // eslint-disable-next-line
     }, [currentUser]);
+
+    useEffect(() => {
+        if (currentUser && selectedFolder) {
+                fetchFiles(selectedFolder);
+        }
+    }, [currentUser, selectedFolder, fetchFiles]);
 
 
 
 
 
   return (
-    <div className='flex-1 h-full static flex-grow flex flex-col md:flex-row gap-2 md:gap-0 w-full overflow-y-auto items-start'>
-        <aside className="h-auto md:h-screen sticky flex-grow flex flex-col bg-white left-0 items-center justify-center md:justify-start md:items-start w-full md:w-[25%] xl:w-[20%] md:border-r md:border-r-neutral-200 shadow-md py-3 px-2 gap-2">
+    <div className='flex-1 h-full static flex-grow flex flex-col md:flex-row gap-2 md:gap-0 w-full items-start'>
+        <aside className="h-auto md:h-screen sticky flex-grow flex flex-col left-0 items-center justify-center md:justify-start md:items-start w-full md:w-[25%] xl:w-[20%] md:border-r md:border-r-neutral-200 shadow-md py-3 px-2 gap-2">
             <button className="flex items-center w-[95%] mx-auto text-sm 2xl:text-base hover:bg-blue-300 cursor-pointer group py-2 px-1.5 rounded-lg hover:text-white gap-2" onClick={openModal}>
                 <MdAdd size='20' className="p-0.5 border border-neutral-400 rounded-md group-hover:border-white group-hover:shadow-md" />
                 New Folder
@@ -188,7 +253,7 @@ const HomeLayout = ({ updateFolderOptions }) => {
             <ul className="hidden md:grid grid-cols-1 items-center w-[95%] mx-auto text-sm 2xl:text-base font-medium overflow-y-auto max-h-[60%] group py-2 px-1.5 rounded-lg gap-2">
                 Folders
                 {folderOptions.map((folder, folderIndex) => (
-                    <li key={folderIndex} className="flex items-center w-[95%] mx-auto text-sm 2xl:text-md font-normal bg-blue-300 cursor-pointer group py-2 px-1.5 rounded-lg text-white gap-2">{folder.name}</li>
+                    <li key={folderIndex} onClick={() => handleFieldChange('folderName', folder.value)} className="flex items-center w-[95%] mx-auto text-sm 2xl:text-md font-normal bg-blue-300 cursor-pointer group py-2 px-1.5 rounded-lg text-white gap-2">{folder.name}</li>
                 ))}
                 
             </ul>
@@ -223,7 +288,7 @@ const HomeLayout = ({ updateFolderOptions }) => {
             </div>
             
 
-            <Box w='full' display='flex' alignContent='center' justifyContent='center' h='screen'>
+            <Box w='full' display='flex' alignContent='center' justifyContent='center' h='screen' overflowY='auto'>
                 <Tabs variant='soft-rounded' colorScheme='blue' p='1' w='full' align="center" h='full' className="flex-grow" isLazy>
                     <TabList display='flex' alignItems='center' gap={['7', '32']} cursor='pointer'>
                         <Tab>All</Tab>
@@ -232,18 +297,28 @@ const HomeLayout = ({ updateFolderOptions }) => {
                     </TabList>
                     <TabPanels h={['79.5vh', '90vh', '85vh', '81.5vh']} w='full' p='1' className="overflow-y-auto" overflowY='auto'>
                         <TabPanel className="flex-grow items-center w-full" h='full' gap='2' flexWrap='wrap' display='flex' justifyContent='start' flexGrow='grow'>
-                             <div className="flex flex-col items-center justify-center w-full flex-grow flex-1 h-full">
-                                <PiSmileyDuotone size='150' opacity='60%' />
-                                <p className=" font-medium tracking-wide">Create a Task/Note to get started.</p>
-                             </div>
+                            {files.map((file) => (
+                                <div key={file.id}>
+                                    <h5>{file.name}</h5>
+                                    <p>{file.contents}</p>
+                                </div>
+                            ))}
+                            {files.length === 0 && (
+                                <div className="flex flex-col items-center justify-center w-full flex-grow flex-1 h-full">
+                                    <PiSmileyDuotone size='150' opacity='60%' />
+                                    <p className=" font-medium tracking-wide">Create a Task/Note to get started.</p>
+                                </div>
+                            )}
                         </TabPanel>
                         <TabPanel className="flex-grow items-center w-full" h='full' gap='2' flexWrap='wrap' display='flex' justifyContent='start' flexGrow='grow'>
+                            {files}
                              <div className="flex flex-col items-center justify-center w-full flex-grow flex-1 h-full">
                                 <PiSmileyDuotone size='150' opacity='60%' />
                                 <p className=" font-medium tracking-wide">Create a Note to get started.</p>
                              </div>
                         </TabPanel>
                         <TabPanel className="flex-grow items-center w-full" h='full' gap='2' flexWrap='wrap' display='flex' justifyContent='start' flexGrow='grow'>
+                            {files}
                              <div className="flex flex-col items-center justify-center w-full flex-grow flex-1 h-full">
                                 <PiSmileyDuotone size='150' opacity='60%' />
                                 <p className=" font-medium tracking-wide">Create a Task to get started.</p>
@@ -254,7 +329,7 @@ const HomeLayout = ({ updateFolderOptions }) => {
             </Box>
         </div>
 
-        <CustomModal isOpen={isModalOpen} onClose={closeModal} initialRef={initialRef} modalConfig={addFolderModalConfig} onSubmit={handleSaveFolder} />
+        <CustomModal isOpen={isModalOpen} onClose={closeModal} initialRef={initialRef} modalConfig={addFolderModalConfig} onSubmit={handleSaveFolder} updateFileOptions={updateFileOptions} />
     </div>
   )
 }
