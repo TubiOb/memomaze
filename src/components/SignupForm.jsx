@@ -230,37 +230,47 @@ const SignupForm = () => {
     //   GETTING USER DATA FROM FORM AND SENDING TO FIREBASE STORAGE
     try {
         const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
-        const user = userCredential.user;
 
-        const userId = userCredential.user.uid;
+        if (userCredential && userCredential.user) {
+            const userId = userCredential.user.uid;
 
-        const userDocRef = doc(firestore, `User/${userId}`);
-
-        await setDoc(userDocRef, {
-            username: formData.username,
-            email: formData.email,
-            userImage: DefaultImage,
-        });
-
-        showToastMessage('Sign Up Successful', 'success');
-
-        setTimeout(() => {
-            //   RESETTING THE FORM
-            setFormData ({
-                username: '',
-                email: '',
-                password: '',
+            const userDocRef = doc(firestore, `User/${userId}`);
+    
+            await setDoc(userDocRef, {
+                username: formData.username,
+                email: formData.email,
+                userImage: DefaultImage,
             });
-
-
-            //   ROUTING BACK TO LOGIN PAGE
-            history('/login');
-        }, 3500);
-
-        await sendEmailVerification(user);
-
-        setEmailSent(true);
-        showToastMessage('Email verification sent. Please check your inbox.', 'success');
+    
+            showToastMessage('Sign Up Successful', 'success');
+    
+            setTimeout(() => {
+                //   RESETTING THE FORM
+                setFormData ({
+                    username: '',
+                    email: '',
+                    password: '',
+                });
+    
+    
+                //   ROUTING BACK TO LOGIN PAGE
+                history('/login');
+            }, 3500);
+    
+            await sendEmailVerification(userCredential.user);
+    
+            setEmailSent(true);
+            showToastMessage('Email verification sent. Please check your inbox.', 'success');
+        }
+        else {
+          showToastMessage('Sign Up failed', 'error');
+          setFormData ({
+            username: '',
+            email: '',
+            password: '',
+          });
+      }
+        
     }
     catch(err) {
         if (err.message.includes('auth/email-already-in-use')) {
@@ -270,16 +280,6 @@ const SignupForm = () => {
               email: '',
               password: '',
           });
-        }
-        else {
-            showToastMessage('Sign Up failed', 'error');
-            setFormData ({
-              username: '',
-              email: '',
-              password: '',
-            });
-            // showToastMessage(err.message, 'error');
-            // console.log(err.message);
         }
     }
   };
