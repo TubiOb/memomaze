@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Button, /* FormControl, FormLabel, Input, Textarea */ } from '@chakra-ui/react';
 
-const CustomModal = ({ isOpen, onClose, initialRef, modalConfig, onSubmit }) => {
+const CustomModal = ({ isOpen, onClose, initialRef, modalConfig, updateFolderOptions, updateFileOptions, onSubmit }) => {
 
     const { title, formFields } = modalConfig;
 

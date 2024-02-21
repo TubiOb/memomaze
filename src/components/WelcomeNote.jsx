@@ -8,7 +8,7 @@ import { NavLink } from 'react-router-dom'
 const WelcomeNote = () => {
   return (
     <div className='flex items-center justify-center w-full h-screen'>
-        <div className='rounded-lg bg-blue-100 flex flex-col w-[90%] lg:w-[50%] xl:w-[40%] 2xl:w-[35%] h-auto py-4 px-5 gap-2'>
+        <div className='rounded-lg bg-blue-100 dark:bg-white dark:text-blue-400 flex flex-col w-[90%] lg:w-[50%] xl:w-[40%] 2xl:w-[35%] h-auto py-4 px-5 gap-2'>
             <div className="w-[90%] lg:w-[60%] h-auto p-3 mx-auto block items-center justify-center text-center font-['Lato'] gap-2">
                 <h3 className=" text-lg md:text-xl lg:text-2xl font-semibold">Welcome to Memomaze</h3>
                 <img src={Memomaze} alt="Memomaze" className='object-cover w-16 lg:w-28 mx-auto' />

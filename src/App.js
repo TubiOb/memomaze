@@ -5,9 +5,11 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Welcome from "./pages/Welcome";
 import Home from "./pages/Home";
+import './index.css'
 import ForgotPassword from "./pages/ForgotPassword";
 import { ChakraProvider } from '@chakra-ui/react'
 import HomeLayout from "./layouts/HomeLayout";
+import { ThemeProvider } from './ThemeContext';
 // import { AuthProvider } from 'react-auth-kit'
 
 function App() {
@@ -34,15 +36,25 @@ function App() {
     }, 4500);
   }, []);
 
+
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('currentUser');
+
+    if (storedUser) {
+          // eslint-disable-next-line
+      const { userId, userEmail } = JSON.parse(storedUser);
+    }
+  }, []);
+
   return (
-    <div>
-      {/* <AuthProvider authType={'cookie'} authName={'_auth'} cookieDomain={window.location.hostname} refreshTokens={true} cookieSecure={true}> */}
+    <ThemeProvider>
+      <div className='bg-white dark:bg-[#212529] text-gray-900 dark:text-white  border-gray-300 dark:border-gray-500'>
         <ChakraProvider>
           <RouterProvider router={router} />
-        </ChakraProvider>
-      {/* </AuthProvider> */}
-      
-    </div>
+        </ChakraProvider>    
+      </div>
+    </ThemeProvider>
   );
 }
 

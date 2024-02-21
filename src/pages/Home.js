@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 // import Navigation from '../components/Navigation'
 import Sidebar from '../components/Sidebar'
 import CustomModal from '../components/CustomModal'
@@ -11,7 +11,7 @@ const Home = ({ updateFileOptions }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [folderOptions, setFolderOptions] = useState([]);
   // eslint-disable-next-line
-  const [fileOptions, setFileOptions] = useState([]);
+  const [files, setFiles] = useState([]);
   const [currentUser, setCurrentUser] = useState('');
   const [currentUserId, setCurrentUserId] = useState('');
   const initialRef = useRef();
@@ -41,9 +41,7 @@ const Home = ({ updateFileOptions }) => {
 
                       if (userInfo) {
                           const loggedUser = userInfo.username;
-                          setCurrentUser(loggedUser)
-                          console.log(loggedUser)
-                          // console.log(currentUserId)
+                          setCurrentUser(loggedUser);
                       }
                   }
               }
@@ -89,15 +87,13 @@ const Home = ({ updateFileOptions }) => {
 
 
       //   FETCHING FOLDERS FROM DATABASE
-  const fetchFolders = async () => {
+  const fetchFolders = useCallback(async () => {
     const folderCollection = collection(firestore, 'Folder');
 
     try {
 
         if (!currentUser) {
             console.error('User not logged in or user data is incomplete.');
-            console.log(currentUser)
-            console.log(currentUserId)
         }
         else {
             const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
@@ -106,11 +102,35 @@ const Home = ({ updateFileOptions }) => {
             ));
             setFolderOptions(folders);
         }
-        fetchFolders();
     } catch (error) {
           console.error("Error fetching folders: ", error);
     }
+  }, [currentUser, currentUserId]);
+
+  useEffect(() => {
+      fetchFolders();
+  }, [fetchFolders]);
+
+
+
+
+
+
+
+
+  const fetchFiles = async (folderName) => {
+    const filesCollection = collection(firestore, 'Folder', folderName, 'Files');
+    const retrievedFiles = await getDocs(filesCollection);
+
+    const files = retrievedFiles.docs.map((fileDoc) => ({
+        id: fileDoc.id,
+        name: fileDoc.data().fileName,
+        contents: fileDoc.data().contents,
+    }));
+
+    return files;
   };
+  
 
 
 
@@ -118,16 +138,12 @@ const Home = ({ updateFileOptions }) => {
 
 
       //   SAVING FILES TO THEIR RESPECTIVE FOLDERS IN THE DATABASE
-          // eslint-disable-next-line
   const handleSaveFile = async (formData) => {
     const { fileName, category, selectedFolder, contents } = formData;
-    console.log(fileName, '\n', category, '\n', selectedFolder, '\n', contents);
 
     try {
         if (!currentUser) {
             console.error('User not logged in or user data is incomplete.');
-            console.log(currentUser)
-            console.log(currentUserId)
         }
 
         else {
@@ -156,10 +172,12 @@ const Home = ({ updateFileOptions }) => {
               try {
                     // eslint-disable-next-line
                 const newFileRef = await addDoc(collection(firestore, 'Folder', selectedFolder, 'Files'), fileDetails);
-                // console.log(currentUserId)
-                setFileOptions((prevFiles) => [...prevFiles, { name: fileName, value: fileName }]);
+
+                const updatedFiles = await fetchFiles(selectedFolder);
+
+                setFiles(updatedFiles);
                 // // eslint-disable-next-line
-                updateFileOptions = prevFiles => [...prevFiles, { name: fileName, value: fileName }];
+                updateFileOptions(prevFiles => [...prevFiles, { name: fileName, value: fileName }]);
 
                 closeModal();
               }
@@ -173,7 +191,12 @@ const Home = ({ updateFileOptions }) => {
     } catch (err) {
         console.error("Error adding document: ", err);
     }
-  }
+  };
+
+
+  // useEffect(() => {
+  //   handleSaveFile();
+  // })
 
 
 
@@ -182,27 +205,20 @@ const Home = ({ updateFileOptions }) => {
 
 
     //   USEEFFECT TO CALL AND RETREIVE FOLDERS FROM DATABASE
-  useEffect(() => {
-      if (currentUser) {
-          fetchFolders();
-
-          // console.log(currentUser)
-      }
-      // eslint-disable-next-line
-  }, [currentUser]);
+  
 
 
 
 
 
   return (
-    <div className={`flex w-full h-screen relative items-start font-['Rethink Sans']`}>
+    <div className={`flex w-full h-screen items-start justify-start overflow-y-hidden`}>
       {/* <Navigation /> */}
         <Sidebar openModal={openModal} />
 
         <Outlet />
 
-        <CustomModal isOpen={isModalOpen} onClose={closeModal} initialRef={initialRef} modalConfig={addFileModalConfig} updateFolderOptions={updateFolderOptions} onSubmit={handleSaveFile} />
+        <CustomModal isOpen={isModalOpen} onClose={closeModal} initialRef={initialRef} modalConfig={addFileModalConfig} updateFolderOptions={updateFolderOptions} updateFileOptions={updateFileOptions} onSubmit={handleSaveFile} />
       
     </div>
   )

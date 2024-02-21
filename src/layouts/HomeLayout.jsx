@@ -1,9 +1,7 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react'
+import React, { useRef, useState, useEffect, /* useCallback */ } from 'react'
 import { CiSearch } from "react-icons/ci";
 import { Box, InputGroup, InputLeftElement, Input } from '@chakra-ui/react'
 import { MdAdd } from "react-icons/md";
-import { Tabs, TabList, TabPanels, Tab, TabPanel } from '@chakra-ui/react'
-// import Blank from '../assets/No Item.png'
 import { PiSmileyDuotone } from "react-icons/pi";
 import CustomModal from "../components/CustomModal";
 import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from 'firebase/firestore';
@@ -16,6 +14,8 @@ const HomeLayout = ({ updateFolderOptions }) => {
     const [folderOptions, setFolderOptions] = useState([]);
     const [selectedFolder, setSelectedFolder] = useState('');
     const [files, setFiles] = useState([]);
+    // eslint-disable-next-line
+    const [folderFiles, setFolderFiles] = useState([]);
     const [currentUser, setCurrentUser] = useState('');
     const [currentUserId, setCurrentUserId] = useState('');
     const initialRef = useRef();
@@ -42,7 +42,7 @@ const HomeLayout = ({ updateFolderOptions }) => {
 
 
     useEffect(() => {
-        console.log(selectedFolder);
+        // console.log(selectedFolder);
       }, [selectedFolder]);
 
 
@@ -79,7 +79,7 @@ const HomeLayout = ({ updateFolderOptions }) => {
                         if (userInfo) {
                             const loggedUser = userInfo.username;
                             setCurrentUser(loggedUser)
-                            console.log(loggedUser)
+                            // console.log(loggedUser)
                             // console.log(currentUserId)
                         }
                     }
@@ -99,16 +99,18 @@ const HomeLayout = ({ updateFolderOptions }) => {
 
 
 
+
+
         //   SAVING FOLDERS TO DATABASE
     const handleSaveFolder = async (formData) => {
         const { folderName } = formData;
-        console.log(folderName);
+        // console.log(folderName);
 
         try {
             if (!currentUser) {
                 console.error('User not logged in or user data is incomplete.');
-                console.log(currentUser)
-                console.log(currentUserId)
+                // console.log(currentUser)
+                // console.log(currentUserId)
             }
 
             else {
@@ -126,9 +128,13 @@ const HomeLayout = ({ updateFolderOptions }) => {
                         createdAt: serverTimestamp(),
                         ownerId: currentUserId,
                     });
-                    console.log(currentUserId)
+                        //   UPDATE THE FOLDER OPTIONS AND FILES IMMEDIATELY AFTER SAVING
                     setFolderOptions(prevFolders => [...prevFolders, { name: folderName, value: folderName }]);
                     updateFolderOptions = prevFolders => [...prevFolders, { name: folderName, value: folderName }];
+
+                        //   FETCH AND UPDATE FILES FOR THE NEWLY ADDED FOLDER
+                    const newFiles = await fetchFiles(folderName);
+                    updateFileOptions(newFiles);
 
                     closeModal();
                 }
@@ -137,82 +143,105 @@ const HomeLayout = ({ updateFolderOptions }) => {
         } catch (err) {
             console.error("Error adding document: ", err);
         }
-    }
+    };
+
+
+
+
 
 
 
 
         //   FETCHING FOLDERS FROM DATABASE
-    const fetchFolders = async () => {
+    useEffect(() => {
+        const fetchFolders = async () => {
+            const folderCollection = collection(firestore, 'Folder');
         
-
-        const folderCollection = collection(firestore, 'Folder');
-        // const usersFolders = query(folderCollection, where('ownerId', '==', currentUser.uid))
-
-        try {
-
-            if (!currentUser) {
-                console.error('User not logged in or user data is incomplete.');
-                console.log(currentUser)
-                console.log(currentUserId)
-            }
-            else {
-                const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
-                const folders = retrievedFolders.docs.map((folderDoc) => (
-                    { name: folderDoc.data().folderName, value: folderDoc.data().folderName }
-                ));
-                setFolderOptions(folders);
-                updateFolderOptions = folders;
-
-                if (selectedFolder) {
-                    fetchFiles(selectedFolder);
-                }
-            }
-          
-        } catch (error) {
-              console.error("Error fetching folders: ", error);
-        }
-        return setFolderOptions;
-    };   
-
-
-
-
-
-
-
-
-
-        //   FETCHING FILES FROM DATABASE
-    const fetchFiles = useCallback(async (folderId) => {
-        const fileCollection = collection(firestore, 'Files');
-
-        try {
-
-            if (!currentUser) {
-                console.error('User not logged in or user data is incomplete.');
-                console.log(currentUser)
-                console.log(currentUserId)
-            }
-            else {
-                let retrievedFiles;
-                if (folderId) {
-                    retrievedFiles = await getDocs(query(fileCollection, where('ownerId', '==', currentUserId), where('folderId', '==', folderId)));
+            try {
+        
+                if (!currentUser) {
+                    console.error('User not logged in or user data is incomplete.');
+                    // console.log(currentUser)
+                    // console.log(currentUserId)
                 }
                 else {
-                    retrievedFiles = await getDocs(query(fileCollection, where('ownerId', '==', currentUserId)));
+                    const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
+                    const folders = retrievedFolders.docs.map((folderDoc) => (
+                        { name: folderDoc.data().folderName, value: folderDoc.data().folderName }
+                    ));
+                    setFolderOptions(folders);
                 }
-                
-                const fileData = retrievedFiles.docs.map((fileDoc) => (
-                    { id: fileDoc.id, name: fileDoc.data().folderName, contents: fileDoc.data().contents }
-                ));
-                setFiles(fileData);
+            } catch (error) {
+                  console.error("Error fetching folders: ", error);
             }
-            // fetchFiles();
-        } catch (error) {
+        };
+
+        fetchFolders();
+    }, [currentUser, currentUserId]);
+    
+
+
+
+
+
+
+
+
+
+      const fetchFiles = async (folderName) => {
+        const filesCollection = collection(firestore, 'Folder', folderName, 'Files');
+        const retrievedFiles = await getDocs(filesCollection);
+    
+        const files = retrievedFiles.docs.map((fileDoc) => ({
+            id: fileDoc.id,
+            name: fileDoc.data().fileName,
+            contents: fileDoc.data().contents,
+        }));
+    
+        return files;
+      };
+    
+      
+    
+            //   FETCHING FOLDER FILES FROM DATABASE
+    useEffect(() => {
+        const fetchFoldersAndFiles = async () => {
+            const folderCollection = collection(firestore, 'Folder');
+        
+            try {
+                if (!currentUser) {
+                    console.error('User not logged in or user data is incomplete.');
+                    // console.log(currentUser);
+                    // console.log(currentUserId);
+                } else {
+                    const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
+        
+                    const foldersData = await Promise.all(
+                        retrievedFolders.docs.map(async (folderDoc) => {
+                            const folderData = folderDoc.data();
+                            const folderName = folderData.folderName;
+        
+                            // Retrieve files from the "Files" collection under the current folder
+                            const files = await fetchFiles(folderName);
+        
+                            return {
+                                folder: { name: folderName, value: folderName },
+                                files: files,
+                            };
+                        })
+                    );
+        
+                    setFolderOptions(foldersData.map((data) => data.folder));
+                    setFolderFiles(foldersData.flatMap((data) => data.files));
+                }
+            } catch (error) {
                 console.error("Error fetching folders: ", error);
-        }
-    }, [currentUser, currentUserId])
+            }
+          };
+
+        fetchFoldersAndFiles();
+    }, [currentUser, currentUserId]);
+    
 
 
 
@@ -221,28 +250,56 @@ const HomeLayout = ({ updateFolderOptions }) => {
 
 
 
-        //   USEEFFECT TO CALL AND RETREIVE FOLDERS FROM DATABASE
+    
+    
+
+            //   FETCHING ALL FILES FROM DATABASE
     useEffect(() => {
-        if (currentUser) {
-            fetchFolders();
+        const fetchAllFiles = async () => {
+            const folderCollection = collection(firestore, 'Folder');
+        
+            try {
+                if (!currentUser) {
+                    console.error('User not logged in or user data is incomplete.');
+                    // console.log(currentUser);
+                    // console.log(currentUserId);
+                } else {
+                    const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
+                    const allFiles = [];
+        
+                    for (const folderDoc of retrievedFolders.docs) {
+                        const folderData = folderDoc.data();
+                        const folderName = folderData.folderName;
+        
+                        // Retrieve files from the "Files" collection under the current folder
+                        const files = await fetchFiles(folderName);
+        
+                        // Add the files to the allFiles array
+                        allFiles.push(...files);
+                    }
+        
+                    // Set the state with all files from all folders
+                    setFiles(allFiles);
+                }
+            } catch (error) {
+                console.error("Error fetching all files: ", error);
+            }
+        };
+       
+        fetchAllFiles();
+    }, [currentUser, currentUserId]);
+    
 
-            // console.log(currentUser)
-        }
-        // eslint-disable-next-line
-    }, [currentUser]);
 
-    useEffect(() => {
-        if (currentUser && selectedFolder) {
-                fetchFiles(selectedFolder);
-        }
-    }, [currentUser, selectedFolder, fetchFiles]);
 
+
+    
 
 
 
 
   return (
-    <div className='flex-1 h-full static flex-grow flex flex-col md:flex-row gap-2 md:gap-0 w-full items-start'>
+    <div className='flex-1 h-screen lg:h-full flex-grow flex flex-col md:flex-row gap-2 md:gap-0 w-full items-start'>
         <aside className="h-auto md:h-screen sticky flex-grow flex flex-col left-0 items-center justify-center md:justify-start md:items-start w-full md:w-[25%] xl:w-[20%] md:border-r md:border-r-neutral-200 shadow-md py-3 px-2 gap-2">
             <button className="flex items-center w-[95%] mx-auto text-sm 2xl:text-base hover:bg-blue-300 cursor-pointer group py-2 px-1.5 rounded-lg hover:text-white gap-2" onClick={openModal}>
                 <MdAdd size='20' className="p-0.5 border border-neutral-400 rounded-md group-hover:border-white group-hover:shadow-md" />
@@ -253,14 +310,14 @@ const HomeLayout = ({ updateFolderOptions }) => {
             <ul className="hidden md:grid grid-cols-1 items-center w-[95%] mx-auto text-sm 2xl:text-base font-medium overflow-y-auto max-h-[60%] group py-2 px-1.5 rounded-lg gap-2">
                 Folders
                 {folderOptions.map((folder, folderIndex) => (
-                    <li key={folderIndex} onClick={() => handleFieldChange('folderName', folder.value)} className="flex items-center w-[95%] mx-auto text-sm 2xl:text-md font-normal bg-blue-300 cursor-pointer group py-2 px-1.5 rounded-lg text-white gap-2">{folder.name}</li>
+                    <li key={folderIndex} onClick={() => handleFieldChange('folderName', folder.value)} className="flex items-center w-[95%] mx-auto text-sm 2xl:text-md bg-neutral-300 text-gray-700 font-semibold cursor-pointer group py-2 px-1.5 rounded-lg gap-2">{folder.name}</li>
                 ))}
                 
             </ul>
 
             <div className="flex md:hidden items-center w-[95%] mx-auto text-sm 2xl:text-base font-medium cursor-none group py-2 px-1.5 rounded-lg gap-2">
                 <label className="text-sm 2xl:text-base font-medium text-gray-500 mb-1 w-full">Folders
-                    <select id="foldersSelect" value='' onChange={(e) => handleFieldChange('folderName', e.target.value)} required className="peer border-none block bg-blue-50 w-full focus:bg-blue-100 py-2 md:py-1.5 lg:py-1 xl:py-2 px-2 xl:px-3.5 text-sm md:text-sm lg:text-base font-normal focus:border-transparent focus:outline-none rounded-lg focus:ring-0">
+                    <select id="foldersSelect" value='' onChange={(e) => handleFieldChange('folderName', e.target.value)} required className="peer border-none block bg-neutral-500 w-full text-white focus:bg-neutral-500 py-2 md:py-1.5 lg:py-1 xl:py-2 px-2 xl:px-3.5 text-sm md:text-sm lg:text-base font-normal focus:border-transparent focus:outline-none rounded-lg focus:ring-0">
                         <option value="" disabled>Select a folder</option>
                         {folderOptions.map((folder, folderIndex) => (
                             <option key={folderIndex} value={folder.name}>
@@ -270,9 +327,6 @@ const HomeLayout = ({ updateFolderOptions }) => {
                     </select>
                 </label>
             </div>
-            
-
-            
         </aside>
 
         <div className="w-full h-screen flex flex-col items-start gap-1">
@@ -288,44 +342,30 @@ const HomeLayout = ({ updateFolderOptions }) => {
             </div>
             
 
-            <Box w='full' display='flex' alignContent='center' justifyContent='center' h='screen' overflowY='auto'>
-                <Tabs variant='soft-rounded' colorScheme='blue' p='1' w='full' align="center" h='full' className="flex-grow" isLazy>
-                    <TabList display='flex' alignItems='center' gap={['7', '32']} cursor='pointer'>
-                        <Tab>All</Tab>
-                        <Tab>Notes</Tab>
-                        <Tab>Tasks</Tab>
-                    </TabList>
-                    <TabPanels h={['79.5vh', '90vh', '85vh', '81.5vh']} w='full' p='1' className="overflow-y-auto" overflowY='auto'>
-                        <TabPanel className="flex-grow items-center w-full" h='full' gap='2' flexWrap='wrap' display='flex' justifyContent='start' flexGrow='grow'>
-                            {files.map((file) => (
-                                <div key={file.id}>
-                                    <h5>{file.name}</h5>
-                                    <p>{file.contents}</p>
+            <Box w='full' display='flex' alignContent='center' justifyContent='center' className='h-full' overflowY='auto'>
+                <Box className="grid grid-cols-2 lg:grid-cols-5 gap-y-4 gap-x-3 items-start justify-center py-2 mb-10 px-3 w-full h-full" overscroll='auto' overflowX='auto'>
+                    {files.map((file) => (
+                        <React.Fragment key={file.id}>
+                            <div className='group max-w-[200px] col-span-1 lg:col-auto items-start max-h-[350px]'>
+                                <div className='flex flex-col pt-3 pb-0.5 px-2 w-full h-full rounded-md border dark:border-white border-neutral-300 shadow-lg gap-2'>
+                                    <h5 className='font-semibold text-[16px]'>{file.name}</h5>
+                                    <div className='w-full items-center'>
+                                        <p className='font-normal text-neutral-600 dark:text-neutral-200 text-[13px] lg:text-[15px] break-all'>{file.contents}</p>    
+                                    </div>
+                                    <div className='flex w-full h-auto py-0.5 px-0.5 items-center opacity-0 group-hover:opacity-100 transition-opacity'>
+                                        <p>Oba</p>
+                                    </div>
                                 </div>
-                            ))}
-                            {files.length === 0 && (
-                                <div className="flex flex-col items-center justify-center w-full flex-grow flex-1 h-full">
-                                    <PiSmileyDuotone size='150' opacity='60%' />
-                                    <p className=" font-medium tracking-wide">Create a Task/Note to get started.</p>
-                                </div>
-                            )}
-                        </TabPanel>
-                        <TabPanel className="flex-grow items-center w-full" h='full' gap='2' flexWrap='wrap' display='flex' justifyContent='start' flexGrow='grow'>
-                            {files}
-                             <div className="flex flex-col items-center justify-center w-full flex-grow flex-1 h-full">
-                                <PiSmileyDuotone size='150' opacity='60%' />
-                                <p className=" font-medium tracking-wide">Create a Note to get started.</p>
-                             </div>
-                        </TabPanel>
-                        <TabPanel className="flex-grow items-center w-full" h='full' gap='2' flexWrap='wrap' display='flex' justifyContent='start' flexGrow='grow'>
-                            {files}
-                             <div className="flex flex-col items-center justify-center w-full flex-grow flex-1 h-full">
-                                <PiSmileyDuotone size='150' opacity='60%' />
-                                <p className=" font-medium tracking-wide">Create a Task to get started.</p>
-                             </div>
-                        </TabPanel>
-                    </TabPanels>
-                </Tabs>
+                            </div>
+                        </React.Fragment>
+                    ))}
+                    {files.length === 0 && (
+                        <div className="flex flex-col items-center justify-center w-full flex-grow flex-1 h-full">
+                            <PiSmileyDuotone size='150' opacity='60%' />
+                            <p className=" font-medium tracking-wide">Create a Task/Note to get started.</p>
+                        </div>
+                    )}
+                </Box>
             </Box>
         </div>
 
