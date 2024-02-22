@@ -203,7 +203,7 @@ const signUserIn = async (user, provider) => {
       const userDocRef = doc(firestore, `User/${userId}`);
       const UserDoc = await getDoc(userDocRef);
 
-      if (UserDoc) {
+      if (UserDoc.exists()) {
         // eslint-disable-next-line
         const userData = UserDoc.data();
 
@@ -227,24 +227,15 @@ const signUserIn = async (user, provider) => {
     catch (err) {
       if (formData.email === '' || formData.password === '') {
         showToastMessage('Please fill in both email and password.', 'error');
-      } else {
+      } 
+      else {
+        showToastMessage('Invalid email or password', 'error');
 
         setFormData ({
           email: '',
           password: '',
         });
-
-        showToastMessage('Invalid email or password', 'error');
-
-        
-
-        
       }
-
-      setFormData ({
-        email: '',
-        password: '',
-    });
     }
   }
 

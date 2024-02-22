@@ -80,7 +80,7 @@ const Sidebar = ({ openModal }) => {
     // ]
 
   return (
-    <aside className='h-screen lg:h-[100vh] w-[50px] relative z-50 flex justify-center items-center border-r border-r-gray-300'>
+    <aside className='h-[100svh] w-[50px] z-50 flex justify-center items-center border-r border-r-gray-300'>
         <nav className='h-[100svh] w-[50px] flex flex-col flex-grow fixed px-2 py-2 items-center justify-between text-sm md:text-md'>
         {/* <button className='p-1.5 flex mt-1 ml-auto mr-[-15px] bg-white rounded-lg border border-blue-200 hover:bg-blue-100 hover:text-white hover:border-white'><LuPanelRightOpen /></button> */}
 
