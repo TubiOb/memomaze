@@ -81,7 +81,7 @@ const Sidebar = ({ openModal }) => {
 
   return (
     <aside className='h-full shrink lg:h-screen lg:shrink-0 overflow-y-auto w-[50px] relative z-50 flex justify-center items-center border-r border-r-gray-300'>
-        <nav className='h-[100svh] shrink lg:h-screen lg:shrink-0 overflow-y-auto w-[50px] flex flex-col flex-grow fixed px-2 py-1 items-center justify-between text-sm md:text-md'>
+        <nav className='h-full shrink lg:h-screen lg:shrink-0 overflow-y-auto w-[50px] flex flex-col flex-grow fixed px-2 py-1 items-center justify-between text-sm md:text-md'>
         {/* <button className='p-1.5 flex mt-1 ml-auto mr-[-15px] bg-white rounded-lg border border-blue-200 hover:bg-blue-100 hover:text-white hover:border-white'><LuPanelRightOpen /></button> */}
 
             {/* <div className='flex-1 flex flex-col px-2 py-2 items-center justify-around text-sm bg-white h-full md:text-md m-auto'> */}
