@@ -343,10 +343,10 @@ const HomeLayout = ({ updateFolderOptions }) => {
             
 
             <Box w='full' display='flex' alignContent='center' justifyContent='center' className='h-full' overflowY='auto'>
-                <Box className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start py-2 px-3 w-full space-y-3 pb-28 h-full" overscroll='auto' overflowX='auto'>
+                <Box className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start py-2 px-3 w-full pb-10 space-y-3 h-screen" overflowX='auto'>
                     {files.map((file) => (
                         <React.Fragment key={file.id}>
-                            <div className='group max-w-[200px] items-start max-h-[350px] overflow-hidden'>
+                            <div className='group max-w-[200px] items-start max-h-[350px] break-inside-avoid overflow-hidden'>
                                 <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full h-full rounded-md border dark:border-white border-neutral-300 shadow-lg gap-2'>
                                     <h5 className='font-semibold text-[16px]'>{file.name}</h5>
                                     <div className='w-full items-center'>
