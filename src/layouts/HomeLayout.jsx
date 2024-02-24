@@ -4,7 +4,7 @@ import { Box, InputGroup, InputLeftElement, Input } from '@chakra-ui/react'
 import { MdAdd } from "react-icons/md";
 import { PiSmileyDuotone } from "react-icons/pi";
 import CustomModal from "../components/CustomModal";
-import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
 import { firestore, auth } from '../Firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
@@ -212,7 +212,8 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
 
       const fetchFiles = async (folderName) => {
         const filesCollection = collection(firestore, 'Folder', folderName, 'Files');
-        const retrievedFiles = await getDocs(filesCollection);
+        const orderQuery = query(filesCollection, orderBy('createdAt', 'desc'));
+        const retrievedFiles = await getDocs(orderQuery);
     
         const files = retrievedFiles.docs.map((fileDoc) => ({
             id: fileDoc.id,
@@ -401,7 +402,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             <ul className="hidden md:grid grid-cols-1 items-center w-[95%] mx-auto text-sm 2xl:text-base font-medium overflow-y-auto max-h-[60%] group py-2 px-1.5 rounded-lg gap-2">
                 Folders
                 {folderOptions.map((folder, folderIndex) => (
-                    <li key={folderIndex} onClick={() => handleFieldChange('folderName', folder.value)} className="flex items-center w-[95%] mx-auto text-sm 2xl:text-md bg-neutral-300 text-gray-700 font-semibold cursor-pointer group py-2 px-1.5 rounded-lg gap-2">{folder.name}</li>
+                    <li key={folderIndex} onClick={() => handleFieldChange('folderName', folder.value)} className="flex items-center w-[95%] mx-auto text-sm 2xl:text-md bg-neutral-300 text-gray-700 font-semibold cursor-pointer group py-2 px-1.5 rounded-lg gap-2 hover:shadow-md hover:shadow-black/20 dark:hover:shadow-white/40">{folder.name}</li>
                 ))}
                 
             </ul>
@@ -437,11 +438,11 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                 <Box className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start py-2 px-3 w-full pb-10 space-y-3 h-screen">
                     {files.map((file) => (
                         <React.Fragment key={file.id}>
-                            <div className='group max-w-[200px] items-start max-h-[350px] break-inside-avoid overflow-hidden'>
-                                <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full h-full rounded-md border dark:border-white border-neutral-300 shadow-lg gap-2'>
+                            <div className='group max-w-[200px] items-start max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden'>
+                                <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full h-full gap-2'>
                                     <h5 className='font-semibold text-[16px]'>{file.name}</h5>
                                     <div className='w-full items-center'>
-                                        <p className='font-normal text-neutral-600 dark:text-neutral-200 text-[13px] lg:text-[15px] break-all'>{file.contents}</p>    
+                                        <p className='font-normal text-neutral-600 dark:text-neutral-200 text-[13px] lg:text-[15px] break-word'>{file.contents}</p>    
                                     </div>
                                     <div className='flex w-full h-auto py-0.5 px-0.5 items-center opacity-0 group-hover:opacity-100 transition-opacity'>
                                         <p>Oba</p>
@@ -456,7 +457,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                             <p className=" font-medium tracking-wide">Create a Task/Note to get started.</p>
                         </div>
                     )}
-                    <button className='flex fixed right-[5%] bottom-[4%] items-center justify-between cursor-pointer px-2 py-1.5 group rounded-xl shadow-2xl bg-neutral-300 border-neutral-600 gap-1 hover:bg-white text-gray-700 hover:text-'>
+                    <button className='flex fixed right-[5%] bottom-[4%] items-center justify-between cursor-pointer px-2 py-2 group rounded-xl shadow-md bg-neutral-600 dark:bg-white dark:hover:bg-neutral-600 border-neutral-600 gap-1 border border-gray-300/40 hover:bg-white dark:shadow-neutral-200/50 dark:hover:shadow-white/30 text-white dark:hover:text-white dark:text-gray-700 hover:text-gray-700'>
                         <MdAdd size={24} onClick={openAddFileModal} /> 
                     </button>
                 </Box>
