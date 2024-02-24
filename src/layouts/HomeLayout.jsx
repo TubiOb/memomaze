@@ -8,9 +8,8 @@ import { addDoc, collection, doc, getDoc, getDocs, query, serverTimestamp, where
 import { firestore, auth } from '../Firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
-const HomeLayout = ({ updateFolderOptions }) => {
+const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
     // const buttonSize = useBreakpointValue({ base: 'md', md: 'lg' });
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const [folderOptions, setFolderOptions] = useState([]);
     const [selectedFolder, setSelectedFolder] = useState('');
     const [files, setFiles] = useState([]);
@@ -19,19 +18,30 @@ const HomeLayout = ({ updateFolderOptions }) => {
     const [currentUser, setCurrentUser] = useState('');
     const [currentUserId, setCurrentUserId] = useState('');
     const initialRef = useRef();
-  
 
-        //   OPENING ADD FOLDER MODAL
-    const openModal = () => {
-      console.log("What's on your mind?");
-      setIsModalOpen(true);
-    }
-  
+    const [isAddFolderModalOpen, setIsAddFolderModalOpen] = useState(false);
+    const [isAddFileModalOpen, setIsAddFileModalOpen] = useState(false);
 
+
+         //   OPENING ADD FOLDER MODAL
+    const openAddFolderModal = () => {
+        setIsAddFolderModalOpen(true);
+    };
+    
         //   CLOSING ADD FOLDER MODAL
-    const closeModal = () => {
-      setIsModalOpen(false);
-    }
+    const closeAddFolderModal = () => {
+        setIsAddFolderModalOpen(false);
+    };
+
+         //   OPENING ADD FILE MODAL
+    const openAddFileModal = () => {
+        setIsAddFileModalOpen(true);
+    };
+    
+        //   CLOSING ADD FILE MODAL
+    const closeAddFileModal = () => {
+        setIsAddFileModalOpen(false);
+    };
 
 
         //   HANDLING/FETCHING SELECTED FOLDER
@@ -46,17 +56,29 @@ const HomeLayout = ({ updateFolderOptions }) => {
       }, [selectedFolder]);
 
 
-    const updateFileOptions = (newFiles) => {
-        setFiles(newFiles);
-      };
-
-
 
         //   ADD FOLDER MODAL CALL
     const addFolderModalConfig = {
         title: 'Add Folder',
         formFields: [
           { label: 'Folder Name', placeholder: 'Enter folder name', type: 'input', fieldName: 'folderName' },
+        ],
+    };
+
+
+
+         //   ADD FILE MODAL CALL
+    const addFileModalConfig = {
+        title: 'Add File',
+        formFields: [
+          { label: 'File Name', placeholder: 'Enter file name', type: 'input', id: 'file name', fieldName: 'fileName' },
+          { label: 'Save To', placeholder: 'Select where to save', type: 'select', id: 'activity', fieldName: 'category', options: [
+              {name: 'Tasks', value: 'Tasks'},
+              {name: 'Notes', value: 'Notes'}
+            ]
+          },
+          { label: 'Folder', placeholder: 'Select folder', type: 'select', id: 'folder', fieldName: 'selectedFolder', options: folderOptions },
+          { label: 'Contents', placeholder: 'Write your thoughts here...', type: 'textarea', id: 'contents', fieldName: 'contents' },
         ],
     };
 
@@ -136,7 +158,7 @@ const HomeLayout = ({ updateFolderOptions }) => {
                     const newFiles = await fetchFiles(folderName);
                     updateFileOptions(newFiles);
 
-                    closeModal();
+                    closeAddFolderModal();
                 }
             }
             
@@ -288,6 +310,75 @@ const HomeLayout = ({ updateFolderOptions }) => {
        
         fetchAllFiles();
     }, [currentUser, currentUserId]);
+
+
+
+
+
+
+
+
+
+
+        //   SAVING FILES TO DATABASE
+    const handleSaveFile = async (formData) => {
+        const { fileName, category, selectedFolder, contents } = formData;
+    
+        try {
+            if (!currentUser) {
+                console.error('User not logged in or user data is incomplete.');
+            }
+    
+            else {
+                  // Check if all required fields are filled
+                if (!fileName || !category || !selectedFolder || !contents) {
+                  console.error('Please fill in all required fields.');
+                  return;
+                }
+    
+                const fileDetails = {
+                  fileName,
+                  category,
+                  contents,
+                  createdAt: serverTimestamp(),
+                  ownerId: currentUserId,
+                };
+    
+                const fileCollectionRef = collection(firestore, 'Folder', selectedFolder, 'Files');
+                const queryRef = query(fileCollectionRef, where('fileName', '==', fileName));
+                const checkFile = await getDocs(queryRef)
+    
+                if (checkFile.size > 0) {
+                    console.error('Folder with the same name already exists.');
+                }
+                else {
+                  try {
+                        // eslint-disable-next-line
+                    const newFileRef = await addDoc(collection(firestore, 'Folder', selectedFolder, 'Files'), fileDetails);
+    
+                    const updatedFiles = await fetchFiles(selectedFolder);
+    
+                    setFiles(updatedFiles);
+                      
+                    
+                    // eslint-disable-next-line
+                    updateFileOptions(prevFiles => [...prevFiles, { name: fileName, value: fileName }]);
+    
+                    
+                  }
+                        
+                  catch (err) {
+    
+                  }
+
+                  closeAddFileModal();
+                }
+            }
+            
+        } catch (err) {
+            console.error("Error adding document: ", err);
+        }
+      };
     
 
 
@@ -301,7 +392,7 @@ const HomeLayout = ({ updateFolderOptions }) => {
   return (
     <div className='flex-1 h-screen lg:h-full flex-grow flex flex-col md:flex-row gap-2 md:gap-0 w-full items-start'>
         <aside className="h-auto md:h-screen sticky flex-grow flex flex-col left-0 items-center justify-center md:justify-start md:items-start w-full md:w-[25%] xl:w-[20%] md:border-r md:border-r-neutral-200 shadow-md py-3 px-2 gap-2">
-            <button className="flex items-center w-[95%] mx-auto text-sm 2xl:text-base hover:bg-blue-300 cursor-pointer group py-2 px-1.5 rounded-lg hover:text-white gap-2" onClick={openModal}>
+            <button className="flex items-center w-[95%] mx-auto text-sm 2xl:text-base hover:bg-neutral-300 cursor-pointer group py-2 px-1.5 rounded-lg hover:text-gray-700 gap-2" onClick={openAddFolderModal}>
                 <MdAdd size='20' className="p-0.5 border border-neutral-400 rounded-md group-hover:border-white group-hover:shadow-md" />
                 New Folder
                 {/* <button className="p-1 ">New Folder</button> */}
@@ -365,11 +456,16 @@ const HomeLayout = ({ updateFolderOptions }) => {
                             <p className=" font-medium tracking-wide">Create a Task/Note to get started.</p>
                         </div>
                     )}
+                    <button className='flex fixed right-[5%] bottom-[4%] items-center justify-between cursor-pointer px-2 py-1.5 group rounded-xl shadow-2xl bg-neutral-300 border-neutral-600 gap-1 hover:bg-white text-gray-700 hover:text-'>
+                        <MdAdd size={24} onClick={openAddFileModal} /> 
+                    </button>
                 </Box>
             </Box>
         </div>
 
-        <CustomModal isOpen={isModalOpen} onClose={closeModal} initialRef={initialRef} modalConfig={addFolderModalConfig} onSubmit={handleSaveFolder} updateFileOptions={updateFileOptions} />
+        <CustomModal isOpen={isAddFolderModalOpen} onClose={closeAddFolderModal} initialRef={initialRef} modalConfig={addFolderModalConfig} onSubmit={handleSaveFolder} />
+
+        <CustomModal isOpen={isAddFileModalOpen} onClose={closeAddFileModal} initialRef={initialRef} modalConfig={addFileModalConfig} onSubmit={handleSaveFile} />
     </div>
   )
 }

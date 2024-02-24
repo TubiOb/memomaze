@@ -7,7 +7,6 @@ import { VscNotebook } from "react-icons/vsc";
 import { Box, Avatar } from '@chakra-ui/react'
 import { RiSettingsLine } from "react-icons/ri";
 import { RiNotification3Line } from "react-icons/ri";
-import { MdAdd } from "react-icons/md";
 import Logo from '../assets/Memomaze logo.png'
 import { NavLink } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
@@ -90,7 +89,7 @@ const Sidebar = ({ openModal }) => {
                     {/* <h1 className='hidden md:flex font-medium text-sm lg:text-lg'>Memomaze</h1> */}
                 </Box>
 
-                <ul className='flex flex-col items-center justify-center gap-4'>
+                <ul className='flex flex-col items-center justify-center gap-9'>
                     {/* <p>Menu</p> */}
                     {menus.map((menu, index) => (
                         <li key={index} onClick={() => setActiveMenu(index)} className={`flex gap-1 items-center cursor-pointer px-1 py-1 relative group rounded-lg ${ activeMenu === index  ? 'bg-neutral-300 text-gray-900 hover:bg-neutral-500 hover:text-white' : 'hover:bg-neutral-500 hover:text-white '}`}>
@@ -104,7 +103,7 @@ const Sidebar = ({ openModal }) => {
                     ))}
                 </ul>
 
-                <hr className='my-1 w-[80%]' />
+                {/* <hr className='my-1 w-[80%]' /> */}
                 
                 {/* <ul className='flex items-center justify-center'>
                     {adds.map((add, index) => (
@@ -115,13 +114,13 @@ const Sidebar = ({ openModal }) => {
                     ))}
                 </ul> */}
 
-                <button className='flex items-center justify-center cursor-pointer px-1 py-1 relative group rounded-lg hover:border-neutral-200 hover:bg-neutral-500 hover:shadow-xl text-gray-500 hover:text-white'>
+                {/* <button className='flex items-center justify-center cursor-pointer px-1 py-1 relative group rounded-lg hover:border-neutral-200 hover:bg-neutral-500 hover:shadow-xl text-gray-500 hover:text-white'>
                     <MdAdd size={25} onClick={openModal} />
-                </button>
+                </button> */}
 
                
-                <div className='border-t flex flex-col items-center justify-between gap-2'>
-                    <Box display='flex' flexDir='column' gap='2' p='1' alignItems='center' rounded='lg'>
+                <div className='border-t flex flex-col items-center justify-between gap-4 py-2'>
+                    <Box display='flex' flexDir='column' gap='3' py='2' px='1' alignItems='center' rounded='lg'>
                         <RiSettingsLine size={['25']} className='hover:bg-neutral-500 hover:text-white py-1 cursor-pointer rounded-lg' />
                         <RiNotification3Line size={['25']} className='hover:bg-neutral-500 hover:text-white py-1 cursor-pointer rounded-lg' />
                     </Box>

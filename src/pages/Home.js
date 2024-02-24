@@ -136,7 +136,6 @@ const Home = ({ updateFileOptions }) => {
 
 
 
-
       //   SAVING FILES TO THEIR RESPECTIVE FOLDERS IN THE DATABASE
   const handleSaveFile = async (formData) => {
     const { fileName, category, selectedFolder, contents } = formData;
@@ -176,7 +175,9 @@ const Home = ({ updateFileOptions }) => {
                 const updatedFiles = await fetchFiles(selectedFolder);
 
                 setFiles(updatedFiles);
-                // // eslint-disable-next-line
+                  
+                
+                // eslint-disable-next-line
                 updateFileOptions(prevFiles => [...prevFiles, { name: fileName, value: fileName }]);
 
                 closeModal();
@@ -192,19 +193,6 @@ const Home = ({ updateFileOptions }) => {
         console.error("Error adding document: ", err);
     }
   };
-
-
-  // useEffect(() => {
-  //   handleSaveFile();
-  // })
-
-
-
-
-
-
-
-    //   USEEFFECT TO CALL AND RETREIVE FOLDERS FROM DATABASE
   
 
 
