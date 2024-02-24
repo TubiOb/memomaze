@@ -9,7 +9,6 @@ import { firestore, auth } from '../Firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
 const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
-    // const buttonSize = useBreakpointValue({ base: 'md', md: 'lg' });
     const [folderOptions, setFolderOptions] = useState([]);
     const [selectedFolder, setSelectedFolder] = useState('');
     const [files, setFiles] = useState([]);
@@ -18,6 +17,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
     const [currentUser, setCurrentUser] = useState('');
     const [currentUserId, setCurrentUserId] = useState('');
     const initialRef = useRef();
+    const [searchQuery, setSearchQuery] = useState('');
 
     const [isAddFolderModalOpen, setIsAddFolderModalOpen] = useState(false);
     const [isAddFileModalOpen, setIsAddFileModalOpen] = useState(false);
@@ -393,7 +393,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
   return (
     <div className='flex-1 h-screen lg:h-full flex-grow flex flex-col md:flex-row gap-2 md:gap-0 w-full items-start'>
         <aside className="h-auto md:h-screen sticky flex-grow flex flex-col left-0 items-center justify-center md:justify-start md:items-start w-full md:w-[25%] xl:w-[20%] md:border-r md:border-r-neutral-200 shadow-md py-3 px-2 gap-2">
-            <button className="flex items-center w-[95%] mx-auto text-sm 2xl:text-base hover:bg-neutral-300 cursor-pointer group py-2 px-1.5 rounded-lg hover:text-gray-700 gap-2" onClick={openAddFolderModal}>
+            <button className="flex items-center w-[95%] mx-auto text-sm 2xl:text-base hover:bg-neutral-300 dark:hover:bg-white cursor-pointer group py-2 px-1.5 rounded-lg hover:text-gray-700 gap-2" onClick={openAddFolderModal}>
                 <MdAdd size='20' className="p-0.5 border border-neutral-400 rounded-md group-hover:border-white group-hover:shadow-md" />
                 New Folder
                 {/* <button className="p-1 ">New Folder</button> */}
@@ -402,7 +402,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             <ul className="hidden md:grid grid-cols-1 items-center w-[95%] mx-auto text-sm 2xl:text-base font-medium overflow-y-auto max-h-[60%] group py-2 px-1.5 rounded-lg gap-2">
                 Folders
                 {folderOptions.map((folder, folderIndex) => (
-                    <li key={folderIndex} onClick={() => handleFieldChange('folderName', folder.value)} className="flex items-center w-[95%] mx-auto text-sm 2xl:text-md bg-neutral-300 text-gray-700 font-semibold cursor-pointer group py-2 px-1.5 rounded-lg gap-2 hover:shadow-md hover:shadow-black/20 dark:hover:shadow-white/40">{folder.name}</li>
+                    <li key={folderIndex} onClick={() => handleFieldChange('folderName', folder.value)} className="flex items-center w-[95%] mx-auto text-sm 2xl:text-md bg-neutral-300 dark:bg-white text-gray-700 font-semibold cursor-pointer group py-2 px-1.5 rounded-lg gap-2 hover:shadow-md hover:shadow-black/20 dark:hover:shadow-white/40">{folder.name}</li>
                 ))}
                 
             </ul>
@@ -428,17 +428,17 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                         <InputLeftElement py='0.5'>
                         <CiSearch />
                         </InputLeftElement>
-                        <Input type='text' placeholder='Search Memomaze' className='text-xs md:text-sm 2xl:text-base focus-within:border-neutral-200' focusBorderColor='#d3d3d3' _placeholder={{ fontSize: 'sm', fontWeight: 'thin' }} />
+                        <Input type='text' placeholder='Search Memomaze' className='text-xs md:text-sm 2xl:text-base focus-within:border-neutral-200' focusBorderColor='#d3d3d3' _placeholder={{ fontSize: 'sm', fontWeight: 'thin' }} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
                     </InputGroup>
                 </Box>
             </div>
             
 
-            <Box w='full' display='flex' alignContent='center' justifyContent='center' className='h-full' overflowY='auto'>
-                <Box className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start py-2 px-3 w-full pb-10 space-y-3 h-screen">
-                    {files.map((file) => (
+            <Box w='full' display='flex' alignContent='center' justifyContent='center' className='h-screen' overflowY='auto'>
+                <Box className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start py-2 px-3 w-full pb-10 space-y-3 h-screen overflow-y-auto" overflowY='auto'>
+                    {files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase())).map((file) => (
                         <React.Fragment key={file.id}>
-                            <div className='group max-w-[200px] items-start max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden'>
+                            <div className='group max-w-[150px] md:max-w-[200px] items-start max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden'>
                                 <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full h-full gap-2'>
                                     <h5 className='font-semibold text-[16px]'>{file.name}</h5>
                                     <div className='w-full items-center'>
@@ -457,7 +457,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                             <p className=" font-medium tracking-wide">Create a Task/Note to get started.</p>
                         </div>
                     )}
-                    <button className='flex fixed right-[5%] bottom-[4%] items-center justify-between cursor-pointer px-2 py-2 group rounded-xl shadow-md bg-neutral-600 dark:bg-white dark:hover:bg-neutral-600 border-neutral-600 gap-1 border border-gray-300/40 hover:bg-white dark:shadow-neutral-200/50 dark:hover:shadow-white/30 text-white dark:hover:text-white dark:text-gray-700 hover:text-gray-700'>
+                    <button className='flex fixed right-[5%] bottom-[4%] items-center justify-between cursor-pointer px-2 py-2 group rounded-xl shadow-sm bg-neutral-600 dark:bg-white dark:hover:bg-neutral-600 border-neutral-600 gap-1 border border-gray-300/40 hover:bg-white dark:shadow-neutral-200/50 dark:hover:shadow-white/30 text-white dark:hover:text-white dark:text-gray-700 hover:text-gray-700'>
                         <MdAdd size={24} onClick={openAddFileModal} /> 
                     </button>
                 </Box>
