@@ -434,12 +434,12 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             </div>
             
 
-            <Box w='full' maxW='100%' display='flex' alignContent='center' justifyContent='center' className='h-screen' >
-                <Box className="columns-auto md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start py-2 px-3 w-full pb-10 space-y-3 h-screen overflow-y-auto border border-red-900 overflow-x-hidden" overflowY='auto'>
+            <Box w='full' maxW='100%' display='flex' alignContent='center' justifyContent='center' flexGrow='grow' className='h-screen' >
+                <Box className="columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start py-2 px-3 w-full pb-10 space-y-3 flex-grow min-h-screen overflow-y-auto border border-red-900" overflowY='auto'>
                     {files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase())).map((file) => (
                         <React.Fragment key={file.id}>
-                            <div className='group items-start col-span-1 break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden'>
-                                <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 max-w-[150px] md:max-w-[200px] max-h-[350px] gap-2'>
+                            <div className='group items-start max-w-[150px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden'>
+                                <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full h-full gap-2'>
                                     <h5 className='font-semibold text-[16px]'>{file.name}</h5>
                                     <div className='w-full items-center'>
                                         <p className='font-normal text-neutral-600 dark:text-neutral-200 text-[13px] lg:text-[15px] break-word'>{file.contents}</p>    
