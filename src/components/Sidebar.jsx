@@ -125,7 +125,7 @@ const Sidebar = ({ openModal }) => {
                         <RiNotification3Line size={['25']} className='hover:bg-neutral-500 hover:text-white py-1 cursor-pointer rounded-lg' />
                     </Box>
                     <button className='p-1 rounded-lg hover:bg-neutral-500 hover:text-white' onClick={toggleTheme} >
-                        {theme === 'dark' ? <PiMoonDuotone size='20' /> : <LuSunDim size='20' />}
+                        {theme === 'dark' ? <LuSunDim size='20' /> : <PiMoonDuotone size='20' />}
                     </button>
 
                     <NavLink to='profile'>
