@@ -21,10 +21,10 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
 
     const [isAddFolderModalOpen, setIsAddFolderModalOpen] = useState(false);
     const [isAddFileModalOpen, setIsAddFileModalOpen] = useState(false);
-    const [hasMore, setHasMore] = useState(true);
+    // const [hasMore, setHasMore] = useState(true);
     // eslint-disable-next-line
-    const [page, setPage] = useState(0);
-    const elementRef = useRef(null);
+    // const [page, setPage] = useState(0);
+    // const elementRef = useRef(null);
 
 
          //   OPENING ADD FOLDER MODAL
@@ -304,14 +304,14 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     allFiles.push(...files);
                 }
     
-                if (allFiles.length === 0) {
-                    setHasMore(false);
-                }
-                else {
+                // if (allFiles.length === 0) {
+                //     setHasMore(false);
+                // }
+                // else {
                             // Set the state with all files from all folders
                     setFiles(allFiles);
-                    setPage(prevPage => prevPage + 1)
-                }
+                    // setPage(prevPage => prevPage + 1)
+                // }
             }
         } catch (error) {
             console.error("Error fetching all files: ", error);
@@ -399,25 +399,25 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
 
 
                //   FUNCTION AND USEEFFECT FOR CREATING NEW INTERSECTION OBSERVER
-        function onIntersection(entries) {
-            const firstEntry = entries[0];
-            if (firstEntry.isIntersecting && hasMore) {
-                fetchAllFiles();
-            }
-            }
+        // function onIntersection(entries) {
+        //     const firstEntry = entries[0];
+        //     if (firstEntry.isIntersecting && hasMore) {
+        //         fetchAllFiles();
+        //     }
+        //     }
 
-            useEffect(() => {
-            const observer = new IntersectionObserver(onIntersection);
-            if (observer && elementRef.current) {
-                observer.observe(elementRef.current);
-            }
-            return () => {
-                if (observer) {
-                    observer.disconnect();
-                }
-            }
-        // eslint-disable-next-line
-        }, [files])
+        //     useEffect(() => {
+        //     const observer = new IntersectionObserver(onIntersection);
+        //     if (observer && elementRef.current) {
+        //         observer.observe(elementRef.current);
+        //     }
+        //     return () => {
+        //         if (observer) {
+        //             observer.disconnect();
+        //         }
+        //     }
+        // // eslint-disable-next-line
+        // }, [files])
     
 
 
@@ -459,7 +459,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             </div>
         </aside>
 
-        <div className="w-full h-screen flex flex-col items-start gap-1">
+        <div className="w-full md:w-[75%] lg:w-[80%] flex-1 max-h-[77%] md:max-h-[100%] flex flex-col items-start gap-1">
             <div className="w-full sticky flex border-b border-b-neutral-200 px-2 py-2 items-start justify-center">
                 <Box className='w-full md:w-[60%] lg:w-[45%] xl:w-[70%]'>
                     <InputGroup className='w-[90%] lg:w-[80%] mx-auto'>
@@ -472,37 +472,27 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             </div>
             
 
-            <Box  w='full' maxW='100%' display='flex' alignContent='start' justifyContent='center' className='max-h-screen '>
-                {/* <Box className='flex items-start justify-center w-full h-full'>
-                </Box> */}
-                {hasMore && 
-                    <Box  className="flex items-start justify-center w-full h-screen">
-                        {files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase())).map((file) => (
-                            <div ref={elementRef} className='columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 max-w-full mx-auto gap-3 pb-10 space-y-3 items-start py-2 px-3 overflow-y-auto flex-grow'>
-                                <div key={file.id} className='group items-start max-w-[145px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25'>
-                                    <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full h-full gap-2 overflow-hidden'>
-                                        <h5 className='font-semibold text-[16px]'>{file.name}</h5>
-                                        <div className='w-full items-center'>
-                                            <p className='font-normal text-neutral-600 dark:text-neutral-200 text-[13px] lg:text-[15px] break-word'>{file.contents}</p>    
-                                        </div>
-                                        <div className='flex w-full h-auto py-0.5 px-0.5 items-center opacity-0 group-hover:opacity-100 transition-opacity'>
-                                            <p>Oba</p>
-                                        </div>
+            <Box w='full' maxW='100%' display='flex' alignContent='center' justifyContent='center' overflowY='auto' overflowX='hidden'  className='h-full flex-grow' >
+                <Box className="trick columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start py-2 px-3 max-w-full pb-10 min-h-[90%] flex-grow space-y-3" overflowY='auto' overflowX='hidden'>
+                    {files.length !== 0 && files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase())).map((file) => (
+                        <React.Fragment key={file.id}>
+                            <div className='group items-start max-w-[150px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden'>
+                                <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full h-full gap-2'>
+                                    <h5 className='font-semibold text-[16px]'>{file.name}</h5>
+                                    <div className='w-full items-center'>
+                                        <p className='font-normal text-neutral-600 dark:text-neutral-200 text-[13px] lg:text-[15px] break-word'>{file.contents}</p>    
+                                    </div>
+                                    <div className='flex w-full h-auto py-0.5 px-0.5 items-center opacity-0 group-hover:opacity-100 transition-opacity'>
+                                        <p>Oba</p>
                                     </div>
                                 </div>
                             </div>
-                        ))}
-                        {files.length === 0 && (
-                        <div className="flex flex-col items-center justify-center w-full flex-grow flex-1 h-full">
-                            <PiSmileyDuotone size='150' opacity='60%' />
-                            <p className=" font-medium tracking-wide">Create a Task/Note to get started.</p>
-                        </div>
-                    )}
-                        <button className='flex fixed right-[5%] bottom-[4%] items-center justify-between cursor-pointer px-2 py-2 group rounded-xl shadow-sm bg-neutral-600 dark:bg-white dark:hover:bg-neutral-600 border-neutral-600 gap-1 border border-gray-300/40 hover:bg-white dark:shadow-neutral-200/50 dark:hover:shadow-white/30 text-white dark:hover:text-white dark:text-gray-700 hover:text-gray-700'>
-                            <MdAdd size={24} onClick={openAddFileModal} /> 
-                        </button>
-                    </Box>
-                }
+                        </React.Fragment>
+                    ))}
+                    <button className='flex fixed right-[5%] bottom-[4%] items-center justify-between cursor-pointer px-2 py-2 group rounded-xl shadow-sm bg-neutral-600 dark:bg-white dark:hover:bg-neutral-600 border-neutral-600 gap-1 border border-gray-300/40 hover:bg-white dark:shadow-neutral-200/50 dark:hover:shadow-white/30 text-white dark:hover:text-white dark:text-gray-700 hover:text-gray-700'>
+                        <MdAdd size={24} onClick={openAddFileModal} /> 
+                    </button>
+                </Box>
             </Box>
         </div>
 

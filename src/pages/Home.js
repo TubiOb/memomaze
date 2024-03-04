@@ -6,7 +6,7 @@ import '../index.css'
 const Home = () => {
 
   return (
-    <div className={`flex w-full h-screen items-start justify-start overflow-y-hidden`}>
+    <div className={`flex w-full flex-grow flex-1 h-screen items-start justify-start`}>
       {/* <Navigation /> */}
         <Sidebar />
 

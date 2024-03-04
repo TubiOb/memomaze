@@ -22,7 +22,7 @@ const CustomModal = ({ isOpen, onClose, initialRef, modalConfig, updateFolderOpt
 
   return (
     <div>
-        <Modal isOpen={isOpen} onClose={onClose} isCentered size={['xs', 'md', 'lg']} colorScheme='teal' >
+        <Modal isOpen={isOpen} onClose={onClose} isCentered size={['xs', 'md', 'lg']} colorScheme='whiteAlpha' >
             <ModalOverlay backdropFilter='blur(5px) hue-rotate(30deg)' />
                 <ModalContent>
                     <ModalHeader>{title}</ModalHeader>
