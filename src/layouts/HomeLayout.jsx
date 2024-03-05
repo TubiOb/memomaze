@@ -1,8 +1,9 @@
 import React, { useRef, useState, useEffect, /* useCallback */ } from 'react'
-import { CiSearch } from "react-icons/ci";
+import { CiSearch, CiMenuKebab } from "react-icons/ci";
+import { GoArchive } from "react-icons/go";
 import { Box, InputGroup, InputLeftElement, Input } from '@chakra-ui/react'
-import { MdAdd } from "react-icons/md";
-import { PiSmileyDuotone } from "react-icons/pi";
+import { MdAdd, MdDeleteOutline } from "react-icons/md";
+// import { PiSmileyDuotone } from "react-icons/pi";
 import CustomModal from "../components/CustomModal";
 import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
 import { firestore, auth } from '../Firebase';
@@ -21,10 +22,6 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
 
     const [isAddFolderModalOpen, setIsAddFolderModalOpen] = useState(false);
     const [isAddFileModalOpen, setIsAddFileModalOpen] = useState(false);
-    // const [hasMore, setHasMore] = useState(true);
-    // eslint-disable-next-line
-    // const [page, setPage] = useState(0);
-    // const elementRef = useRef(null);
 
 
          //   OPENING ADD FOLDER MODAL
@@ -52,10 +49,16 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
     const handleFieldChange = (fieldName, selectedValue) => {
         // console.log(selectedValue);
         setSelectedFolder(selectedValue);
+        fetchFoldersAndFiles(selectedValue);
     };
 
 
     useEffect(() => {
+        if (selectedFolder) {
+            fetchFiles(selectedFolder).then((updatedFiles) => {
+                setFiles(updatedFiles);
+            });
+        }
         // console.log(selectedFolder);
       }, [selectedFolder]);
 
@@ -134,7 +137,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
 
         try {
             if (!currentUser) {
-                console.error('User not logged in or user data is incomplete.');
+                // console.error('User not logged in or user data is incomplete.');
                 // console.log(currentUser)
                 // console.log(currentUserId)
             }
@@ -186,7 +189,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             try {
         
                 if (!currentUser) {
-                    console.error('User not logged in or user data is incomplete.');
+                    // console.error('User not logged in or user data is incomplete.');
                     // console.log(currentUser)
                     // console.log(currentUserId)
                 }
@@ -231,43 +234,46 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
       
     
             //   FETCHING FOLDER FILES FROM DATABASE
-    useEffect(() => {
-        const fetchFoldersAndFiles = async () => {
-            const folderCollection = collection(firestore, 'Folder');
-        
-            try {
-                if (!currentUser) {
-                    console.error('User not logged in or user data is incomplete.');
-                    // console.log(currentUser);
-                    // console.log(currentUserId);
-                } else {
-                    const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
-        
-                    const foldersData = await Promise.all(
-                        retrievedFolders.docs.map(async (folderDoc) => {
-                            const folderData = folderDoc.data();
-                            const folderName = folderData.folderName;
-        
-                            // Retrieve files from the "Files" collection under the current folder
+    const fetchFoldersAndFiles = async (selectedFolder) => {
+        const folderCollection = collection(firestore, 'Folder');
+    
+        try {
+            if (!currentUser) {
+                // console.error('User not logged in or user data is incomplete.');
+                // console.log(currentUser);
+                // console.log(currentUserId);
+            } else {
+                const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
+    
+                const foldersData = await Promise.all(
+                    retrievedFolders.docs.map(async (folderDoc) => {
+                        const folderData = folderDoc.data();
+                        const folderName = folderData.folderName;
+    
+                        // Retrieve files from the "Files" collection under the current folder
+                        if (folderName === selectedFolder) {
                             const files = await fetchFiles(folderName);
-        
-                            return {
-                                folder: { name: folderName, value: folderName },
-                                files: files,
-                            };
-                        })
-                    );
-        
-                    setFolderOptions(foldersData.map((data) => data.folder));
-                    setFolderFiles(foldersData.flatMap((data) => data.files));
-                }
-            } catch (error) {
-                console.error("Error fetching folders: ", error);
+                            setFolderFiles(files);
+                        }
+    
+                        return {
+                            folder: { name: folderName, value: folderName },
+                            // files: files,
+                        };
+                    })
+                );
+    
+                setFolderOptions(foldersData.map((data) => data.folder));
             }
-          };
-
+        } catch (error) {
+            console.error("Error fetching folders: ", error);
+        }
+    };
+    
+    useEffect(() => {
         fetchFoldersAndFiles();
-    }, [currentUser, currentUserId]);
+        // eslint-disable-next-line
+    }, [currentUser, currentUserId, selectedFolder]);
     
 
 
@@ -286,7 +292,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
     
         try {
             if (!currentUser) {
-                console.error('User not logged in or user data is incomplete.');
+                // console.error('User not logged in or user data is incomplete.');
                 // console.log(currentUser);
                 // console.log(currentUserId);
             } else {
@@ -302,16 +308,9 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
     
                     // Add the files to the allFiles array
                     allFiles.push(...files);
-                }
-    
-                // if (allFiles.length === 0) {
-                //     setHasMore(false);
-                // }
-                // else {
-                            // Set the state with all files from all folders
+                    // Set the state with all files from all folders
                     setFiles(allFiles);
-                    // setPage(prevPage => prevPage + 1)
-                // }
+                }
             }
         } catch (error) {
             console.error("Error fetching all files: ", error);
@@ -337,7 +336,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
     
         try {
             if (!currentUser) {
-                console.error('User not logged in or user data is incomplete.');
+                // console.error('User not logged in or user data is incomplete.');
             }
     
             else {
@@ -390,36 +389,6 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             console.error("Error adding document: ", err);
         }
       };
-
-
-
-
-
-
-
-
-               //   FUNCTION AND USEEFFECT FOR CREATING NEW INTERSECTION OBSERVER
-        // function onIntersection(entries) {
-        //     const firstEntry = entries[0];
-        //     if (firstEntry.isIntersecting && hasMore) {
-        //         fetchAllFiles();
-        //     }
-        //     }
-
-        //     useEffect(() => {
-        //     const observer = new IntersectionObserver(onIntersection);
-        //     if (observer && elementRef.current) {
-        //         observer.observe(elementRef.current);
-        //     }
-        //     return () => {
-        //         if (observer) {
-        //             observer.disconnect();
-        //         }
-        //     }
-        // // eslint-disable-next-line
-        // }, [files])
-    
-
 
 
 
@@ -482,8 +451,10 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                                     <div className='w-full items-center'>
                                         <p className='font-normal text-neutral-600 dark:text-neutral-200 text-[13px] lg:text-[15px] break-word'>{file.contents}</p>    
                                     </div>
-                                    <div className='flex w-full h-auto py-0.5 px-0.5 items-center opacity-0 group-hover:opacity-100 transition-opacity'>
-                                        <p>Oba</p>
+                                    <div className='flex w-full h-auto py-1 px-0.5 items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity'>
+                                        <GoArchive size='18' className='hover:cursor-pointer hover:font-semibold' />
+                                        <MdDeleteOutline size='18' className='hover:cursor-pointer hover:font-semibold' />
+                                        <CiMenuKebab size='18' className='hover:cursor-pointer hover:font-semibold' />
                                     </div>
                                 </div>
                             </div>
