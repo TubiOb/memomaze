@@ -49,7 +49,6 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
     const handleFieldChange = (fieldName, selectedValue) => {
         // console.log(selectedValue);
         setSelectedFolder(selectedValue);
-        fetchFoldersAndFiles(selectedValue);
     };
 
 
@@ -108,8 +107,6 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                         if (userInfo) {
                             const loggedUser = userInfo.username;
                             setCurrentUser(loggedUser)
-                            // console.log(loggedUser)
-                            // console.log(currentUserId)
                         }
                     }
                 }
@@ -133,13 +130,9 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
         //   SAVING FOLDERS TO DATABASE
     const handleSaveFolder = async (formData) => {
         const { folderName } = formData;
-        // console.log(folderName);
 
         try {
             if (!currentUser) {
-                // console.error('User not logged in or user data is incomplete.');
-                // console.log(currentUser)
-                // console.log(currentUserId)
             }
 
             else {
@@ -189,9 +182,6 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             try {
         
                 if (!currentUser) {
-                    // console.error('User not logged in or user data is incomplete.');
-                    // console.log(currentUser)
-                    // console.log(currentUserId)
                 }
                 else {
                     const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
@@ -234,14 +224,11 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
       
     
             //   FETCHING FOLDER FILES FROM DATABASE
-    const fetchFoldersAndFiles = async (selectedFolder) => {
+    const fetchFoldersAndFiles = async (selectedFolder = null) => {
         const folderCollection = collection(firestore, 'Folder');
     
         try {
             if (!currentUser) {
-                // console.error('User not logged in or user data is incomplete.');
-                // console.log(currentUser);
-                // console.log(currentUserId);
             } else {
                 const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
     
@@ -251,9 +238,11 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                         const folderName = folderData.folderName;
     
                         // Retrieve files from the "Files" collection under the current folder
-                        if (folderName === selectedFolder) {
+                        if (selectedFolder && folderName === selectedFolder) {
                             const files = await fetchFiles(folderName);
-                            setFolderFiles(files);
+                            // setFolderFiles(files);
+                            console.log('Files:', files);
+                            setFiles(files);
                         }
     
                         return {
@@ -269,13 +258,6 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             console.error("Error fetching folders: ", error);
         }
     };
-    
-    useEffect(() => {
-        fetchFoldersAndFiles();
-        // eslint-disable-next-line
-    }, [currentUser, currentUserId, selectedFolder]);
-    
-
 
 
 
@@ -292,12 +274,10 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
     
         try {
             if (!currentUser) {
-                // console.error('User not logged in or user data is incomplete.');
-                // console.log(currentUser);
-                // console.log(currentUserId);
-            } else {
-                const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
+            } 
+            else {
                 const allFiles = [];
+                const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
     
                 for (const folderDoc of retrievedFolders.docs) {
                     const folderData = folderDoc.data();
@@ -308,9 +288,9 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
     
                     // Add the files to the allFiles array
                     allFiles.push(...files);
-                    // Set the state with all files from all folders
-                    setFiles(allFiles);
                 }
+                        // Set the state with all files from all folders
+                setFiles(allFiles);
             }
         } catch (error) {
             console.error("Error fetching all files: ", error);
@@ -318,8 +298,14 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
     };
 
     useEffect(() => {
-        fetchAllFiles();
-    });
+        if (selectedFolder) {
+            fetchFoldersAndFiles(selectedFolder);
+        }
+        else {
+            fetchAllFiles();
+        }
+        // eslint-disable-next-line
+    }, [currentUser, currentUserId, selectedFolder]);
 
 
 
@@ -336,7 +322,6 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
     
         try {
             if (!currentUser) {
-                // console.error('User not logged in or user data is incomplete.');
             }
     
             else {
@@ -369,12 +354,8 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     const updatedFiles = await fetchFiles(selectedFolder);
     
                     setFiles(updatedFiles);
-                      
-                    
                     // eslint-disable-next-line
                     updateFileOptions(prevFiles => [...prevFiles, { name: fileName, value: fileName }]);
-    
-                    
                   }
                         
                   catch (err) {
@@ -399,7 +380,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
 
   return (
     <div className='flex-1 h-screen lg:h-full flex-grow flex flex-col md:flex-row gap-2 md:gap-0 w-full items-start'>
-        <aside className="h-auto md:h-screen sticky flex-grow flex flex-col left-0 items-center justify-center md:justify-start md:items-start w-full md:w-[25%] xl:w-[20%] md:border-r md:border-r-neutral-200 shadow-md py-3 px-2 gap-2">
+        <aside className="h-auto md:h-screen sticky flex-grow flex flex-col left-0 items-center justify-center md:justify-start md:items-start w-full md:max-w-[25%] xl:max-w-[20%] md:border-r md:border-r-neutral-200 shadow-md py-3 px-2 gap-2">
             <button className="flex items-center w-[95%] mx-auto text-sm 2xl:text-base hover:bg-neutral-300 dark:hover:bg-white cursor-pointer group py-2 px-1.5 rounded-lg hover:text-gray-700 gap-2" onClick={openAddFolderModal}>
                 <MdAdd size='20' className="p-0.5 border border-neutral-400 rounded-md group-hover:border-white group-hover:shadow-md" />
                 New Folder
@@ -428,7 +409,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             </div>
         </aside>
 
-        <div className="w-full md:w-[75%] lg:w-[80%] flex-1 max-h-[77%] md:max-h-[100%] flex flex-col items-start gap-1">
+        <div className="w-full md:w-[75%] lg:w-[80%] flex-1 min-h-[77%] md:max-h-[100%] flex flex-col items-start gap-1">
             <div className="w-full sticky flex border-b border-b-neutral-200 px-2 py-2 items-start justify-center">
                 <Box className='w-full md:w-[60%] lg:w-[45%] xl:w-[70%]'>
                     <InputGroup className='w-[90%] lg:w-[80%] mx-auto'>
