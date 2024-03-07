@@ -10,6 +10,8 @@ import ForgotPassword from "./pages/ForgotPassword";
 import { ChakraProvider } from '@chakra-ui/react'
 import HomeLayout from "./layouts/HomeLayout";
 import { ThemeProvider } from './ThemeContext';
+import NotesLayouts from "./layouts/NotesLayouts";
+import TasksLayout from "./layouts/TasksLayout";
 // import { AuthProvider } from 'react-auth-kit'
 
 function App() {
@@ -25,6 +27,8 @@ function App() {
         <Route path="welcome" element={<Welcome />} />
         <Route path="home" element={<Home />} >
           <Route path="" element={<HomeLayout />} />
+          <Route path="notes" element={<NotesLayouts />} />
+          <Route path="tasks" element={<TasksLayout />} />
         </Route>
     </Route>
     )

@@ -25,7 +25,8 @@ const Sidebar = ({ openModal }) => {
 
     const [activeMenu, setActiveMenu] = useState(() => {
         // Retrieve the active menu index from localStorage, defaulting to 0 if not present.
-        return parseInt(localStorage.getItem('activeMenuIndex')) || 0;
+        const storedActiveMenuIndex = parseInt(localStorage.getItem('activeMenuIndex'));
+        return storedActiveMenuIndex !== null ? storedActiveMenuIndex : 0;
     });
 
     useEffect(() => {
@@ -67,11 +68,11 @@ const Sidebar = ({ openModal }) => {
 
         //   DYNAMICALLY CREATING SIDEBAR MENUITEMS
     const menus = [
-        { name: 'Dashboard', icon: LuLayoutDashboard, color: '', active: true },
-        { name: 'Completed', icon: GoChecklist, color: '', active: false },
-        { name: 'Tasks', icon: GoTasklist, color: '', active: false },
-        { name: 'Note', icon: VscNotebook, color: '', active: false},
-        { name: 'Calendar', icon: IoCalendarOutline, color: '', active: false, alert: false},
+        { name: 'Dashboard', icon: LuLayoutDashboard, color: '', path: (`/home`) },
+        { name: 'Completed', icon: GoChecklist, color: '', path: (``) },
+        { name: 'Tasks', icon: GoTasklist, color: '', path: (`tasks`) },
+        { name: 'Note', icon: VscNotebook, color: '', path: (`notes`) },
+        { name: 'Calendar', icon: IoCalendarOutline, color: '', path: (``) },
     ]
 
     // const adds = [
@@ -92,14 +93,13 @@ const Sidebar = ({ openModal }) => {
                 <ul className='flex flex-col items-center justify-center gap-9'>
                     {/* <p>Menu</p> */}
                     {menus.map((menu, index) => (
-                        <li key={index} onClick={() => setActiveMenu(index)} className={`flex gap-1 items-center cursor-pointer px-1 py-1 relative group rounded-lg ${ activeMenu === index  ? 'bg-neutral-300 text-gray-900 hover:bg-neutral-500 hover:text-white' : 'hover:bg-neutral-500 hover:text-white '}`}>
-                            {React.createElement(menu.icon, {color: menu.color, size: 25})}
-                            <div className='absolute rounded-md px-2 py-1 ml-10 bg-neutral-500 font-medium z-50 invisible opacity-10 translate-x-1 transition-all group-hover:visible group-hover:opacity-100 group:hover:z-50 group-hover:translate-x-0'>{menu.name}</div>
-
-                            {/* <div className=''>
-                                {menu.name}
-                            </div> */}
-                        </li>
+                        <NavLink to={menu.path} key={index} onClick={() => setActiveMenu(index)} >
+                            <li className={`flex gap-1 items-center cursor-pointer px-1 py-1 relative group rounded-lg ${ activeMenu === index  ? 'bg-neutral-300 text-gray-900 hover:bg-neutral-500 hover:text-white' : 'hover:bg-neutral-500 hover:text-white '}`}>
+                                {React.createElement(menu.icon, {color: menu.color, size: 25})}
+                                <div className='absolute rounded-md px-2 py-1 ml-10 bg-neutral-500 font-medium z-50 invisible opacity-10 translate-x-1 transition-all group-hover:visible group-hover:opacity-100 group:hover:z-50 group-hover:translate-x-0'>{menu.name}</div>
+                            </li>
+                        </NavLink>
+                        
                     ))}
                 </ul>
 
