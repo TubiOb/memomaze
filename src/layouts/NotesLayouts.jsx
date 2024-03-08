@@ -1,12 +1,441 @@
-import React from 'react'
+import React, { useRef, useState, useEffect } from 'react'
+import CustomModal from "../components/CustomModal";
+import { CiSearch, CiMenuKebab } from "react-icons/ci";
+import { GoArchive } from "react-icons/go";
+import { Box, InputGroup, InputLeftElement, Input } from '@chakra-ui/react'
+import { MdAdd, MdDeleteOutline } from "react-icons/md";
+import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
+import { firestore, auth } from '../Firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
-const NotesLayouts = () => {
+const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
+    const [isAddFolderModalOpen, setIsAddFolderModalOpen] = useState(false);
+    const [isAddFileModalOpen, setIsAddFileModalOpen] = useState(false);
+    const initialRef = useRef();
+    const [searchQuery, setSearchQuery] = useState('');
+    const [folderOptions, setFolderOptions] = useState([]);
+    const [selectedFolder, setSelectedFolder] = useState('');
+    const [files, setFiles] = useState([]);
+    const [currentUser, setCurrentUser] = useState('');
+    const [currentUserId, setCurrentUserId] = useState('');
     
-  return (
-    <div>
 
+        //   OPENING ADD FOLDER MODAL
+    const openAddFolderModal = () => {
+        setIsAddFolderModalOpen(true);
+    };
+    
+        //   CLOSING ADD FOLDER MODAL
+    const closeAddFolderModal = () => {
+        setIsAddFolderModalOpen(false);
+    };
+
+          //   OPENING ADD FILE MODAL
+    const openAddFileModal = () => {
+        setIsAddFileModalOpen(true);
+    };
+    
+        //   CLOSING ADD FILE MODAL
+    const closeAddFileModal = () => {
+        setIsAddFileModalOpen(false);
+    };
+
+
+        //   HANDLING/FETCHING SELECTED FOLDER
+    const handleFieldChange = (fieldName, selectedValue) => {
+        // console.log(selectedValue);
+        setSelectedFolder(selectedValue);
+    };
+
+
+    useEffect(() => {
+        if (selectedFolder) {
+            fetchFiles(selectedFolder).then((updatedFiles) => {
+                setFiles(updatedFiles);
+            });
+        }
+        // console.log(selectedFolder);
+      }, [selectedFolder]);
+
+
+
+        //   ADD FOLDER MODAL CALL
+    const addFolderModalConfig = {
+        title: 'Add Folder',
+        formFields: [
+          { label: 'Folder Name', placeholder: 'Enter folder name', type: 'input', fieldName: 'folderName' },
+        ],
+    };
+
+
+
+          //   ADD FILE MODAL CALL
+    const addFileModalConfig = {
+        title: 'Add File',
+        formFields: [
+          { label: 'File Name', placeholder: 'Enter file name', type: 'input', id: 'file name', fieldName: 'fileName' },
+          { label: 'Save To', placeholder: 'Select where to save', type: 'select', id: 'activity', fieldName: 'category', options: [
+              {name: 'Tasks', value: 'Tasks'},
+              {name: 'Notes', value: 'Notes'}
+            ]
+          },
+          { label: 'Folder', placeholder: 'Select folder', type: 'select', id: 'folder', fieldName: 'selectedFolder', options: folderOptions },
+          { label: 'Contents', placeholder: 'Write your thoughts here...', type: 'textarea', id: 'contents', fieldName: 'contents' },
+        ],
+    };
+
+
+
+
+
+
+        //   GETTING CURRENT USER
+    useEffect(() => {
+        const loggedInUser = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                const userUID = user.uid;
+                setCurrentUserId(userUID);
+                const userDocRef = doc(firestore, 'User', userUID);
+                try {
+                    const userData = await getDoc(userDocRef);
+
+                    if (userData.exists()) {
+                        const userInfo = userData.data();
+
+                        if (userInfo) {
+                            const loggedUser = userInfo.username;
+                            setCurrentUser(loggedUser)
+                        }
+                    }
+                }
+                catch (err) {
+
+                }
+                
+            }
+            else {
+                setCurrentUser('')
+                setCurrentUserId('')
+            }
+        });
+        return () => loggedInUser();
+    }, [currentUserId]);
+
+
+
+
+
+
+        //   SAVING FOLDERS TO DATABASE
+    const handleSaveFolder = async (formData) => {
+          const { folderName } = formData;
+  
+          try {
+              if (!currentUser) {
+              }
+  
+              else {
+                  const folderCollectionRef = collection(firestore, 'Folder');
+                  const queryRef = query(folderCollectionRef, where('folderName', '==', folderName));
+                  const checkFolder = await getDocs(queryRef)
+  
+                  if (checkFolder.size > 0) {
+                      console.error('Folder with the same name already exists.');
+                  }
+                  else {
+                          // eslint-disable-next-line
+                      const newFolderRef = await addDoc(folderCollectionRef, {
+                          folderName,
+                          createdAt: serverTimestamp(),
+                          ownerId: currentUserId,
+                      });
+                          //   UPDATE THE FOLDER OPTIONS AND FILES IMMEDIATELY AFTER SAVING
+                      setFolderOptions(prevFolders => [...prevFolders, { name: folderName, value: folderName }]);
+                      updateFolderOptions = prevFolders => [...prevFolders, { name: folderName, value: folderName }];
+  
+                          //   FETCH AND UPDATE FILES FOR THE NEWLY ADDED FOLDER
+                      const newFiles = await fetchFiles(folderName);
+                      updateFileOptions(newFiles);
+  
+                      closeAddFolderModal();
+                  }
+              }
+              
+          } catch (err) {
+              console.error("Error adding document: ", err);
+          }
+    };
+  
+  
+  
+  
+  
+        //   FETCHING FOLDERS FROM DATABASE
+    useEffect(() => {
+        const fetchFolders = async () => {
+            const folderCollection = collection(firestore, 'Folder');
+        
+            try {
+        
+                if (!currentUser) {
+                }
+                else {
+                    const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
+                    const folders = retrievedFolders.docs.map((folderDoc) => (
+                        { name: folderDoc.data().folderName, value: folderDoc.data().folderName }
+                    ));
+                    setFolderOptions(folders);
+                }
+            } catch (error) {
+                  console.error("Error fetching folders: ", error);
+            }
+        };
+
+        fetchFolders();
+    }, [currentUser, currentUserId]);
+  
+  
+  
+  
+  
+  
+    const fetchFiles = async (folderName, category) => {
+      const filesCollection = collection(firestore, 'Folder', folderName, 'Files');
+      const orderQuery = query(filesCollection, where('category', '==', category), orderBy('createdAt', 'desc'));
+      const retrievedFiles = await getDocs(orderQuery);
+  
+      const files = retrievedFiles.docs.map((fileDoc) => ({
+          id: fileDoc.id,
+          name: fileDoc.data().fileName,
+          contents: fileDoc.data().contents,
+      }));
+  
+      return files;
+    };
+      
+        
+      
+
+        //   FETCHING FOLDER FILES FROM DATABASE
+    const fetchFoldersAndFiles = async (selectedFolder = null) => {
+        const folderCollection = collection(firestore, 'Folder');
+    
+        try {
+            if (!currentUser) {
+            } else {
+                const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
+    
+                const foldersData = await Promise.all(
+                    retrievedFolders.docs.map(async (folderDoc) => {
+                        const folderData = folderDoc.data();
+                        const folderName = folderData.folderName;
+    
+                        // Retrieve files from the "Files" collection under the current folder
+                        if (selectedFolder && folderName === selectedFolder) {
+                            const files = await fetchFiles(folderName, 'Notes');
+                            // setFolderFiles(files);
+                            setFiles(files);
+                        }
+    
+                        return {
+                            folder: { name: folderName, value: folderName },
+                            // files: files,
+                        };
+                    })
+                );
+    
+                setFolderOptions(foldersData.map((data) => data.folder));
+            }
+        } catch (error) {
+            console.error("Error fetching folders: ", error);
+        }
+    };
+  
+      
+      
+  
+        //   FETCHING ALL FILES FROM DATABASE
+    const fetchAllFiles = async () => {
+        const folderCollection = collection(firestore, 'Folder');
+    
+        try {
+            if (!currentUser) {
+            } 
+            else {
+                const allFiles = [];
+                const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
+    
+                for (const folderDoc of retrievedFolders.docs) {
+                    const folderData = folderDoc.data();
+                    const folderName = folderData.folderName;
+    
+                    // Retrieve files from the "Files" collection under the current folder
+                    const files = await fetchFiles(folderName, 'Notes');
+    
+                    // Add the files to the allFiles array
+                    allFiles.push(...files);
+                }
+                        // Set the state with all files from all folders
+                setFiles(allFiles);
+            }
+        } catch (error) {
+            console.error("Error fetching all files: ", error);
+        }
+    };
+  
+
+
+
+
+    useEffect(() => {
+        if (selectedFolder) {
+            fetchFoldersAndFiles(selectedFolder);
+        }
+        else {
+            fetchAllFiles();
+        }
+        // eslint-disable-next-line
+    }, [currentUser, currentUserId, selectedFolder]);
+  
+  
+  
+
+  
+        //   SAVING FILES TO DATABASE
+    const handleSaveFile = async (formData) => {
+        const { fileName, category, selectedFolder, contents } = formData;
+    
+        try {
+            if (!currentUser) {
+            }
+    
+            else {
+                  // Check if all required fields are filled
+                if (!fileName || !category || !selectedFolder || !contents) {
+                  console.error('Please fill in all required fields.');
+                  return;
+                }
+    
+                const fileDetails = {
+                  fileName,
+                  category,
+                  contents,
+                  createdAt: serverTimestamp(),
+                  ownerId: currentUserId,
+                };
+    
+                const fileCollectionRef = collection(firestore, 'Folder', selectedFolder, 'Files');
+                const queryRef = query(fileCollectionRef, where('fileName', '==', fileName));
+                const checkFile = await getDocs(queryRef)
+    
+                if (checkFile.size > 0) {
+                    console.error('Folder with the same name already exists.');
+                }
+                else {
+                  try {
+                        // eslint-disable-next-line
+                    const newFileRef = await addDoc(collection(firestore, 'Folder', selectedFolder, 'Files'), fileDetails);
+    
+                    const updatedFiles = await fetchFiles(selectedFolder, 'Notes');
+    
+                    setFiles(updatedFiles);
+                    // eslint-disable-next-line
+                    updateFileOptions(prevFiles => [...prevFiles, { name: fileName, value: fileName }]);
+                  }
+                        
+                  catch (err) {
+    
+                  }
+
+                  closeAddFileModal();
+                }
+            }
+            
+        } catch (err) {
+            console.error("Error adding document: ", err);
+        }
+    };
+
+
+    
+
+
+
+  return (
+    <div className='flex-1 h-screen lg:h-full flex-grow flex flex-col md:flex-row gap-2 md:gap-0 w-full items-start'>
+      <aside className="h-auto md:h-screen sticky flex-grow flex flex-col left-0 items-center justify-center md:justify-start md:items-start w-full md:max-w-[25%] xl:max-w-[20%] md:border-r md:border-r-neutral-200 shadow-md py-3 px-2 gap-2">
+            <button className="flex items-center w-[95%] mx-auto text-sm 2xl:text-base hover:bg-neutral-300 dark:hover:bg-white cursor-pointer group py-2 px-1.5 rounded-lg hover:text-gray-700 gap-2" onClick={openAddFolderModal}>
+                <MdAdd size='20' className="p-0.5 border border-neutral-400 rounded-md group-hover:border-white group-hover:shadow-md" />
+                New Folder
+            </button>
+
+            <ul className="hidden md:grid grid-cols-1 items-center w-[95%] mx-auto text-sm 2xl:text-base font-medium overflow-y-auto max-h-[60%] group py-2 px-1.5 rounded-lg gap-2">
+                Folders
+                {folderOptions.map((folder, folderIndex) => (
+                    <li key={folderIndex} onClick={() => handleFieldChange('folderName', folder.value)} className="flex items-center w-[95%] mx-auto text-sm 2xl:text-md bg-neutral-300 dark:bg-white text-gray-700 font-semibold cursor-pointer group py-2 px-1.5 rounded-lg gap-2 hover:shadow-md hover:shadow-black/20 dark:hover:shadow-white/40">{folder.name}</li>
+                ))}
+                
+            </ul>
+
+            <div className="flex md:hidden items-center w-[95%] mx-auto text-sm 2xl:text-base font-medium cursor-none group py-2 px-1.5 rounded-lg gap-2">
+                <label className="text-sm 2xl:text-base font-medium text-gray-500 mb-1 w-full">Folders
+                    <select id="foldersSelect" value='' onChange={(e) => handleFieldChange('folderName', e.target.value)} required className="peer border-none block bg-neutral-500 w-full text-white focus:bg-neutral-500 py-2 md:py-1.5 lg:py-1 xl:py-2 px-2 xl:px-3.5 text-sm md:text-sm lg:text-base font-normal focus:border-transparent focus:outline-none rounded-lg focus:ring-0">
+                        <option value="" disabled>Select a folder</option>
+                        {folderOptions.map((folder, folderIndex) => (
+                            <option key={folderIndex} value={folder.name}>
+                                {folder.name}
+                            </option>
+                        ))}
+                    </select>
+                </label>
+            </div>
+      </aside>
+
+      <div className="w-full md:w-[75%] lg:w-[80%] flex-1 min-h-[77%] md:max-h-[100%] flex flex-col items-start gap-1">
+        <div className="w-full sticky flex border-b border-b-neutral-200 px-2 py-2 items-start justify-center">
+            <Box className='w-full md:w-[60%] lg:w-[45%] xl:w-[70%]'>
+                <InputGroup className='w-[90%] lg:w-[80%] mx-auto'>
+                    <InputLeftElement py='0.5'>
+                    <CiSearch />
+                    </InputLeftElement>
+                    <Input type='text' placeholder='Search Memomaze' className='text-xs md:text-sm 2xl:text-base focus-within:border-neutral-200' focusBorderColor='#d3d3d3' _placeholder={{ fontSize: 'sm', fontWeight: 'thin' }} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+                </InputGroup>
+            </Box>
+        </div>
+            
+
+        <Box w='full' maxW='100%' display='flex' alignContent='center' justifyContent='center' overflowY='auto' overflowX='hidden'  className='h-full flex-grow' >
+            <Box className="trick columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start py-2 px-3 max-w-full pb-10 min-h-[90%] flex-grow space-y-3" overflowY='auto' overflowX='hidden'>
+                {files.length !== 0 && files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase())).map((file) => (
+                    <React.Fragment key={file.id}>
+                        <div className='group items-start max-w-[145px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden'>
+                            <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full max-h-[300px] gap-2 overflow-hidden'>
+                                <h5 className='font-semibold text-[16px]'>{file.name}</h5>
+                                <div className='w-full items-center'>
+                                    <p className='font-normal text-neutral-600 dark:text-neutral-200 text-[13px] lg:text-[15px] break-word'>{file.contents}</p>    
+                                </div>
+                                
+                            </div>
+                            <div className='flex w-full h-auto py-1 px-2 items-center justify-between opacity-0 group-hover:opacity-100 z-50 transition-opacity'>
+                                <GoArchive size='18' className='hover:cursor-pointer hover:font-semibold' />
+                                <MdDeleteOutline size='20' className='hover:cursor-pointer hover:font-semibold' />
+                                <CiMenuKebab size='18' className='hover:cursor-pointer hover:font-semibold' />
+                            </div>
+                        </div>
+                    </React.Fragment>
+                ))}
+                <button className='flex fixed right-[5%] bottom-[4%] items-center justify-between cursor-pointer px-2 py-2 group rounded-xl shadow-sm bg-neutral-600 dark:bg-white dark:hover:bg-neutral-600 border-neutral-600 gap-1 border border-gray-300/40 hover:bg-white dark:shadow-neutral-200/50 dark:hover:shadow-white/30 text-white dark:hover:text-white dark:text-gray-700 hover:text-gray-700'>
+                    <MdAdd size={24} onClick={openAddFileModal} /> 
+                </button>
+            </Box>
+        </Box>
+      </div>
+
+      <CustomModal isOpen={isAddFolderModalOpen} onClose={closeAddFolderModal} initialRef={initialRef} modalConfig={addFolderModalConfig} onSubmit={handleSaveFolder} />
+
+      <CustomModal isOpen={isAddFileModalOpen} onClose={closeAddFileModal} initialRef={initialRef} modalConfig={addFileModalConfig} onSubmit={handleSaveFile} />
     </div>
   )
 }
 
-export default NotesLayouts
+export default NotesLayout
