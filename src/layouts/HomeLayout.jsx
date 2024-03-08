@@ -23,7 +23,6 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
     const [isAddFolderModalOpen, setIsAddFolderModalOpen] = useState(false);
     const [isAddFileModalOpen, setIsAddFileModalOpen] = useState(false);
 
-
          //   OPENING ADD FOLDER MODAL
     const openAddFolderModal = () => {
         setIsAddFolderModalOpen(true);
@@ -59,9 +58,10 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             });
         }
         // console.log(selectedFolder);
-      }, [selectedFolder]);
+    }, [selectedFolder]);
 
 
+    
 
         //   ADD FOLDER MODAL CALL
     const addFolderModalConfig = {
@@ -311,11 +311,6 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
 
 
 
-
-
-
-
-
         //   SAVING FILES TO DATABASE
     const handleSaveFile = async (formData) => {
         const { fileName, category, selectedFolder, contents } = formData;
@@ -369,12 +364,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
         } catch (err) {
             console.error("Error adding document: ", err);
         }
-      };
-
-
-
-    
-
+    };
 
 
 
