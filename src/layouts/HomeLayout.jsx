@@ -70,6 +70,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
 
     const openEditFileModal = (fileDetails) => {
         setEditFileData({
+            id: fileDetails.id,
             fileName: fileDetails.name,
             category: fileDetails.category,
             selectedFolder: fileDetails.folderName,
@@ -77,6 +78,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
         });
 
         setInitialEditData({
+            id: fileDetails.id,
             fileName: fileDetails.name,
             category: fileDetails.category,
             selectedFolder: fileDetails.folderName,
@@ -131,12 +133,12 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
         title: 'Edit File',
         formFields: [
             { label: 'File Name', placeholder: 'Enter file name', type: 'input', id: 'file name', fieldName: 'fileName' },
-            // { label: 'Save To', placeholder: 'Select where to save', type: 'input', id: 'activity', fieldName: 'category', options: [
-            //     {name: 'Tasks', value: 'Tasks'},
-            //     {name: 'Notes', value: 'Notes'}
-            //   ]
-            // },
-            // { label: 'Folder', placeholder: 'Select folder', type: 'input', id: 'folder', fieldName: 'selectedFolder', options: folderOptions },
+            { label: 'Save To', placeholder: 'Select where to save', type: 'input', id: 'activity', fieldName: 'category', options: [
+                {name: 'Tasks', value: 'Tasks'},
+                {name: 'Notes', value: 'Notes'}
+              ]
+            },
+            { label: 'Folder', placeholder: 'Select folder', type: 'input', id: 'folder', fieldName: 'selectedFolder', options: folderOptions },
             { label: 'Contents', placeholder: 'Write your thoughts here...', type: 'textarea', id: 'contents', fieldName: 'contents' },
         ],
     };
@@ -450,37 +452,41 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
         } catch (error) {
           console.error('Error fetching file details:', error);
         }
-      };
-
-
-
-    
+    };
 
 
 
 
 
 
-        const handleSaveEditedFile = async (formData) => {
-            const { contents } = formData;
-            const fileName = editFileData.fileName;
-            const category = editFileData.category;
-            try {
-                if (!currentUser) {
-                    console.error('User not logged in.');
-                } else {
-                    const fileDetails = {
-                        fileName,
-                        category,
-                        contents: contents || '',
-                        updatedAt: serverTimestamp(),
-                        ownerId: currentUserId,
-                    };
 
-                    const fileCollectionRef = collection(firestore, 'Folder', editFileData.selectedFolder, 'Files');
-                    const fileDocRef = doc(fileCollectionRef, editFileData.id);
+
+    const handleSaveEditedFile = async (formData) => {
+        const { contents } = formData;
+        console.log(contents);
+        const fileName = editFileData.fileName;
+        console.log(fileName);
+        const category = editFileData.category;
+        console.log(category);
+        try {
+            if (!currentUser) {
+                console.error('User not logged in.');
+            } else {
+                const fileDetails = {
+                    fileName,
+                    category,
+                    contents: contents || '',
+                    updatedAt: serverTimestamp(),
+                    ownerId: currentUserId,
+                };
+
+                const fileCollectionRef = collection(firestore, 'Folder', editFileData.selectedFolder, 'Files');
+                console.log(fileCollectionRef);
+                const fileDocRef = editFileData.id ? doc(fileCollectionRef, editFileData.id) : null;
+                console.log(editFileData.id);
+                if (fileDocRef) {
                     const fileDoc = await getDoc(fileDocRef);
-
+                    
                     if (fileDoc.exists()) {
                         // Document exists, proceed with the update
                         await updateDoc(fileDocRef, fileDetails);
@@ -496,11 +502,16 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                         // Document does not exist, handle accordingly (create new document or show an error)
                         console.error('Document does not exist. Handle accordingly.');
                     }
+                } else {
+                console.error('Invalid file ID');
                 }
-            } catch (err) {
-                console.error('Error saving edited file:', err);
+
+                
             }
-        };
+        } catch (err) {
+            console.error('Error saving edited file:', err);
+        }
+    };
 
 
     
