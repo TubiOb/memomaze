@@ -1,11 +1,15 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Modal, ModalOverlay, ModalContent, ModalHeader, ModalCloseButton, ModalBody, ModalFooter, Button, /* FormControl, FormLabel, Input, Textarea */ } from '@chakra-ui/react';
 
-const CustomModal = ({ isOpen, onClose, initialRef, modalConfig, updateFolderOptions, updateFileOptions, onSubmit }) => {
+const CustomModal = ({ isOpen, onClose, initialRef, modalConfig, updateFolderOptions, updateFileOptions, onSubmit, fileDetails, initialEditData }) => {
 
     const { title, formFields } = modalConfig;
 
-    const [formData, setFormData] = useState({});
+    const [formData, setFormData] = useState(initialEditData || {});
+
+    useEffect(() => {
+        setFormData(initialEditData || {});
+    }, [initialEditData])
 
     const handleFieldChange = (fieldName, value) => {
         setFormData((prevData) => ({
@@ -33,7 +37,7 @@ const CustomModal = ({ isOpen, onClose, initialRef, modalConfig, updateFolderOpt
                                         {field.type === 'input' ? (
                                             <React.Fragment>
                                                 <label className="text-xs font-medium text-gray-500 mb-1">{field.label}
-                                                    <input type={field.type} id={field.id} ref={index === 0 ? initialRef : null} onChange={(e) => handleFieldChange(field.fieldName, e.target.value)} required className=" border-none bg-blue-50 w-full focus:bg-blue-100 py-2 md:py-1.5 lg:py-1 xl:py-2 px-2 xl:px-3.5 text-sm md:text-sm lg:text-base font-normal focus:border-transparent focus:outline-none rounded-lg focus:ring-0" placeholder={field.placeholder} />
+                                                    <input type={field.type} id={field.id} ref={index === 0 ? initialRef : null} value={formData[field.fieldName] || ''} onChange={(e) => handleFieldChange(field.fieldName, e.target.value)} required className=" border-none bg-blue-50 w-full focus:bg-blue-100 py-2 md:py-1.5 lg:py-1 xl:py-2 px-2 xl:px-3.5 text-sm md:text-sm lg:text-base font-normal focus:border-transparent focus:outline-none rounded-lg focus:ring-0" placeholder={field.placeholder} />
                                                 </label>
                                             </React.Fragment>
 
@@ -56,7 +60,7 @@ const CustomModal = ({ isOpen, onClose, initialRef, modalConfig, updateFolderOpt
                                         ) : field.type === 'textarea' ? (
                                             <React.Fragment>
                                                 <label className="text-xs font-medium text-gray-500 mb-1">{field.label}
-                                                    <textarea type={field.type} id={field.id} ref={index === 0 ? initialRef : null} onChange={(e) => handleFieldChange(field.fieldName, e.target.value)} rows="10" required className="border-none bg-blue-50 w-full focus:bg-blue-100  py-2 md:py-1.5 lg:py-1 xl:py-2 px-2 xl:px-3.5 text-sm md:text-sm lg:text-base font-normal focus:border-transparent focus:outline-none rounded-lg focus:ring-0 resize-none" placeholder={field.placeholder} />
+                                                    <textarea type={field.type} id={field.id} ref={index === 0 ? initialRef : null} value={formData[field.fieldName] || ''} onChange={(e) => handleFieldChange(field.fieldName, e.target.value)} rows="10" required className="border-none bg-blue-50 w-full focus:bg-blue-100  py-2 md:py-1.5 lg:py-1 xl:py-2 px-2 xl:px-3.5 text-sm md:text-sm lg:text-base font-normal focus:border-transparent focus:outline-none rounded-lg focus:ring-0 resize-none" placeholder={field.placeholder} />
                                                 </label>
                                             </React.Fragment>
                                             

@@ -5,7 +5,7 @@ import { Box, InputGroup, InputLeftElement, Input } from '@chakra-ui/react'
 import { MdAdd, MdDeleteOutline } from "react-icons/md";
 // import { PiSmileyDuotone } from "react-icons/pi";
 import CustomModal from "../components/CustomModal";
-import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from 'firebase/firestore';
 import { firestore, auth } from '../Firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
@@ -22,6 +22,10 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
 
     const [isAddFolderModalOpen, setIsAddFolderModalOpen] = useState(false);
     const [isAddFileModalOpen, setIsAddFileModalOpen] = useState(false);
+
+    const [isEditFileModalOpen, setIsEditFileModalOpen] = useState(false);
+    const [editFileData, setEditFileData] = useState(null);
+    const [initialEditData, setInitialEditData] = useState(null);
 
          //   OPENING ADD FOLDER MODAL
     const openAddFolderModal = () => {
@@ -61,6 +65,36 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
     }, [selectedFolder]);
 
 
+
+
+
+    const openEditFileModal = (fileDetails) => {
+        setEditFileData({
+            fileName: fileDetails.name,
+            category: fileDetails.category,
+            selectedFolder: fileDetails.folderName,
+            contents: fileDetails.contents,
+        });
+
+        setInitialEditData({
+            fileName: fileDetails.name,
+            category: fileDetails.category,
+            selectedFolder: fileDetails.folderName,
+            contents: fileDetails.contents,
+        });
+        
+        setIsEditFileModalOpen(true);
+    };
+
+
+
+    useEffect(() => {
+        console.log('Initial Edit Data:', initialEditData);
+        // console.log('Edit Data:', editFileData);
+    }, [initialEditData])
+    
+
+
     
 
         //   ADD FOLDER MODAL CALL
@@ -87,6 +121,27 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
           { label: 'Contents', placeholder: 'Write your thoughts here...', type: 'textarea', id: 'contents', fieldName: 'contents' },
         ],
     };
+
+
+
+
+
+        // Edit File Modal Configuration
+    const editFileModalConfig = {
+        title: 'Edit File',
+        formFields: [
+            { label: 'File Name', placeholder: 'Enter file name', type: 'input', id: 'file name', fieldName: 'fileName' },
+            // { label: 'Save To', placeholder: 'Select where to save', type: 'input', id: 'activity', fieldName: 'category', options: [
+            //     {name: 'Tasks', value: 'Tasks'},
+            //     {name: 'Notes', value: 'Notes'}
+            //   ]
+            // },
+            // { label: 'Folder', placeholder: 'Select folder', type: 'input', id: 'folder', fieldName: 'selectedFolder', options: folderOptions },
+            { label: 'Contents', placeholder: 'Write your thoughts here...', type: 'textarea', id: 'contents', fieldName: 'contents' },
+        ],
+    };
+
+  
 
 
 
@@ -207,24 +262,34 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
 
 
 
-      const fetchFiles = async (folderName) => {
+      const fetchFiles = async (folderName, fileId) => {
         const filesCollection = collection(firestore, 'Folder', folderName, 'Files');
-        const orderQuery = query(filesCollection, orderBy('createdAt', 'desc'));
-        const retrievedFiles = await getDocs(orderQuery);
-    
-        const files = retrievedFiles.docs.map((fileDoc) => ({
-            id: fileDoc.id,
-            name: fileDoc.data().fileName,
-            contents: fileDoc.data().contents,
-        }));
-    
-        return files;
+        // const fileDocRef = fileId ? doc(filesCollection, fileId) : filesCollection;
+        try {
+            const orderQuery = query(filesCollection, orderBy('createdAt', 'desc'));
+            const retrievedFiles = await getDocs(orderQuery, where('id', '==', fileId));
+        
+            const files = retrievedFiles.docs.map((fileDoc) => ({
+                id: fileDoc.id,
+                name: fileDoc.data().fileName,
+                contents: fileDoc.data().contents,
+                category: fileDoc.data().category,
+                folderName: folderName,
+            }));
+        
+            return files;
+        }
+        catch (err) {
+            console.error('Error fetching files:', err);
+            throw err;
+        }
+        
       };
     
       
     
             //   FETCHING FOLDER FILES FROM DATABASE
-    const fetchFoldersAndFiles = async (selectedFolder = null) => {
+    const fetchFoldersAndFiles = async (selectedFolder = null, fileId = null) => {
         const folderCollection = collection(firestore, 'Folder');
     
         try {
@@ -236,10 +301,12 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     retrievedFolders.docs.map(async (folderDoc) => {
                         const folderData = folderDoc.data();
                         const folderName = folderData.folderName;
+
+                        let files = [];
     
                         // Retrieve files from the "Files" collection under the current folder
                         if (selectedFolder && folderName === selectedFolder) {
-                            const files = await fetchFiles(folderName);
+                            files = await fetchFiles(folderName, folderData.fileId);
                             // setFolderFiles(files);
                             console.log('Files:', files);
                             setFiles(files);
@@ -247,7 +314,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
     
                         return {
                             folder: { name: folderName, value: folderName },
-                            // files: files,
+                            files: files,
                         };
                     })
                 );
@@ -320,18 +387,18 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             }
     
             else {
-                  // Check if all required fields are filled
+                    // Check if all required fields are filled
                 if (!fileName || !category || !selectedFolder || !contents) {
-                  console.error('Please fill in all required fields.');
-                  return;
+                    console.error('Please fill in all required fields.');
+                    return;
                 }
     
                 const fileDetails = {
-                  fileName,
-                  category,
-                  contents,
-                  createdAt: serverTimestamp(),
-                  ownerId: currentUserId,
+                    fileName,
+                    category,
+                    contents,
+                    createdAt: serverTimestamp(),
+                    ownerId: currentUserId,
                 };
     
                 const fileCollectionRef = collection(firestore, 'Folder', selectedFolder, 'Files');
@@ -342,7 +409,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     console.error('Folder with the same name already exists.');
                 }
                 else {
-                  try {
+                    try {
                         // eslint-disable-next-line
                     const newFileRef = await addDoc(collection(firestore, 'Folder', selectedFolder, 'Files'), fileDetails);
     
@@ -351,13 +418,13 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     setFiles(updatedFiles);
                     // eslint-disable-next-line
                     updateFileOptions(prevFiles => [...prevFiles, { name: fileName, value: fileName }]);
-                  }
+                    }
                         
-                  catch (err) {
+                    catch (err) {
     
-                  }
+                    }
 
-                  closeAddFileModal();
+                    closeAddFileModal();
                 }
             }
             
@@ -365,6 +432,83 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             console.error("Error adding document: ", err);
         }
     };
+
+
+
+
+
+
+    const handleFileClick = async (fileId) => {
+        try {
+          // Fetch the selected/clicked file details based on the file ID
+          const fileDetails = files.find((file) => file.id === fileId);
+      
+          // Now, you have the file details, and you can use them as needed
+          console.log('Selected File Details:', fileDetails);
+      
+          openEditFileModal(fileDetails);
+        } catch (error) {
+          console.error('Error fetching file details:', error);
+        }
+      };
+
+
+
+    
+
+
+
+
+
+
+        const handleSaveEditedFile = async (formData) => {
+            const { contents } = formData;
+            const fileName = editFileData.fileName;
+            const category = editFileData.category;
+            try {
+                if (!currentUser) {
+                    console.error('User not logged in.');
+                } else {
+                    const fileDetails = {
+                        fileName,
+                        category,
+                        contents: contents || '',
+                        updatedAt: serverTimestamp(),
+                        ownerId: currentUserId,
+                    };
+
+                    const fileCollectionRef = collection(firestore, 'Folder', editFileData.selectedFolder, 'Files');
+                    const fileDocRef = doc(fileCollectionRef, editFileData.id);
+                    const fileDoc = await getDoc(fileDocRef);
+
+                    if (fileDoc.exists()) {
+                        // Document exists, proceed with the update
+                        await updateDoc(fileDocRef, fileDetails);
+                        console.log('File updated successfully.');
+
+                        // Fetch and update the files for the edited file's folder
+                        const updatedFiles = await fetchFiles(editFileData.selectedFolder);
+                        setFiles(updatedFiles);
+
+                        // Close the edit file modal
+                        setIsEditFileModalOpen(false);
+                    } else {
+                        // Document does not exist, handle accordingly (create new document or show an error)
+                        console.error('Document does not exist. Handle accordingly.');
+                    }
+                }
+            } catch (err) {
+                console.error('Error saving edited file:', err);
+            }
+        };
+
+
+    
+
+
+
+
+
 
 
 
@@ -387,7 +531,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
 
             <div className="flex md:hidden items-center w-[95%] mx-auto text-sm 2xl:text-base font-medium cursor-none group py-2 px-1.5 rounded-lg gap-2">
                 <label className="text-sm 2xl:text-base font-medium text-gray-500 mb-1 w-full">Folders
-                    <select id="foldersSelect" value='' onChange={(e) => handleFieldChange('folderName', e.target.value)} required className="peer border-none block bg-neutral-500 w-full text-white focus:bg-neutral-500 py-2 md:py-1.5 lg:py-1 xl:py-2 px-2 xl:px-3.5 text-sm md:text-sm lg:text-base font-normal focus:border-transparent focus:outline-none rounded-lg focus:ring-0">
+                    <select id="foldersSelect" value={selectedFolder} onChange={(e) => handleFieldChange('folderName', e.target.value)} required className="peer border-none block bg-neutral-500 w-full text-white focus:bg-neutral-500 py-2 md:py-1.5 lg:py-1 xl:py-2 px-2 xl:px-3.5 text-sm md:text-sm lg:text-base font-normal focus:border-transparent focus:outline-none rounded-lg focus:ring-0">
                         <option value="" disabled>Select a folder</option>
                         {folderOptions.map((folder, folderIndex) => (
                             <option key={folderIndex} value={folder.name}>
@@ -416,7 +560,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                 <Box className="trick columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start flex-wrap py-2 px-3 max-w-full pb-10 min-h-[90%] flex-grow space-y-3" overflowY='auto' overflowX='hidden'>
                     {files.length !== 0 && files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase())).map((file) => (
                         <React.Fragment key={file.id}>
-                            <div className='group items-start max-w-[145px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden'>
+                            <div className='group items-start max-w-[145px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden' onClick={() => handleFileClick(file.id)}>
                                 <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full max-h-[300px] gap-2 overflow-hidden'>
                                     <h5 className='font-semibold text-[16px]'>{file.name}</h5>
                                     <div className='w-full items-center'>
@@ -442,6 +586,8 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
         <CustomModal isOpen={isAddFolderModalOpen} onClose={closeAddFolderModal} initialRef={initialRef} modalConfig={addFolderModalConfig} onSubmit={handleSaveFolder} />
 
         <CustomModal isOpen={isAddFileModalOpen} onClose={closeAddFileModal} initialRef={initialRef} modalConfig={addFileModalConfig} onSubmit={handleSaveFile} />
+
+        <CustomModal isOpen={isEditFileModalOpen} onClose={() => setIsEditFileModalOpen(false)} initialRef={initialRef} modalConfig={editFileModalConfig} onSubmit={handleSaveEditedFile} initialEditData={initialEditData} />
     </div>
   )
 }
