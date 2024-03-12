@@ -91,7 +91,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
 
 
     useEffect(() => {
-        console.log('Initial Edit Data:', initialEditData);
+        // console.log('Initial Edit Data:', initialEditData);
         // console.log('Edit Data:', editFileData);
     }, [initialEditData])
     
@@ -133,12 +133,12 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
         title: 'Edit File',
         formFields: [
             { label: 'File Name', placeholder: 'Enter file name', type: 'input', id: 'file name', fieldName: 'fileName' },
-            { label: 'Save To', placeholder: 'Select where to save', type: 'input', id: 'activity', fieldName: 'category', options: [
-                {name: 'Tasks', value: 'Tasks'},
-                {name: 'Notes', value: 'Notes'}
-              ]
-            },
-            { label: 'Folder', placeholder: 'Select folder', type: 'input', id: 'folder', fieldName: 'selectedFolder', options: folderOptions },
+            // { label: 'Save To', placeholder: 'Select where to save', type: 'input', id: 'activity', fieldName: 'category', options: [
+            //     {name: 'Tasks', value: 'Tasks'},
+            //     {name: 'Notes', value: 'Notes'}
+            //   ]
+            // },
+            // { label: 'Folder', placeholder: 'Select folder', type: 'input', id: 'folder', fieldName: 'selectedFolder', options: folderOptions },
             { label: 'Contents', placeholder: 'Write your thoughts here...', type: 'textarea', id: 'contents', fieldName: 'contents' },
         ],
     };
@@ -445,9 +445,6 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
           // Fetch the selected/clicked file details based on the file ID
           const fileDetails = files.find((file) => file.id === fileId);
       
-          // Now, you have the file details, and you can use them as needed
-          console.log('Selected File Details:', fileDetails);
-      
           openEditFileModal(fileDetails);
         } catch (error) {
           console.error('Error fetching file details:', error);
@@ -463,11 +460,8 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
 
     const handleSaveEditedFile = async (formData) => {
         const { contents } = formData;
-        console.log(contents);
         const fileName = editFileData.fileName;
-        console.log(fileName);
         const category = editFileData.category;
-        console.log(category);
         try {
             if (!currentUser) {
                 console.error('User not logged in.');
@@ -481,9 +475,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                 };
 
                 const fileCollectionRef = collection(firestore, 'Folder', editFileData.selectedFolder, 'Files');
-                console.log(fileCollectionRef);
                 const fileDocRef = editFileData.id ? doc(fileCollectionRef, editFileData.id) : null;
-                console.log(editFileData.id);
                 if (fileDocRef) {
                     const fileDoc = await getDoc(fileDocRef);
                     
