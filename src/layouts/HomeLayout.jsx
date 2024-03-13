@@ -93,7 +93,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
     useEffect(() => {
         // console.log('Initial Edit Data:', initialEditData);
         // console.log('Edit Data:', editFileData);
-    }, [initialEditData])
+    }, [initialEditData]);
     
 
 

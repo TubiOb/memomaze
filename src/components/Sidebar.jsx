@@ -7,6 +7,7 @@ import { VscNotebook } from "react-icons/vsc";
 import { Box, Avatar } from '@chakra-ui/react'
 import { RiSettingsLine } from "react-icons/ri";
 import { RiNotification3Line } from "react-icons/ri";
+import { BiArchive } from "react-icons/bi";
 import Logo from '../assets/Memomaze logo.png'
 import { NavLink } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
@@ -69,6 +70,7 @@ const Sidebar = ({ openModal }) => {
         //   DYNAMICALLY CREATING SIDEBAR MENUITEMS
     const menus = [
         { name: 'Dashboard', icon: LuLayoutDashboard, color: '', path: (`/home`) },
+        {name: 'Archived', icon: BiArchive, color: '', path: ('') },
         { name: 'Completed', icon: GoChecklist, color: '', path: (``) },
         { name: 'Tasks', icon: GoTasklist, color: '', path: (`tasks`) },
         { name: 'Note', icon: VscNotebook, color: '', path: (`notes`) },

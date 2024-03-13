@@ -4,7 +4,7 @@ import { CiSearch, CiMenuKebab } from "react-icons/ci";
 import { GoArchive } from "react-icons/go";
 import { Box, InputGroup, InputLeftElement, Input } from '@chakra-ui/react'
 import { MdAdd, MdDeleteOutline } from "react-icons/md";
-import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
+import { addDoc, updateDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
 import { firestore, auth } from '../Firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 
@@ -18,6 +18,10 @@ const TasksLayout = ({ updateFolderOptions, updateFileOptions }) => {
     const [files, setFiles] = useState([]);
     const [currentUser, setCurrentUser] = useState('');
     const [currentUserId, setCurrentUserId] = useState('');
+
+    const [isEditFileModalOpen, setIsEditFileModalOpen] = useState(false);
+    const [editFileData, setEditFileData] = useState(null);
+    const [initialEditData, setInitialEditData] = useState(null);
     
 
         //   OPENING ADD FOLDER MODAL
@@ -59,6 +63,38 @@ const TasksLayout = ({ updateFolderOptions, updateFileOptions }) => {
 
 
 
+
+      const openEditFileModal = (fileDetails) => {
+        setEditFileData({
+            id: fileDetails.id,
+            fileName: fileDetails.name,
+            category: 'Tasks',
+            selectedFolder: fileDetails.folderName,
+            contents: fileDetails.contents,
+        });
+
+        setInitialEditData({
+            id: fileDetails.id,
+            fileName: fileDetails.name,
+            category: 'Tasks',
+            selectedFolder: fileDetails.folderName,
+            contents: fileDetails.contents,
+        });
+        
+        setIsEditFileModalOpen(true);
+    };
+
+
+
+    useEffect(() => {
+        // console.log('Initial Edit Data:', initialEditData);
+        // console.log('Edit Data:', editFileData);
+    }, [initialEditData]);
+
+
+
+
+
         //   ADD FOLDER MODAL CALL
     const addFolderModalConfig = {
         title: 'Add Folder',
@@ -81,6 +117,19 @@ const TasksLayout = ({ updateFolderOptions, updateFileOptions }) => {
           },
           { label: 'Folder', placeholder: 'Select folder', type: 'select', id: 'folder', fieldName: 'selectedFolder', options: folderOptions },
           { label: 'Contents', placeholder: 'Write your thoughts here...', type: 'textarea', id: 'contents', fieldName: 'contents' },
+        ],
+    };
+
+
+
+
+
+        // Edit File Modal Configuration
+    const editFileModalConfig = {
+        title: 'Edit File',
+        formFields: [
+            { label: 'File Name', placeholder: 'Enter file name', type: 'input', id: 'file name', fieldName: 'fileName' },
+            { label: 'Contents', placeholder: 'Write your thoughts here...', type: 'textarea', id: 'contents', fieldName: 'contents' },
         ],
     };
 
@@ -208,6 +257,8 @@ const TasksLayout = ({ updateFolderOptions, updateFileOptions }) => {
           id: fileDoc.id,
           name: fileDoc.data().fileName,
           contents: fileDoc.data().contents,
+          category: fileDoc.data().category,
+          folderName: folderName,
       }));
   
       return files;
@@ -357,6 +408,78 @@ const TasksLayout = ({ updateFolderOptions, updateFileOptions }) => {
     };
 
 
+
+
+
+    const handleFileClick = async (fileId) => {
+        try {
+          // Fetch the selected/clicked file details based on the file ID
+          const fileDetails = files.find((file) => file.id === fileId);
+      
+          openEditFileModal(fileDetails);
+        } catch (error) {
+          console.error('Error fetching file details:', error);
+        }
+    };
+
+
+
+
+
+
+    const handleSaveEditedFile = async (formData) => {
+        const { contents } = formData;
+        const fileName = editFileData.fileName;
+        const category = 'Tasks';
+        const folderName = editFileData.selectedFolder;
+        const fileId = editFileData.id;
+
+        try {
+            if (!currentUser) {
+                console.error('User not logged in.');
+            } else {
+                const fileDetails = {
+                    fileName,
+                    category,
+                    contents: contents || '',
+                    updatedAt: serverTimestamp(),
+                    ownerId: currentUserId,
+                };
+
+                const fileCollectionRef = collection(firestore, 'Folder', folderName, 'Files');
+                const fileDocRef = editFileData.id ? doc(fileCollectionRef, fileId) : null;
+                if (fileDocRef) {
+                    const fileDoc = await getDoc(fileDocRef);
+                    
+                    if (fileDoc.exists()) {
+                        // Document exists, proceed with the update
+                        await updateDoc(fileDocRef, fileDetails);
+                        console.log('File updated successfully.');
+
+                        // Fetch and update the files for the edited file's folder
+                        const updatedFiles = await fetchFiles(folderName, 'Tasks');
+                        setFiles(updatedFiles);
+
+                        // Close the edit file modal
+                        setIsEditFileModalOpen(false);
+                    } else {
+                        // Document does not exist, handle accordingly (create new document or show an error)
+                        console.error('Document does not exist. Handle accordingly.');
+                    }
+                } else {
+                console.error('Invalid file ID');
+                }
+
+                
+            }
+        } catch (err) {
+            console.error('Error saving edited file:', err);
+        }
+    };
+
+
+
+
     
 
 
@@ -408,7 +531,7 @@ const TasksLayout = ({ updateFolderOptions, updateFileOptions }) => {
             <Box className="trick columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start py-2 px-3 max-w-full pb-10 min-h-[90%] flex-grow space-y-3" overflowY='auto' overflowX='hidden'>
                 {files.length !== 0 && files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase())).map((file) => (
                     <React.Fragment key={file.id}>
-                        <div className='group items-start max-w-[145px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden'>
+                        <div className='group items-start max-w-[145px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden' onClick={() => handleFileClick(file.id)} >
                             <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full max-h-[300px] gap-2 overflow-hidden'>
                                 <h5 className='font-semibold text-[16px]'>{file.name}</h5>
                                 <div className='w-full items-center'>
@@ -434,6 +557,8 @@ const TasksLayout = ({ updateFolderOptions, updateFileOptions }) => {
       <CustomModal isOpen={isAddFolderModalOpen} onClose={closeAddFolderModal} initialRef={initialRef} modalConfig={addFolderModalConfig} onSubmit={handleSaveFolder} />
 
       <CustomModal isOpen={isAddFileModalOpen} onClose={closeAddFileModal} initialRef={initialRef} modalConfig={addFileModalConfig} onSubmit={handleSaveFile} />
+
+      <CustomModal isOpen={isEditFileModalOpen} onClose={() => setIsEditFileModalOpen(false)} initialRef={initialRef} modalConfig={editFileModalConfig} onSubmit={handleSaveEditedFile} initialEditData={initialEditData} />
     </div>
   )
 }
