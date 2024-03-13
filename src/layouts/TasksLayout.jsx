@@ -248,10 +248,10 @@ const TasksLayout = ({ updateFolderOptions, updateFileOptions }) => {
   
   
   
-    const fetchFiles = async (folderName, category) => {
+    const fetchFiles = async (folderName = '', category = 'Tasks', fileId = '') => {
       const filesCollection = collection(firestore, 'Folder', folderName, 'Files');
       const orderQuery = query(filesCollection, where('category', '==', category), orderBy('createdAt', 'desc'));
-      const retrievedFiles = await getDocs(orderQuery);
+      const retrievedFiles = await getDocs(orderQuery, where('id', '==', fileId));
   
       const files = retrievedFiles.docs.map((fileDoc) => ({
           id: fileDoc.id,
@@ -283,7 +283,7 @@ const TasksLayout = ({ updateFolderOptions, updateFileOptions }) => {
     
                         // Retrieve files from the "Files" collection under the current folder
                         if (selectedFolder && folderName === selectedFolder) {
-                            const files = await fetchFiles(folderName, 'Tasks');
+                            const files = await fetchFiles(folderName);
                             // setFolderFiles(files);
                             setFiles(files);
                         }
@@ -321,7 +321,7 @@ const TasksLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     const folderName = folderData.folderName;
     
                     // Retrieve files from the "Files" collection under the current folder
-                    const files = await fetchFiles(folderName, 'Tasks');
+                    const files = await fetchFiles(folderName);
     
                     // Add the files to the allFiles array
                     allFiles.push(...files);
@@ -387,7 +387,7 @@ const TasksLayout = ({ updateFolderOptions, updateFileOptions }) => {
                         // eslint-disable-next-line
                     const newFileRef = await addDoc(collection(firestore, 'Folder', selectedFolder, 'Files'), fileDetails);
     
-                    const updatedFiles = await fetchFiles(selectedFolder, 'Tasks');
+                    const updatedFiles = await fetchFiles(selectedFolder);
     
                     setFiles(updatedFiles);
                     // eslint-disable-next-line
@@ -457,7 +457,7 @@ const TasksLayout = ({ updateFolderOptions, updateFileOptions }) => {
                         console.log('File updated successfully.');
 
                         // Fetch and update the files for the edited file's folder
-                        const updatedFiles = await fetchFiles(folderName, 'Tasks');
+                        const updatedFiles = await fetchFiles(folderName);
                         setFiles(updatedFiles);
 
                         // Close the edit file modal
@@ -528,7 +528,7 @@ const TasksLayout = ({ updateFolderOptions, updateFileOptions }) => {
             
 
         <Box w='full' maxW='100%' display='flex' alignContent='center' justifyContent='center' overflowY='auto' overflowX='hidden'  className='h-full flex-grow' >
-            <Box className="trick columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start py-2 px-3 max-w-full pb-10 min-h-[90%] flex-grow space-y-3" overflowY='auto' overflowX='hidden'>
+            <Box className="trick columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start flex-wrap py-2 px-3 max-w-full pb-10 min-h-[90%] flex-grow space-y-3" overflowY='auto' overflowX='hidden'>
                 {files.length !== 0 && files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase())).map((file) => (
                     <React.Fragment key={file.id}>
                         <div className='group items-start max-w-[145px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden' onClick={() => handleFileClick(file.id)} >

@@ -310,7 +310,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                         if (selectedFolder && folderName === selectedFolder) {
                             files = await fetchFiles(folderName, folderData.fileId);
                             // setFolderFiles(files);
-                            console.log('Files:', files);
+                            // console.log('Files:', files);
                             setFiles(files);
                         }
     
