@@ -8,6 +8,8 @@ import CustomModal from "../components/CustomModal";
 import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from 'firebase/firestore';
 import { firestore, auth } from '../Firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { toast } from 'sonner'
+import Toast from '../components/Toast';
 
 const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
     const [folderOptions, setFolderOptions] = useState([]);
@@ -62,6 +64,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             });
         }
         // console.log(selectedFolder);
+        // eslint-disable-next-line
     }, [selectedFolder]);
 
 
@@ -133,12 +136,6 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
         title: 'Edit File',
         formFields: [
             { label: 'File Name', placeholder: 'Enter file name', type: 'input', id: 'file name', fieldName: 'fileName' },
-            // { label: 'Save To', placeholder: 'Select where to save', type: 'input', id: 'activity', fieldName: 'category', options: [
-            //     {name: 'Tasks', value: 'Tasks'},
-            //     {name: 'Notes', value: 'Notes'}
-            //   ]
-            // },
-            // { label: 'Folder', placeholder: 'Select folder', type: 'input', id: 'folder', fieldName: 'selectedFolder', options: folderOptions },
             { label: 'Contents', placeholder: 'Write your thoughts here...', type: 'textarea', id: 'contents', fieldName: 'contents' },
         ],
     };
@@ -168,7 +165,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     }
                 }
                 catch (err) {
-
+                    showToastMessage('No user found', 'error');
                 }
                 
             }
@@ -198,7 +195,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                 const checkFolder = await getDocs(queryRef)
 
                 if (checkFolder.size > 0) {
-                    console.error('Folder with the same name already exists.');
+                    showToastMessage('Folder with the same name already exists.', 'warning');
                 }
                 else {
                         // eslint-disable-next-line
@@ -220,7 +217,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             }
             
         } catch (err) {
-            console.error("Error adding document: ", err);
+            showToastMessage('Error adding folder', 'error');
         }
     };
 
@@ -248,7 +245,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     setFolderOptions(folders);
                 }
             } catch (error) {
-                  console.error("Error fetching folders: ", error);
+                  showToastMessage('Error fetching folders', 'error');
             }
         };
 
@@ -282,7 +279,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             return files;
         }
         catch (err) {
-            console.error('Error fetching files:', err);
+            showToastMessage('Error fetching files', 'error')
             throw err;
         }
         
@@ -324,7 +321,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                 setFolderOptions(foldersData.map((data) => data.folder));
             }
         } catch (error) {
-            console.error("Error fetching folders: ", error);
+            showToastMessage('Error fetching folders and files', 'error');
         }
     };
 
@@ -362,7 +359,8 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                 setFiles(allFiles);
             }
         } catch (error) {
-            console.error("Error fetching all files: ", error);
+            showToastMessage('Error fetching files', 'error');
+
         }
     };
 
@@ -391,7 +389,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             else {
                     // Check if all required fields are filled
                 if (!fileName || !category || !selectedFolder || !contents) {
-                    console.error('Please fill in all required fields.');
+                    showToastMessage('Please fill in all required fields', 'warning');
                     return;
                 }
     
@@ -408,7 +406,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                 const checkFile = await getDocs(queryRef)
     
                 if (checkFile.size > 0) {
-                    console.error('Folder with the same name already exists.');
+                    showToastMessage('File with the same name already exists', 'warning');
                 }
                 else {
                     try {
@@ -423,7 +421,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     }
                         
                     catch (err) {
-    
+                        showToastMessage('Error fetching files', 'error');
                     }
 
                     closeAddFileModal();
@@ -431,7 +429,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             }
             
         } catch (err) {
-            console.error("Error adding document: ", err);
+            showToastMessage("Error adding file", 'error');
         }
     };
 
@@ -447,7 +445,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
       
           openEditFileModal(fileDetails);
         } catch (error) {
-          console.error('Error fetching file details:', error);
+          showToastMessage('Error fetching file details:', 'error');
         }
     };
 
@@ -464,7 +462,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
         const category = editFileData.category;
         try {
             if (!currentUser) {
-                console.error('User not logged in.');
+                // console.error('User not logged in.');
             } else {
                 const fileDetails = {
                     fileName,
@@ -482,7 +480,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     if (fileDoc.exists()) {
                         // Document exists, proceed with the update
                         await updateDoc(fileDocRef, fileDetails);
-                        console.log('File updated successfully.');
+                        showToastMessage('File updated successfully', 'success');
 
                         // Fetch and update the files for the edited file's folder
                         const updatedFiles = await fetchFiles(editFileData.selectedFolder);
@@ -492,16 +490,53 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                         setIsEditFileModalOpen(false);
                     } else {
                         // Document does not exist, handle accordingly (create new document or show an error)
-                        console.error('Document does not exist. Handle accordingly.');
+                        showToastMessage('File does not exist', 'error');
                     }
                 } else {
-                console.error('Invalid file ID');
+                    showToastMessage('Invalid file ID', 'error');
                 }
 
                 
             }
         } catch (err) {
-            console.error('Error saving edited file:', err);
+            showToastMessage('Error saving edited file', 'error');
+        }
+    };
+
+
+
+
+
+
+
+
+
+        //   CONFIGURING TOAST TO TOAST MESSAGE
+    const showToastMessage = (message, type) => {
+        switch (type) {
+            case 'success':
+                toast.success(message, {
+                    position: 'top-right',
+                    duration: 3000,
+                    preventDefault: true,
+                });
+                break;
+            case 'error':
+                toast.error(message, {
+                    position: 'top-right',
+                    duration: 3000,
+                    preventDefault: true,
+                });
+                break;
+            case 'warning':
+                toast.warning(message, {
+                    position: 'top-right',
+                    duration: 3000,
+                    preventDefault: true,
+                });
+                break;
+            default:
+                break;
         }
     };
 
@@ -563,7 +598,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                 <Box className="trick columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start flex-wrap py-2 px-3 max-w-full pb-10 min-h-[90%] flex-grow space-y-3" overflowY='auto' overflowX='hidden'>
                     {files.length !== 0 && files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase())).map((file) => (
                         <React.Fragment key={file.id}>
-                            <div className='group items-start max-w-[145px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden' onClick={() => handleFileClick(file.id)}>
+                            <div className='group cursor-pointer items-start max-w-[145px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden' onClick={() => handleFileClick(file.id)}>
                                 <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full max-h-[300px] gap-2 overflow-hidden'>
                                     <h5 className='font-semibold text-[16px]'>{file.name}</h5>
                                     <div className='w-full items-center'>
@@ -585,6 +620,8 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                 </Box>
             </Box>
         </div>
+
+        <Toast showToast={showToastMessage} />
 
         <CustomModal isOpen={isAddFolderModalOpen} onClose={closeAddFolderModal} initialRef={initialRef} modalConfig={addFolderModalConfig} onSubmit={handleSaveFolder} />
 

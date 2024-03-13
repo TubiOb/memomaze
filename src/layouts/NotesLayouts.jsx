@@ -7,6 +7,8 @@ import { MdAdd, MdDeleteOutline } from "react-icons/md";
 import { addDoc, updateDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, where } from 'firebase/firestore';
 import { firestore, auth } from '../Firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { toast } from 'sonner'
+import Toast from '../components/Toast';
 
 const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
     const [isAddFolderModalOpen, setIsAddFolderModalOpen] = useState(false);
@@ -160,7 +162,7 @@ const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     }
                 }
                 catch (err) {
-
+                    showToastMessage('No user found', 'error');
                 }
                 
             }
@@ -191,7 +193,7 @@ const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
                   const checkFolder = await getDocs(queryRef)
   
                   if (checkFolder.size > 0) {
-                      console.error('Folder with the same name already exists.');
+                    showToastMessage('Folder with the same name already exists.', 'warning');
                   }
                   else {
                           // eslint-disable-next-line
@@ -213,7 +215,7 @@ const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
               }
               
           } catch (err) {
-              console.error("Error adding document: ", err);
+            showToastMessage('Error adding folder', 'error');
           }
     };
   
@@ -238,7 +240,7 @@ const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     setFolderOptions(folders);
                 }
             } catch (error) {
-                  console.error("Error fetching folders: ", error);
+                showToastMessage('Error fetching folders', 'error');
             }
         };
 
@@ -300,7 +302,7 @@ const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
                 setFolderOptions(foldersData.map((data) => data.folder));
             }
         } catch (error) {
-            console.error("Error fetching folders: ", error);
+            showToastMessage('Error fetching folders and Notes', 'error');
         }
     };
   
@@ -332,7 +334,7 @@ const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
                 setFiles(allFiles);
             }
         } catch (error) {
-            console.error("Error fetching all files: ", error);
+            showToastMessage('Error fetching Notes', 'error');
         }
     };
   
@@ -365,7 +367,7 @@ const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
             else {
                   // Check if all required fields are filled
                 if (!fileName || !category || !selectedFolder || !contents) {
-                  console.error('Please fill in all required fields.');
+                    showToastMessage('Please fill in all required fields', 'warning');
                   return;
                 }
     
@@ -382,7 +384,7 @@ const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
                 const checkFile = await getDocs(queryRef)
     
                 if (checkFile.size > 0) {
-                    console.error('Folder with the same name already exists.');
+                    showToastMessage('Note with the same name already exists', 'warning');
                 }
                 else {
                   try {
@@ -397,7 +399,7 @@ const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
                   }
                         
                   catch (err) {
-    
+                    showToastMessage('Error fetching Notes', 'error');
                   }
 
                   closeAddFileModal();
@@ -405,7 +407,7 @@ const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
             }
             
         } catch (err) {
-            console.error("Error adding document: ", err);
+            showToastMessage("Error adding Note", 'error');
         }
     };
 
@@ -420,7 +422,7 @@ const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
       
           openEditFileModal(fileDetails);
         } catch (error) {
-          console.error('Error fetching file details:', error);
+            showToastMessage('Error fetching Note details:', 'error');
         }
     };
 
@@ -438,7 +440,7 @@ const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
 
         try {
             if (!currentUser) {
-                console.error('User not logged in.');
+                // console.error('User not logged in.');
             } else {
                 const fileDetails = {
                     fileName,
@@ -456,7 +458,7 @@ const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     if (fileDoc.exists()) {
                         // Document exists, proceed with the update
                         await updateDoc(fileDocRef, fileDetails);
-                        console.log('File updated successfully.');
+                        showToastMessage('Note updated successfully', 'success');
 
                         // Fetch and update the files for the edited file's folder
                         const updatedFiles = await fetchFiles(folderName, 'Notes');
@@ -466,16 +468,52 @@ const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
                         setIsEditFileModalOpen(false);
                     } else {
                         // Document does not exist, handle accordingly (create new document or show an error)
-                        console.error('Document does not exist. Handle accordingly.');
+                        showToastMessage('Note does not exist', 'error');
                     }
                 } else {
-                console.error('Invalid file ID');
+                    showToastMessage('Invalid Note ID', 'error');
                 }
 
                 
             }
         } catch (err) {
-            console.error('Error saving edited file:', err);
+            showToastMessage('Error saving edited Note', 'error');
+        }
+    };
+
+
+
+
+
+
+
+
+        //   CONFIGURING TOAST TO TOAST MESSAGE
+    const showToastMessage = (message, type) => {
+        switch (type) {
+            case 'success':
+                toast.success(message, {
+                    position: 'top-right',
+                    duration: 3000,
+                    preventDefault: true,
+                });
+                break;
+            case 'error':
+                toast.error(message, {
+                    position: 'top-right',
+                    duration: 3000,
+                    preventDefault: true,
+                });
+                break;
+            case 'warning':
+                toast.warning(message, {
+                    position: 'top-right',
+                    duration: 3000,
+                    preventDefault: true,
+                });
+                break;
+            default:
+                break;
         }
     };
 
@@ -531,7 +569,7 @@ const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
             <Box className="trick columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start flex-wrap py-2 px-3 max-w-full pb-10 min-h-[90%] flex-grow space-y-3" overflowY='auto' overflowX='hidden'>
                 {files.length !== 0 && files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase())).map((file) => (
                     <React.Fragment key={file.id}>
-                        <div className='group items-start max-w-[145px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden' onClick={() => handleFileClick(file.id)} >
+                        <div className='group cursor-pointer items-start max-w-[145px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden' onClick={() => handleFileClick(file.id)} >
                             <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full max-h-[300px] gap-2 overflow-hidden'>
                                 <h5 className='font-semibold text-[16px]'>{file.name}</h5>
                                 <div className='w-full items-center'>
@@ -553,6 +591,8 @@ const NotesLayout = ({ updateFolderOptions, updateFileOptions }) => {
             </Box>
         </Box>
       </div>
+
+      <Toast showToast={showToastMessage} />
 
       <CustomModal isOpen={isAddFolderModalOpen} onClose={closeAddFolderModal} initialRef={initialRef} modalConfig={addFolderModalConfig} onSubmit={handleSaveFolder} />
 
