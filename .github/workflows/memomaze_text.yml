@@ -32,5 +32,5 @@ jobs:
     #     runs-on: ubuntu-latest
 
     #     steps:
-    #         - name: Deploy to Netlify
-    #           run: curl -X POST -d {} 
+    #         - name: Netlify Actions
+    #           run: nwtgck/actions-netlify@v3.0.0 
