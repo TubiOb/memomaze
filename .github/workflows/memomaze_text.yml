@@ -25,7 +25,7 @@ jobs:
               run: yarn build
 
             - name: Test react app
-              run: npm test
+              run: yarn test
 
     # deploy_to_netlify:
     #     needs: build_and_test
