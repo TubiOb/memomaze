@@ -1,11 +1,11 @@
 import React, { useRef, useState, useEffect, /* useCallback */ } from 'react'
-import { CiSearch, CiMenuKebab } from "react-icons/ci";
+import { CiSearch } from "react-icons/ci";
 import { GoArchive } from "react-icons/go";
 import { Box, InputGroup, InputLeftElement, Input } from '@chakra-ui/react'
 import { MdAdd, MdDeleteOutline } from "react-icons/md";
 // import { PiSmileyDuotone } from "react-icons/pi";
 import CustomModal from "../components/CustomModal";
-import { addDoc, collection, doc, getDoc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from 'firebase/firestore';
 import { firestore, auth } from '../Firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { toast } from 'sonner'
@@ -186,36 +186,30 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
         const { folderName } = formData;
 
         try {
-            if (!currentUser) {
-            }
+            const folderCollectionRef = collection(firestore, 'Folder');
+            const queryRef = query(folderCollectionRef, where('folderName', '==', folderName));
+            const checkFolder = await getDocs(queryRef)
 
+            if (checkFolder.size > 0) {
+                showToastMessage('Folder with the same name already exists.', 'warning');
+            }
             else {
-                const folderCollectionRef = collection(firestore, 'Folder');
-                const queryRef = query(folderCollectionRef, where('folderName', '==', folderName));
-                const checkFolder = await getDocs(queryRef)
+                    // eslint-disable-next-line
+                const newFolderRef = await addDoc(folderCollectionRef, {
+                    folderName,
+                    createdAt: serverTimestamp(),
+                    ownerId: currentUserId,
+                });
+                    //   UPDATE THE FOLDER OPTIONS AND FILES IMMEDIATELY AFTER SAVING
+                setFolderOptions(prevFolders => [...prevFolders, { name: folderName, value: folderName }]);
+                updateFolderOptions = prevFolders => [...prevFolders, { name: folderName, value: folderName }];
 
-                if (checkFolder.size > 0) {
-                    showToastMessage('Folder with the same name already exists.', 'warning');
-                }
-                else {
-                        // eslint-disable-next-line
-                    const newFolderRef = await addDoc(folderCollectionRef, {
-                        folderName,
-                        createdAt: serverTimestamp(),
-                        ownerId: currentUserId,
-                    });
-                        //   UPDATE THE FOLDER OPTIONS AND FILES IMMEDIATELY AFTER SAVING
-                    setFolderOptions(prevFolders => [...prevFolders, { name: folderName, value: folderName }]);
-                    updateFolderOptions = prevFolders => [...prevFolders, { name: folderName, value: folderName }];
+                    //   FETCH AND UPDATE FILES FOR THE NEWLY ADDED FOLDER
+                const newFiles = await fetchFiles(folderName);
+                updateFileOptions(newFiles);
 
-                        //   FETCH AND UPDATE FILES FOR THE NEWLY ADDED FOLDER
-                    const newFiles = await fetchFiles(folderName);
-                    updateFileOptions(newFiles);
-
-                    closeAddFolderModal();
-                }
+                closeAddFolderModal();
             }
-            
         } catch (err) {
             showToastMessage('Error adding folder', 'error');
         }
@@ -234,16 +228,11 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             const folderCollection = collection(firestore, 'Folder');
         
             try {
-        
-                if (!currentUser) {
-                }
-                else {
-                    const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
-                    const folders = retrievedFolders.docs.map((folderDoc) => (
-                        { name: folderDoc.data().folderName, value: folderDoc.data().folderName }
-                    ));
-                    setFolderOptions(folders);
-                }
+                const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
+                const folders = retrievedFolders.docs.map((folderDoc) => (
+                    { name: folderDoc.data().folderName, value: folderDoc.data().folderName }
+                ));
+                setFolderOptions(folders);
             } catch (error) {
                   showToastMessage('Error fetching folders', 'error');
             }
@@ -288,38 +277,33 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
       
     
             //   FETCHING FOLDER FILES FROM DATABASE
-    const fetchFoldersAndFiles = async (selectedFolder = null, fileId = null) => {
+    const fetchFoldersAndFiles = async (selectedFolder = null) => {
         const folderCollection = collection(firestore, 'Folder');
     
         try {
-            if (!currentUser) {
-            } else {
-                const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
-    
-                const foldersData = await Promise.all(
-                    retrievedFolders.docs.map(async (folderDoc) => {
-                        const folderData = folderDoc.data();
-                        const folderName = folderData.folderName;
+            const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
 
-                        let files = [];
-    
-                        // Retrieve files from the "Files" collection under the current folder
-                        if (selectedFolder && folderName === selectedFolder) {
-                            files = await fetchFiles(folderName, folderData.fileId);
-                            // setFolderFiles(files);
-                            // console.log('Files:', files);
-                            setFiles(files);
-                        }
-    
-                        return {
-                            folder: { name: folderName, value: folderName },
-                            files: files,
-                        };
-                    })
-                );
-    
-                setFolderOptions(foldersData.map((data) => data.folder));
-            }
+            const foldersData = await Promise.all(
+                retrievedFolders.docs.map(async (folderDoc) => {
+                    const folderData = folderDoc.data();
+                    const folderName = folderData.folderName;
+
+                    // Retrieve files from the "Files" collection under the current folder
+                    if (selectedFolder && folderName === selectedFolder) {
+                        const files = await fetchFiles(folderName, folderData.fileId);
+                        // setFolderFiles(files);
+                        // console.log('Files:', files);
+                        setFiles(files);
+                    }
+
+                    return {
+                        folder: { name: folderName, value: folderName },
+                        files: files,
+                    };
+                })
+            );
+
+            setFolderOptions(foldersData.map((data) => data.folder));
         } catch (error) {
             showToastMessage('Error fetching folders and files', 'error');
         }
@@ -339,25 +323,21 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
         const folderCollection = collection(firestore, 'Folder');
     
         try {
-            if (!currentUser) {
-            } 
-            else {
-                const allFiles = [];
-                const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
-    
-                for (const folderDoc of retrievedFolders.docs) {
-                    const folderData = folderDoc.data();
-                    const folderName = folderData.folderName;
-    
-                    // Retrieve files from the "Files" collection under the current folder
-                    const files = await fetchFiles(folderName);
-    
-                    // Add the files to the allFiles array
-                    allFiles.push(...files);
-                }
-                        // Set the state with all files from all folders
-                setFiles(allFiles);
+            const allFiles = [];
+            const retrievedFolders = await getDocs(query(folderCollection, where('ownerId', '==', currentUserId)));
+
+            for (const folderDoc of retrievedFolders.docs) {
+                const folderData = folderDoc.data();
+                const folderName = folderData.folderName;
+
+                // Retrieve files from the "Files" collection under the current folder
+                const files = await fetchFiles(folderName);
+
+                // Add the files to the allFiles array
+                allFiles.push(...files);
             }
+                    // Set the state with all files from all folders
+            setFiles(allFiles);
         } catch (error) {
             showToastMessage('Error fetching files', 'error');
 
@@ -383,51 +363,46 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
         const { fileName, category, selectedFolder, contents } = formData;
     
         try {
-            if (!currentUser) {
+                // Check if all required fields are filled
+            if (!fileName || !category || !selectedFolder || !contents) {
+                showToastMessage('Please fill in all required fields', 'warning');
+                return;
             }
-    
+
+            const fileDetails = {
+                fileName,
+                category,
+                contents,
+                createdAt: serverTimestamp(),
+                ownerId: currentUserId,
+            };
+
+            const fileCollectionRef = collection(firestore, 'Folder', selectedFolder, 'Files');
+            const queryRef = query(fileCollectionRef, where('fileName', '==', fileName));
+            const checkFile = await getDocs(queryRef)
+
+            if (checkFile.size > 0) {
+                showToastMessage('File with the same name already exists', 'warning');
+            }
             else {
-                    // Check if all required fields are filled
-                if (!fileName || !category || !selectedFolder || !contents) {
-                    showToastMessage('Please fill in all required fields', 'warning');
-                    return;
-                }
-    
-                const fileDetails = {
-                    fileName,
-                    category,
-                    contents,
-                    createdAt: serverTimestamp(),
-                    ownerId: currentUserId,
-                };
-    
-                const fileCollectionRef = collection(firestore, 'Folder', selectedFolder, 'Files');
-                const queryRef = query(fileCollectionRef, where('fileName', '==', fileName));
-                const checkFile = await getDocs(queryRef)
-    
-                if (checkFile.size > 0) {
-                    showToastMessage('File with the same name already exists', 'warning');
-                }
-                else {
-                    try {
-                        // eslint-disable-next-line
+                try {
+                    // eslint-disable-next-line
                     const newFileRef = await addDoc(collection(firestore, 'Folder', selectedFolder, 'Files'), fileDetails);
+                    showToastMessage('File saved', 'success');
     
                     const updatedFiles = await fetchFiles(selectedFolder);
     
                     setFiles(updatedFiles);
                     // eslint-disable-next-line
                     updateFileOptions(prevFiles => [...prevFiles, { name: fileName, value: fileName }]);
-                    }
-                        
-                    catch (err) {
-                        showToastMessage('Error fetching files', 'error');
-                    }
-
-                    closeAddFileModal();
                 }
+                    
+                catch (err) {
+                    showToastMessage('Error fetching files', 'error');
+                }
+
+                closeAddFileModal();
             }
-            
         } catch (err) {
             showToastMessage("Error adding file", 'error');
         }
@@ -461,49 +436,80 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
         const fileName = editFileData.fileName;
         const category = editFileData.category;
         try {
-            if (!currentUser) {
-                // console.error('User not logged in.');
-            } else {
-                const fileDetails = {
-                    fileName,
-                    category,
-                    contents: contents || '',
-                    updatedAt: serverTimestamp(),
-                    ownerId: currentUserId,
-                };
+            const fileDetails = {
+                fileName,
+                category,
+                contents: contents || '',
+                updatedAt: serverTimestamp(),
+                ownerId: currentUserId,
+            };
 
-                const fileCollectionRef = collection(firestore, 'Folder', editFileData.selectedFolder, 'Files');
-                const fileDocRef = editFileData.id ? doc(fileCollectionRef, editFileData.id) : null;
-                if (fileDocRef) {
-                    const fileDoc = await getDoc(fileDocRef);
-                    
-                    if (fileDoc.exists()) {
-                        // Document exists, proceed with the update
-                        await updateDoc(fileDocRef, fileDetails);
-                        showToastMessage('File updated successfully', 'success');
-
-                        // Fetch and update the files for the edited file's folder
-                        const updatedFiles = await fetchFiles(editFileData.selectedFolder);
-                        setFiles(updatedFiles);
-
-                        // Close the edit file modal
-                        setIsEditFileModalOpen(false);
-                    } else {
-                        // Document does not exist, handle accordingly (create new document or show an error)
-                        showToastMessage('File does not exist', 'error');
-                    }
-                } else {
-                    showToastMessage('Invalid file ID', 'error');
-                }
-
+            const fileCollectionRef = collection(firestore, 'Folder', editFileData.selectedFolder, 'Files');
+            const fileDocRef = editFileData.id ? doc(fileCollectionRef, editFileData.id) : null;
+            if (fileDocRef) {
+                const fileDoc = await getDoc(fileDocRef);
                 
-            }
+                if (fileDoc.exists()) {
+                    // Document exists, proceed with the update
+                    await updateDoc(fileDocRef, fileDetails);
+                    showToastMessage('File updated', 'success');
+
+                    // Fetch and update the files for the edited file's folder
+                    const updatedFiles = await fetchFiles(editFileData.selectedFolder);
+                    setFiles(updatedFiles);
+
+                    // Close the edit file modal
+                    setIsEditFileModalOpen(false);
+                } else {
+                    // Document does not exist, handle accordingly (create new document or show an error)
+                    showToastMessage('File does not exist', 'error');
+                }
+            } else {
+                showToastMessage('Invalid file ID', 'error');
+            }   
         } catch (err) {
             showToastMessage('Error saving edited file', 'error');
         }
     };
 
 
+
+
+
+
+    const handleArchiveFile = async (fileId, folderName) => {
+        try {
+            const fileRef = doc(firestore, 'Folder', folderName, 'Files', fileId);
+            await deleteDoc(fileRef);
+
+            const fileDetails = files.find((file) => file.id === fileId);
+
+            const archiveFileRef = collection(firestore, 'Archive Files');
+            await addDoc(archiveFileRef, fileDetails);
+
+            showToastMessage('File archived', 'success');
+        }
+        catch (err) {
+            showToastMessage('Error archiving file', 'error');
+            console.log(err.message);
+        }
+    };
+
+
+
+
+
+    const handleDeleteFile = async (fileId, folderName) => {
+        try {
+            const fileRef = doc(firestore, 'Folder', folderName, 'Files', fileId);
+            await deleteDoc(fileRef);
+
+            showToastMessage('File deleted', 'success');
+        }
+        catch (err) {
+            showToastMessage('Error deleting file', 'error');
+        }
+    }
 
 
 
@@ -598,18 +604,18 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                 <Box className="trick columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start flex-wrap py-2 px-3 max-w-full pb-10 min-h-[90%] flex-grow space-y-3" overflowY='auto' overflowX='hidden'>
                     {files.length !== 0 && files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase())).map((file) => (
                         <React.Fragment key={file.id}>
-                            <div className='group cursor-pointer items-start max-w-[145px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden' onClick={() => handleFileClick(file.id)}>
-                                <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full max-h-[300px] gap-2 overflow-hidden'>
+                            <div className='group cursor-pointer items-start max-w-[145px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden'>
+                                <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full max-h-[300px] gap-2 overflow-hidden' onClick={() => handleFileClick(file.id)}>
                                     <h5 className='font-semibold text-[16px]'>{file.name}</h5>
                                     <div className='w-full items-center'>
                                         <p className='font-normal text-neutral-600 dark:text-neutral-200 text-[13px] lg:text-[15px] break-word'>{file.contents}</p>    
                                     </div>
                                     
                                 </div>
-                                <div className='flex w-full h-auto py-1 px-2 items-center justify-between opacity-0 group-hover:opacity-100 z-50 transition-opacity'>
-                                    <GoArchive size='18' className='hover:cursor-pointer hover:font-semibold' />
-                                    <MdDeleteOutline size='20' className='hover:cursor-pointer hover:font-semibold' />
-                                    <CiMenuKebab size='18' className='hover:cursor-pointer hover:font-semibold' />
+                                <div className='flex w-full h-auto py-1 px-2 items-center justify-between opacity-40 hover:opacity-100 lg:opacity-0 lg:group-hover:opacity-100 z-50 lg:transition-opacity'>
+                                    <GoArchive size='18' className='hover:cursor-pointer hover:font-semibold text-slate-50/60 hover:text-white' onClick={() => handleArchiveFile(file.id)} />
+                                    <MdDeleteOutline size='20' className='hover:cursor-pointer hover:font-semibold text-slate-50/60 hover:text-white' onClick={() => handleDeleteFile(file.id)} />
+                                    {/* <CiMenuKebab size='18' className='hover:cursor-pointer hover:font-semibold' /> */}
                                 </div>
                             </div>
                         </React.Fragment>

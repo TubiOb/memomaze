@@ -394,6 +394,7 @@ const TasksLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     setFiles(updatedFiles);
                     // eslint-disable-next-line
                     updateFileOptions(prevFiles => [...prevFiles, { name: fileName, value: fileName }]);
+                    showToastMessage('File saved', 'success');
                   }
                         
                   catch (err) {
