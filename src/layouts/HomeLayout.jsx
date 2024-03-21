@@ -455,7 +455,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     showToastMessage('File updated', 'success');
 
                     // Fetch and update the files for the edited file's folder
-                    const updatedFiles = await fetchFiles(editFileData.selectedFolder);
+                    const updatedFiles = files.filter((file) => file.id !== editFileData.id);
                     setFiles(updatedFiles);
 
                     // Close the edit file modal
@@ -488,6 +488,10 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             await addDoc(archiveFileRef, fileDetails);
 
             showToastMessage('File archived', 'success');
+
+            const updatedFiles = files.filter((file) => file.id !== fileId);
+            setFiles(updatedFiles);
+
         }
         catch (err) {
             showToastMessage('Error archiving file', 'error');
@@ -505,6 +509,10 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             await deleteDoc(fileRef);
 
             showToastMessage('File deleted', 'success');
+
+            const updatedFiles = files.filter((file) => file.id !== fileId);
+            setFiles(updatedFiles);
+            
         }
         catch (err) {
             showToastMessage('Error deleting file', 'error');
@@ -604,17 +612,17 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                 <Box className="trick columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start flex-wrap py-2 px-3 max-w-full pb-10 min-h-[90%] flex-grow space-y-3" overflowY='auto' overflowX='hidden'>
                     {files.length !== 0 && files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase())).map((file) => (
                         <React.Fragment key={file.id}>
-                            <div className='group cursor-pointer items-start max-w-[145px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden'>
-                                <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full max-h-[300px] gap-2 overflow-hidden' onClick={() => handleFileClick(file.id)}>
+                            <div className='group relative cursor-pointer items-start max-w-[145px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden'>
+                                <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full max-h-[300px] gap-2 overflow-hidden mb-6' onClick={() => handleFileClick(file.id)}>
                                     <h5 className='font-semibold text-[16px]'>{file.name}</h5>
                                     <div className='w-full items-center'>
                                         <p className='font-normal text-neutral-600 dark:text-neutral-200 text-[13px] lg:text-[15px] break-word'>{file.contents}</p>    
                                     </div>
                                     
                                 </div>
-                                <div className='flex w-full h-auto py-1 px-2 items-center justify-between opacity-40 hover:opacity-100 lg:opacity-0 lg:group-hover:opacity-100 z-50 lg:transition-opacity'>
-                                    <GoArchive size='18' className='hover:cursor-pointer hover:font-semibold text-slate-50/60 hover:text-white' onClick={() => handleArchiveFile(file.id)} />
-                                    <MdDeleteOutline size='20' className='hover:cursor-pointer hover:font-semibold text-slate-50/60 hover:text-white' onClick={() => handleDeleteFile(file.id)} />
+                                <div className='flex absolute w-full h-auto py-1 px-2 items-center justify-between bottom-0 lg:-bottom-52 lg:group-hover:bottom-0 z-50 lg:transition-opacity'>
+                                    <GoArchive size='18' className='hover:cursor-pointer hover:font-semibold text-slate-50/60 hover:text-white' onClick={() => handleArchiveFile(file.id, file.folderName)} />
+                                    <MdDeleteOutline size='20' className='hover:cursor-pointer hover:font-semibold text-slate-50/60 hover:text-white' onClick={() => handleDeleteFile(file.id, file.folderName)} />
                                     {/* <CiMenuKebab size='18' className='hover:cursor-pointer hover:font-semibold' /> */}
                                 </div>
                             </div>
