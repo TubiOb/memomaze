@@ -10,7 +10,7 @@ import CustomModal from "../components/CustomModal";
 import { toast } from 'sonner'
 import Toast from '../components/Toast';
 
-const ArchiveLayout = () => {
+const CompletedLayout = () => {
     const initialRef = useRef();
     const [files, setFiles] = useState([]);
     // eslint-disable-next-line
@@ -105,7 +105,7 @@ const ArchiveLayout = () => {
 
 
     const fetchFiles = async () => {
-        const archiveCollection = collection(firestore, 'Archive Files');
+        const archiveCollection = collection(firestore, 'Completed');
         try {
             const retrievedFiles = await getDocs(archiveCollection);
 
@@ -198,9 +198,9 @@ const ArchiveLayout = () => {
 
 
 
-    const handleUnarchiveFile = async (fileId, folderName) => {
+    const handleUncompleteFile = async (fileId, folderName) => {
         try {
-            const archiveFileRef = doc(firestore, 'Archive Files', fileId);
+            const archiveFileRef = doc(firestore, 'Completed', fileId);
             const archiveFileDoc = await getDoc(archiveFileRef);
             const fileDetails = archiveFileDoc.data();
 
@@ -221,7 +221,34 @@ const ArchiveLayout = () => {
             showToastMessage('Error restoring file', 'error');
             console.log(err.message);
         }
-    }
+    };
+
+
+
+
+
+
+    const handleArchiveFile = async (fileId, folderName) => {
+        try {
+            const fileRef = doc(firestore, 'Folder', folderName, 'Files', fileId);
+            await deleteDoc(fileRef);
+
+            const fileDetails = files.find((file) => file.id === fileId);
+
+            const archiveFileRef = collection(firestore, 'Archive Files');
+            await addDoc(archiveFileRef, fileDetails);
+
+            showToastMessage('File archived', 'success');
+
+            const updatedFiles = files.filter((file) => file.id !== fileId);
+            setFiles(updatedFiles);
+
+        }
+        catch (err) {
+            showToastMessage('Error archiving file', 'error');
+            console.log(err.message);
+        }
+    };
 
 
 
@@ -241,32 +268,6 @@ const ArchiveLayout = () => {
         }
         catch (err) {
             showToastMessage('Error deleting file', 'error');
-        }
-    };
-
-
-
-
-
-
-    const handleCompletedFile = async (fileId, folderName) => {
-        try {
-            const fileRef = doc(firestore, 'Folder', folderName, 'Files', fileId);
-            await deleteDoc(fileRef);
-
-            const fileDetails = files.find((file) => file.id === fileId);
-
-            const completedFileRef = collection(firestore, 'Completed');
-            await addDoc(completedFileRef, fileDetails);
-
-            showToastMessage('Completed', 'success');
-
-            const updatedFiles = files.filter((file) => file.id !== fileId);
-            setFiles(updatedFiles);
-        }
-        catch (err) {
-            showToastMessage('Error completing item', 'error');
-            console.log(err.message);
         }
     };
 
@@ -307,7 +308,6 @@ const ArchiveLayout = () => {
 
 
 
-
   return (
     <div className='flex-1 h-screen lg:h-full flex-grow flex flex-col md:flex-row gap-2 md:gap-0 w-full items-start'>
         <div className="w-full flex-1 min-h-[77%] md:max-h-[100%] flex flex-col items-start gap-1">
@@ -336,9 +336,9 @@ const ArchiveLayout = () => {
                                     
                                 </div>
                                 <div className='flex absolute w-full h-auto py-1 px-2 items-center justify-between bottom-0 lg:-bottom-52 lg:group-hover:bottom-0 z-50 lg:transition-opacity'>
-                                    <MdOutlineUnarchive size='20' className='hover:cursor-pointer hover:font-semibold dark:text-slate-50/60 dark:hover:text-yellow-500 hover:text-yellow-500 text-black/60' onClick={() => handleUnarchiveFile(file.id, file.folderName)} />
+                                    <MdOutlineUnarchive size='20' className='hover:cursor-pointer hover:font-semibold dark:text-slate-50/60 dark:hover:text-yellow-500 hover:text-yellow-500 text-black/60' onClick={() => handleArchiveFile(file.id, file.folderName)} />
                                     <MdDeleteOutline size='20' className='hover:cursor-pointer hover:font-semibold dark:text-slate-50/60 hover:text-red-800 dark:hover:text-red-500 text-black/60' onClick={() => handleDeleteFile(file.id, file.folderName)} />
-                                    <IoCheckmarkDoneCircle size='20' className='hover:cursor-pointer hover:font-semibold dark:text-slate-50/60 hover:text-green-900 dark:hover:text-green-500 text-black/60' onClick={() => handleCompletedFile(file.id, file.folderName)} />
+                                    <IoCheckmarkDoneCircle size='20' className='hover:cursor-pointer hover:font-semibold dark:text-slate-50/60 hover:text-green-900 dark:hover:text-green-500 text-black/60' onClick={() => handleUncompleteFile(file.id, file.folderName)} />
                                 </div>
                             </div>
                         </React.Fragment>
@@ -354,4 +354,4 @@ const ArchiveLayout = () => {
   )
 }
 
-export default ArchiveLayout
+export default CompletedLayout

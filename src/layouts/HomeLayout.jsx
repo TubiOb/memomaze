@@ -3,6 +3,7 @@ import { CiSearch } from "react-icons/ci";
 import { GoArchive } from "react-icons/go";
 import { Box, InputGroup, InputLeftElement, Input } from '@chakra-ui/react'
 import { MdAdd, MdDeleteOutline } from "react-icons/md";
+import { IoCheckmarkDoneCircle } from "react-icons/io5";
 // import { PiSmileyDuotone } from "react-icons/pi";
 import CustomModal from "../components/CustomModal";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, serverTimestamp, updateDoc, where } from 'firebase/firestore';
@@ -518,7 +519,33 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
         catch (err) {
             showToastMessage('Error deleting file', 'error');
         }
-    }
+    };
+
+
+
+
+
+
+    const handleCompletedFile = async (fileId, folderName) => {
+        try {
+            const fileRef = doc(firestore, 'Folder', folderName, 'Files', fileId);
+            await deleteDoc(fileRef);
+
+            const fileDetails = files.find((file) => file.id === fileId);
+
+            const completedFileRef = collection(firestore, 'Completed');
+            await addDoc(completedFileRef, fileDetails);
+
+            showToastMessage('Completed', 'success');
+
+            const updatedFiles = files.filter((file) => file.id !== fileId);
+            setFiles(updatedFiles);
+        }
+        catch (err) {
+            showToastMessage('Error completing item', 'error');
+            console.log(err.message);
+        }
+    };
 
 
 
@@ -622,9 +649,9 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                                     
                                 </div>
                                 <div className='flex absolute w-full h-auto py-1 px-2 items-center justify-between bottom-0 lg:-bottom-52 lg:group-hover:bottom-0 z-50 lg:transition-opacity'>
-                                    <GoArchive size='18' className='hover:cursor-pointer hover:font-semibold text-slate-50/60 hover:text-white' onClick={() => handleArchiveFile(file.id, file.folderName)} />
-                                    <MdDeleteOutline size='20' className='hover:cursor-pointer hover:font-semibold text-slate-50/60 hover:text-white' onClick={() => handleDeleteFile(file.id, file.folderName)} />
-                                    {/* <CiMenuKebab size='18' className='hover:cursor-pointer hover:font-semibold' /> */}
+                                    <GoArchive size='18' className='hover:cursor-pointer hover:font-semibold dark:text-slate-50/60 dark:hover:text-yellow-500 hover:text-yellow-500 text-black/60' onClick={() => handleArchiveFile(file.id, file.folderName)} />
+                                    <MdDeleteOutline size='20' className='hover:cursor-pointer hover:font-semibold dark:text-slate-50/60 hover:text-red-800 dark:hover:text-red-500 text-black/60' onClick={() => handleDeleteFile(file.id, file.folderName)} />
+                                    <IoCheckmarkDoneCircle size='20' className='hover:cursor-pointer hover:font-semibold dark:text-slate-50/60 hover:text-green-900 dark:hover:text-green-500 text-black/60' onClick={() => handleCompletedFile(file.id, file.folderName)} />
                                 </div>
                             </div>
                         </React.Fragment>

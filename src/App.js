@@ -13,6 +13,8 @@ import { ThemeProvider } from './ThemeContext';
 import NotesLayouts from "./layouts/NotesLayouts";
 import TasksLayout from "./layouts/TasksLayout";
 import ArchiveLayout from "./layouts/ArchiveLayout";
+import CompletedLayout from "./layouts/CompletedLayout";
+import Settings from "./pages/Settings";
 // import { AuthProvider } from 'react-auth-kit'
 
 function App() {
@@ -31,6 +33,8 @@ function App() {
           <Route path="notes" element={<NotesLayouts />} />
           <Route path="tasks" element={<TasksLayout />} />
           <Route path="archive" element={<ArchiveLayout />} />
+          <Route path="completed" element={<CompletedLayout />} />
+          <Route path="profile" element={<Settings />} />
         </Route>
     </Route>
     )

@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { PiMoonDuotone } from "react-icons/pi";
-import { IoCalendarOutline } from "react-icons/io5";
 import { GoChecklist, GoTasklist } from "react-icons/go";
 import { LuLayoutDashboard } from "react-icons/lu";
 import { VscNotebook } from "react-icons/vsc";
 import { Box, Avatar } from '@chakra-ui/react'
-import { RiSettingsLine } from "react-icons/ri";
-import { RiNotification3Line } from "react-icons/ri";
+// import { RiSettingsLine } from "react-icons/ri";
+// import { RiNotification3Line } from "react-icons/ri";
 import { BiArchive } from "react-icons/bi";
 import Logo from '../assets/Memomaze logo.png'
 import { NavLink } from 'react-router-dom';
@@ -71,10 +70,9 @@ const Sidebar = ({ openModal }) => {
     const menus = [
         { name: 'Dashboard', icon: LuLayoutDashboard, color: '', path: (`/home`) },
         {name: 'Archived', icon: BiArchive, color: '', path: ('archive') },
-        { name: 'Completed', icon: GoChecklist, color: '', path: (``) },
+        { name: 'Completed', icon: GoChecklist, color: '', path: (`completed`) },
         { name: 'Tasks', icon: GoTasklist, color: '', path: (`tasks`) },
         { name: 'Note', icon: VscNotebook, color: '', path: (`notes`) },
-        { name: 'Calendar', icon: IoCalendarOutline, color: '', path: (``) },
     ]
 
     // const adds = [
@@ -107,10 +105,10 @@ const Sidebar = ({ openModal }) => {
 
                
                 <div className='border-t flex flex-col items-center justify-between gap-4 py-2'>
-                    <Box display='flex' flexDir='column' gap='3' py='2' px='1' alignItems='center' rounded='lg'>
+                    {/* <Box display='flex' flexDir='column' gap='3' py='2' px='1' alignItems='center' rounded='lg'>
                         <RiSettingsLine size={['25']} className='hover:bg-neutral-500 hover:text-white py-1 cursor-pointer rounded-lg' />
                         <RiNotification3Line size={['25']} className='hover:bg-neutral-500 hover:text-white py-1 cursor-pointer rounded-lg' />
-                    </Box>
+                    </Box> */}
                     <button className='p-1 rounded-lg hover:bg-neutral-500 hover:text-white' onClick={toggleTheme} >
                         {theme === 'dark' ? <LuSunDim size='20' /> : <PiMoonDuotone size='20' />}
                     </button>
