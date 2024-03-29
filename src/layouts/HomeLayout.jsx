@@ -259,7 +259,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
         
             const files = retrievedFiles.docs.map((fileDoc) => ({
                 id: fileDoc.id,
-                name: fileDoc.data().fileName,
+                fileName: fileDoc.data().fileName,
                 contents: fileDoc.data().contents,
                 category: fileDoc.data().category,
                 folderName: folderName,
@@ -268,7 +268,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             return files;
         }
         catch (err) {
-            showToastMessage('Error fetching files', 'error')
+            showToastMessage('Error fetching files 1', 'error')
             throw err;
         }
         
@@ -339,7 +339,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     // Set the state with all files from all folders
             setFiles(allFiles);
         } catch (error) {
-            showToastMessage('Error fetching files', 'error');
+            showToastMessage('Error fetching files 2', 'error');
 
         }
     };
@@ -390,7 +390,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                     const newFileRef = await addDoc(collection(firestore, 'Folder', selectedFolder, 'Files'), fileDetails);
                     showToastMessage('File saved', 'success');
     
-                    const updatedFiles = await fetchFiles(selectedFolder);
+                    const updatedFiles = await fetchAllFiles();
     
                     setFiles(updatedFiles);
                     // eslint-disable-next-line
@@ -398,7 +398,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
                 }
                     
                 catch (err) {
-                    showToastMessage('Error fetching files', 'error');
+                    showToastMessage('Error fetching files 3', 'error');
                 }
 
                 closeAddFileModal();
@@ -417,6 +417,7 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
         try {
           // Fetch the selected/clicked file details based on the file ID
           const fileDetails = files.find((file) => file.id === fileId);
+          console.log(fileDetails);
       
           openEditFileModal(fileDetails);
         } catch (error) {
@@ -608,13 +609,13 @@ const HomeLayout = ({ updateFolderOptions, updateFileOptions }) => {
             </div>
             
 
-            <Box w='full' maxW='100%' display='flex' alignContent='center' justifyContent='center' overflowY='auto' overflowX='hidden'  className='h-full flex-grow' >
-                <Box className="trick columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start flex-wrap py-2 px-3 max-w-full pb-10 min-h-[90%] flex-grow space-y-3" overflowY='auto' overflowX='hidden'>
-                    {files.length !== 0 && files.filter((file) => file.name.toLowerCase().includes(searchQuery.toLowerCase())).map((file) => (
+            <Box w='full' maxW='100%' display='flex' alignContent='center' justifyContent='center' overflowY='auto' overflowX='hidden'  className='h-screen sticky flex-grow' >
+                <Box className="trick columns-2 md:columns-3 lg:columns-4 xl:columns-5 2xl:columns-6 mx-auto gap-3 items-start flex-wrap py-2 px-3 pb-10 flex-grow space-y-2" overflowY='auto' overflowX='hidden'>
+                    {files.length !== 0 && files.filter((file) => file.fileName.toLowerCase().includes(searchQuery.toLowerCase())).map((file) => (
                         <React.Fragment key={file.id}>
                             <div className='group relative cursor-pointer items-start max-w-[145px] md:max-w-[200px] max-h-[350px] break-inside-avoid rounded-md shadow-md shadow-neutral-600/40 dark:shadow-white/10 hover:shadow-neutral-600/80 dark:hover:shadow-white/40 border border-neutral-50/25 overflow-hidden'>
                                 <div className='flex flex-col inset-0 pt-3 pb-0.5 px-2 w-full max-h-[300px] gap-2 overflow-hidden mb-6' onClick={() => handleFileClick(file.id)}>
-                                    <h5 className='font-semibold text-[16px]'>{file.name}</h5>
+                                    <h5 className='font-semibold text-[16px]'>{file.fileName}</h5>
                                     <div className='w-full items-center'>
                                         <p className='font-normal text-neutral-600 dark:text-neutral-200 text-[13px] lg:text-[15px] break-word'>{file.contents}</p>    
                                     </div>

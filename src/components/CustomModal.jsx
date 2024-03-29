@@ -22,6 +22,13 @@ const CustomModal = ({ isOpen, onClose, initialRef, modalConfig, updateFolderOpt
     const handleSubmit = (e) => {
         e.preventDefault();
         onSubmit(formData);
+
+        resetForm();
+    };
+
+        // Function to reset the form fields
+    const resetForm = () => {
+        setFormData({});
     };
 
   return (

@@ -70,7 +70,7 @@ const Sidebar = ({ openModal }) => {
         //   DYNAMICALLY CREATING SIDEBAR MENUITEMS
     const menus = [
         { name: 'Dashboard', icon: LuLayoutDashboard, color: '', path: (`/home`) },
-        {name: 'Archived', icon: BiArchive, color: '', path: ('') },
+        {name: 'Archived', icon: BiArchive, color: '', path: ('archive') },
         { name: 'Completed', icon: GoChecklist, color: '', path: (``) },
         { name: 'Tasks', icon: GoTasklist, color: '', path: (`tasks`) },
         { name: 'Note', icon: VscNotebook, color: '', path: (`notes`) },
