@@ -109,7 +109,9 @@ const ArchiveLayout = () => {
         try {
             const retrievedFiles = await getDocs(archiveCollection);
 
-            const files = retrievedFiles.docs.map((fileDoc) => ({
+            const files = retrievedFiles.docs
+            .filter(fileDoc => fileDoc.data().ownerId === currentUserId)
+            .map((fileDoc) => ({
                 id: fileDoc.id,
                 fileName: fileDoc.data().fileName,
                 contents: fileDoc.data().contents,
@@ -129,6 +131,7 @@ const ArchiveLayout = () => {
 
     useEffect(() => {
         fetchFiles();
+        // eslint-disable-next-line
     }, []);
 
 

@@ -1,16 +1,17 @@
 import React, { useState } from 'react'
 import '../index.css'
 import Image from '../assets/Bullet journal-pana.svg'
-import DefaultImage from '../assets/user.png'
+// import DefaultImage from '../assets/user.png'
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { IoLogoGoogleplus } from "react-icons/io";
 import { FaFacebookF } from "react-icons/fa";
 import { Link, useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import Toast from './Toast';
-import { firestore, auth, FacebookUser, GoogleUser } from '../Firebase';
+import { firestore, auth, storage, FacebookUser, GoogleUser } from '../Firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification, signInWithPopup } from 'firebase/auth'
 import { collection, doc, getDoc, getDocs, setDoc, where, addDoc, serverTimestamp } from 'firebase/firestore';
+import { ref, uploadBytes } from 'firebase/storage';
 
 
 const SignupForm = () => {
@@ -118,11 +119,16 @@ const SignupForm = () => {
         }
 
 
+        const defaultImageFile = require('../assets/user.png');
+        const defaultImageRef = ref(storage, `user_images/${user.uid}/user.png`);
+        await uploadBytes(defaultImageRef, defaultImageFile);
+
+
         if (provider === 'Google' || provider === 'Facebook') {
           userData = {
             username: getFirstName(user.displayName),
             email: user.email,
-            userImage: DefaultImage,
+            userImage: `User/${user.uid}/user.png`
           }
         }
         
@@ -242,11 +248,15 @@ const SignupForm = () => {
             const userId = userCredential.user.uid;
 
             const userDocRef = doc(firestore, `User/${userId}`);
+
+            const defaultImageFile = require('../assets/user.png');
+            const defaultImageRef = ref(storage, `user_images/${userId}/user.png`);
+            await uploadBytes(defaultImageRef, defaultImageFile);
     
             await setDoc(userDocRef, {
                 username: formData.username,
                 email: formData.email,
-                userImage: DefaultImage,
+                userImage: `user_images/${userId}/user.png`,
             });
 
             await addDoc(folderCollectionRef, {

@@ -9,8 +9,9 @@ import { Box, Avatar } from '@chakra-ui/react'
 import { BiArchive } from "react-icons/bi";
 import Logo from '../assets/Memomaze logo.png'
 import { NavLink } from 'react-router-dom';
-import { doc, getDoc } from 'firebase/firestore';
-import { auth, firestore } from '../Firebase';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { auth, firestore, storage } from '../Firebase';
+import { getDownloadURL, ref  } from 'firebase/storage';
 import { LuSunDim } from "react-icons/lu";
 import { useTheme } from '../ThemeContext';
 
@@ -19,8 +20,7 @@ const Sidebar = ({ openModal }) => {
 
     // eslint-disable-next-line
     const [loggedUser, setloggedUser] = useState('');
-    // eslint-disable-next-line
-    const [userImage, setuserImage] = useState('');
+    const [userImage, setUserImage] = useState('');
 
 
     const [activeMenu, setActiveMenu] = useState(() => {
@@ -33,6 +33,27 @@ const Sidebar = ({ openModal }) => {
         // Save the active menu index to localStorage whenever it changes.
         localStorage.setItem('activeMenuIndex', activeMenu);
     }, [activeMenu]);
+
+
+
+
+        //   FETCHING USER'S PROFILE IMAGE
+        // eslint-disable-next-line
+    const fetchUserImage = async () => {
+        try {
+            if (userImage) {
+                const imageURL = await getDownloadURL(ref(storage, userImage));
+                return imageURL;
+            } else {
+                return null;
+            }
+        }
+        catch (err) {
+            // showToastMessage('Error fteching image', 'error');
+            return null;
+        }
+    };
+
 
 
         //   GETTING CURRENT USER
@@ -50,10 +71,19 @@ const Sidebar = ({ openModal }) => {
 
                         if (userInfo) {
                             const loggedUser = userInfo.username;
-                            const userImage = userInfo.userImage;
 
                             setloggedUser(loggedUser);
-                            setuserImage(userImage);
+                            if (userInfo.userImage) {
+                                const imageURL = await getDownloadURL(ref(storage, userInfo.userImage));
+                                setUserImage(imageURL);
+                            }
+
+                                // Listen for changes in user's profile image
+                            const userImageRef = ref(storage, userInfo.userImage);
+                            onSnapshot(userImageRef, async (snapshot) => {
+                                const imageURL = await getDownloadURL(snapshot.ref);
+                                setUserImage(imageURL);
+                            });
                         }
                     }
                 }

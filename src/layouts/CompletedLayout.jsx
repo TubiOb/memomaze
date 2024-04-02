@@ -109,7 +109,9 @@ const CompletedLayout = () => {
         try {
             const retrievedFiles = await getDocs(archiveCollection);
 
-            const files = retrievedFiles.docs.map((fileDoc) => ({
+            const files = retrievedFiles.docs
+            .filter(fileDoc => fileDoc.data().ownerId === currentUserId)
+            .map((fileDoc) => ({
                 id: fileDoc.id,
                 fileName: fileDoc.data().fileName,
                 contents: fileDoc.data().contents,
@@ -129,6 +131,7 @@ const CompletedLayout = () => {
 
     useEffect(() => {
         fetchFiles();
+        // eslint-disable-next-line
     }, []);
 
 
@@ -200,11 +203,11 @@ const CompletedLayout = () => {
 
     const handleUncompleteFile = async (fileId, folderName) => {
         try {
-            const archiveFileRef = doc(firestore, 'Completed', fileId);
-            const archiveFileDoc = await getDoc(archiveFileRef);
-            const fileDetails = archiveFileDoc.data();
+            const completedFileRef = doc(firestore, 'Completed', fileId);
+            const completedFileDoc = await getDoc(completedFileRef);
+            const fileDetails = completedFileDoc.data();
 
-            await deleteDoc(archiveFileRef);
+            await deleteDoc(completedFileRef);
 
             const fileCollectionRef = collection(firestore, 'Folder', folderName, 'Files');
             await addDoc(fileCollectionRef, {
