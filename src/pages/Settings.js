@@ -24,7 +24,6 @@ const Settings = () => {
     const [imageFile, setImageFile] = useState(null);
 
 
-
         //   FETCHING USER'S PROFILE IMAGE
         // eslint-disable-next-line
     const fetchUserImage = async () => {
