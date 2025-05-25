@@ -24,5 +24,5 @@ export const database = getDatabase(app);
 export const storage = getStorage(app);
 // export const storageRef = ref(storage);
 // export const createdUser = createUserWithEmailAndPassword(app);
-export const GoogleUser = new GoogleAuthProvider(app);
-export const FacebookUser = new FacebookAuthProvider(app);
+export const GoogleUser = new GoogleAuthProvider();
+export const FacebookUser = new FacebookAuthProvider();

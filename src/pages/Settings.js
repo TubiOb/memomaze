@@ -228,8 +228,8 @@ const Settings = () => {
     <div className='w-full h-screen px-2.5 py-3 flex flex-1'>
         <div className='flex flex-col overflow-y-auto trick items-center gap-3 dark:bg-white dark:shadow-white/50 shadow-black/50 bg-neutral-950/80 w-full lg:w-[70%] mx-auto h-full rounded-lg shadow-md px-4 lg:px-7 py-9 dark:text-neutral-900 text-white'>
             <div className='flex flex-col lg:flex-row w-full rounded-lg items-center justify-start p-2 gap-2'>
-                <div className='w-full lg:w-[25%] items-center justify-center flex p-1 relative'>
-                    <img src={userImage} alt={currentUser} className='rounded-full w-16 h-16 lg:w-24 lg:h-24 object-cover ring-2 ring-white dark:ring-neutral-500/80' />
+                <div className='w-full lg:w-[25%] items-center justify-center flex p-1'>
+                    <img src={userImage} alt={currentUser} className='rounded-full w-16 h-16 lg:w-24 lg:h-24 object-cover ring-2 ring-white dark:ring-neutral-500/80 relative' />
                     
                     <label htmlFor="upload" className="cursor-pointer absolute px-1 py-1 text-sm lg:text-base -top-0 lg:-top-0 rounded-lg dark:bg-white bg-neutral-700 z-50 shadow-sm right-24 lg:right-16">
                         <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" id="upload" />
